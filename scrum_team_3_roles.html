@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Scrum Roles · Do's & Don'ts</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap');
+
+  /* COLORBLIND-SAFE PALETTE
+     Roles use shape + pattern + high-contrast black borders — not color alone.
+     Do/Don't differentiated by column position, bold labels, and icons.
+     Tested against Deuteranopia, Protanopia, Tritanopia.
+  */
+  :root {
+    --white: #ffffff;
+    --bg: #f5f5f5;
+    --border: #bbbbbb;
+    --border-dark: #555555;
+    --text: #111111;
+    --muted: #555555;
+    --subtle-bg: #f0f0f0;
+    --do-bg: #f7f7f7;
+    --dont-bg: #f7f7f7;
+    --do-header-bg: #e8e8e8;
+    --dont-header-bg: #cccccc;
+    --expand-bg: #ebebeb;
+    --po-stripe: #111111;
+    --sm-stripe: #555555;
+    --tm-stripe: #888888;
+    --po-badge-bg: #e0e0e0;
+    --sm-badge-bg: #d0d0d0;
+    --tm-badge-bg: #c0c0c0;
+    --focus-outline: #0057b7;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    font-family: 'Source Sans 3', 'Helvetica Neue', Arial, sans-serif;
+    color: var(--text);
+    padding: 48px 32px 64px;
+    min-height: 100vh;
+    font-size: 16px;
+    line-height: 1.5;
+  }
+
+  /* HEADER */
+  header {
+    max-width: 1100px;
+    margin: 0 auto 36px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    border-bottom: 3px solid var(--text);
+    padding-bottom: 18px;
+    gap: 24px;
+  }
+
+  .header-left h1 {
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 1.2;
+    color: var(--text);
+    margin-bottom: 4px;
+    letter-spacing: -0.01em;
+  }
+
+  .header-left p {
+    font-size: 15px;
+    color: var(--muted);
+    font-weight: 400;
+  }
+
+  .header-hint {
+    font-size: 14px;
+    color: var(--muted);
+    font-weight: 600;
+    text-align: right;
+    line-height: 1.5;
+    white-space: nowrap;
+  }
+
+  .header-hint .hint-badge {
+    display: inline-block;
+    background: var(--text);
+    color: var(--white);
+    font-size: 12px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 4px;
+    letter-spacing: 0.05em;
+    margin-bottom: 4px;
+  }
+
+  /* TABLE WRAPPER */
+  .table-wrap {
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  /* ROLE SECTION */
+  .role-section {
+    margin-bottom: 32px;
+  }
+
+  /* ROLE HEADER ROW */
+  .role-header-row {
+    display: grid;
+    grid-template-columns: 210px 1fr 1fr;
+    border: 2px solid var(--text);
+    border-bottom: none;
+    border-radius: 6px 6px 0 0;
+    overflow: hidden;
+  }
+
+  .role-badge {
+    padding: 18px 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    border-right: 2px solid var(--text);
+  }
+
+  .po .role-badge { background: var(--po-badge-bg); }
+  .sm .role-badge { background: var(--sm-badge-bg); }
+  .tm .role-badge { background: var(--tm-badge-bg); }
+
+  .role-badge .role-emoji { font-size: 26px; margin-bottom: 6px; line-height: 1; }
+
+  .role-badge .role-name {
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1.2;
+    color: var(--text);
+  }
+
+  .role-badge .role-abbr {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-top: 3px;
+  }
+
+  .col-do-head {
+    padding: 14px 20px;
+    background: var(--do-header-bg);
+    border-right: 2px solid var(--text);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .col-dont-head {
+    padding: 14px 20px;
+    background: var(--dont-header-bg);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .col-head-icon {
+    font-size: 20px;
+    font-weight: 900;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+
+  .col-head-label {
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text);
+  }
+
+  /* ROWS CONTAINER */
+  .role-rows {
+    border: 2px solid var(--text);
+    border-top: none;
+    border-radius: 0 0 6px 6px;
+    overflow: hidden;
+    margin-bottom: 0;
+  }
+
+  /* BEHAVIOR ROW */
+  .behavior-row {
+    display: grid;
+    grid-template-columns: 210px 1fr 1fr;
+    background: var(--white);
+    border-top: 1px solid var(--border);
+    cursor: pointer;
+    transition: background 0.15s;
+    position: relative;
+  }
+
+  .behavior-row:first-child { border-top: none; }
+  .behavior-row:hover { background: var(--subtle-bg); }
+  .behavior-row.open { background: var(--subtle-bg); }
+
+  /* Role left stripe — uses thickness + shade, not color */
+  .row-role-spacer {
+    border-right: 2px solid var(--border);
+    background: var(--white);
+  }
+
+  .po .behavior-row .row-role-spacer { border-left: 5px solid var(--po-stripe); }
+  .sm .behavior-row .row-role-spacer { border-left: 5px solid var(--sm-stripe); }
+  .tm .behavior-row .row-role-spacer { border-left: 5px solid var(--tm-stripe); }
+
+  .behavior-row.open .row-role-spacer { background: var(--subtle-bg); }
+
+  .cell {
+    padding: 16px 20px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .cell-do {
+    border-right: 2px solid var(--border);
+    background: var(--do-bg);
+  }
+
+  .cell-dont {
+    background: var(--dont-bg);
+  }
+
+  .behavior-row:hover .cell-do,
+  .behavior-row:hover .cell-dont,
+  .behavior-row.open .cell-do,
+  .behavior-row.open .cell-dont { background: var(--subtle-bg); }
+
+  .cell-icon {
+    font-size: 18px;
+    font-weight: 900;
+    flex-shrink: 0;
+    margin-top: 1px;
+    line-height: 1.3;
+    width: 22px;
+    text-align: center;
+  }
+
+  .cell-text {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.5;
+  }
+
+  /* Click indicator */
+  .cell-expand {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--muted);
+    opacity: 0;
+    transition: opacity 0.2s;
+    pointer-events: none;
+    background: var(--border);
+    padding: 2px 8px;
+    border-radius: 3px;
+    letter-spacing: 0.04em;
+  }
+
+  .behavior-row:hover .cell-expand { opacity: 1; }
+  .behavior-row.open .cell-expand { opacity: 0; }
+
+  /* EXPAND PANEL */
+  .expand-panel {
+    display: none;
+    border-top: 2px dashed var(--border-dark);
+    background: var(--expand-bg);
+  }
+
+  .expand-panel.open {
+    display: grid;
+    grid-template-columns: 210px 1fr 1fr;
+  }
+
+  .expand-spacer {
+    border-right: 2px solid var(--border);
+    padding: 20px 16px;
+  }
+
+  .expand-cell {
+    padding: 22px 24px;
+    border-left: 2px solid var(--border);
+  }
+
+  .expand-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+
+  .expand-why {
+    margin-bottom: 18px;
+  }
+
+  .expand-why p {
+    font-size: 15px;
+    line-height: 1.65;
+    color: var(--text);
+    font-weight: 400;
+  }
+
+  .expand-example {
+    background: var(--white);
+    border-left: 4px solid var(--border-dark);
+    padding: 12px 16px;
+  }
+
+  .expand-example p {
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--muted);
+    font-style: italic;
+  }
+
+  /* FOCUS STYLES for accessibility */
+  .behavior-row:focus {
+    outline: 3px solid var(--focus-outline);
+    outline-offset: -3px;
+  }
+
+  /* FOOTER */
+  footer {
+    max-width: 1100px;
+    margin: 28px auto 0;
+    padding-top: 18px;
+    border-top: 2px solid var(--border-dark);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 24px;
+  }
+
+  footer p {
+    font-size: 15px;
+    color: var(--muted);
+    font-weight: 400;
+  }
+
+  footer strong {
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .role-pills {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+
+  .pill {
+    font-size: 13px;
+    font-weight: 700;
+    padding: 5px 12px;
+    border-radius: 4px;
+    letter-spacing: 0.05em;
+    border: 2px solid var(--text);
+  }
+
+  .pill-po { background: var(--po-badge-bg); color: var(--text); }
+  .pill-sm { background: var(--sm-badge-bg); color: var(--text); }
+  .pill-tm { background: var(--tm-badge-bg); color: var(--text); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <h1>Scrum Roles · Do's &amp; Don'ts</h1>
+    <p>Working Out Loud · Agile Reference</p>
+  </div>
+  <div class="header-hint">
+    <span class="hint-badge">CLICK ANY ROW</span><br>
+    to see why it matters<br>and a real-world example
+  </div>
+</header>
+
+<div class="table-wrap" id="tableWrap"></div>
+
+<footer>
+  <p><strong>Agile is not the outcome.</strong> Disciplined, predictable delivery is the outcome.</p>
+  <div class="role-pills">
+    <span class="pill pill-po">PO</span>
+    <span class="pill pill-sm">SM</span>
+    <span class="pill pill-tm">Team</span>
+  </div>
+</footer>
+
+<script>
+const roles = [
+  {
+    id: 'po',
+    emoji: '🎯',
+    name: 'Product Owner',
+    abbr: 'PO',
+    rows: [
+      {
+        do: 'Keep the backlog ordered by value — not by who asks loudest.',
+        dont: 'Treat everything as urgent.',
+        doWhy: 'A honestly ordered backlog is the team\'s single source of truth. When the PO names the priority, the team can commit with confidence.',
+        dontWhy: 'When everything is urgent, nothing is. The team is forced to guess, which means the most important work may not get done first.',
+        doExample: 'The PO orders the backlog so the team works on the items that reduce the most patient-facing risk first.',
+        dontExample: 'Every item comes in marked high priority — the team spends planning arguing about what actually matters this sprint.'
+      },
+      {
+        do: 'Name the trade-off every time scope changes.',
+        dont: 'Change direction without telling the team why.',
+        doWhy: 'Transparency builds trust. When the PO explains why something changed, the team can adapt without losing confidence in the plan.',
+        dontWhy: 'Silent reprioritization erodes trust. The team senses the shift but has no context — and starts to stop planning carefully.',
+        doExample: '"If we pull in this urgent access request, we\'re moving the reporting work to next sprint — is that the right call?"',
+        dontExample: 'The backlog looks different at Wednesday standup than it did at Monday planning, with no explanation.'
+      },
+      {
+        do: 'Say no to mid-sprint additions on behalf of the team.',
+        dont: 'Add work without removing something of equal size.',
+        doWhy: 'The PO holds the line on scope so the team can deliver what they committed to. Every addition is a trade-off — naming it protects the team and the stakeholder relationship.',
+        dontWhy: 'Every unchecked addition silently shrinks capacity for committed work. Sprints collapse not from one big change, but from a dozen small ones.',
+        doExample: 'A department head requests an urgent report mid-sprint. The PO defers it to the next sprint and confirms the original commitment stands.',
+        dontExample: 'Agrees to add a "quick" request without identifying what it displaces — the team finishes the sprint at 60% of their commitment.'
+      },
+      {
+        do: 'Make the priority call — don\'t wait for consensus.',
+        dont: 'Defer every decision until more people weigh in.',
+        doWhy: 'The PO exists to give the team one clear voice on what matters next. When that voice hedges, the team loses the ability to move with confidence.',
+        dontWhy: 'Waiting for consensus turns every backlog question into a scheduling problem. The team stalls, and learns that decisions don\'t come from the PO.',
+        doExample: 'During refinement, the team asks which of two features to build first. The PO makes the call on the spot based on known priorities.',
+        dontExample: 'The PO responds to every prioritization question with "I need to check with a few people first" — the same items sit unordered sprint after sprint.'
+      },
+      {
+        do: 'Done at good enough beats perfect at never.',
+        dont: 'Let perfect be the enemy of delivered.',
+        doWhy: 'Eighty percent of the value a piece of work delivers comes from twenty percent of its features. The remaining polish costs the same effort but returns almost nothing new. Calling something done at the right threshold is a discipline, not a shortcut.',
+        dontWhy: 'Every sprint spent refining what\'s already working is a sprint not spent on what patients and staff actually need next.',
+        doExample: 'A new intake form works, routes correctly, and saves time. The PO closes it out rather than holding it for cosmetic changes the team requested.',
+        dontExample: 'A working solution sits in review for three sprints while the team tweaks formatting no end user has complained about.'
+      }
+    ]
+  },
+  {
+    id: 'sm',
+    emoji: '🔧',
+    name: 'Scrum Master',
+    abbr: 'SM',
+    rows: [
+      {
+        do: 'Protect the team\'s ability to self-organize.',
+        dont: 'Assign tasks or direct who works on what.',
+        doWhy: 'The Scrum Master\'s job is to improve the conditions the team works in — not to manage the work itself. When the SM directs tasks, the team stops owning their process.',
+        dontWhy: 'A team that waits to be told what to do never builds the collective judgment that makes Agile reliable. Direction from the SM creates dependency, not capability.',
+        doExample: 'The board shows three stories in progress and two blocked. The SM asks what the team needs to finish — the team decides how to respond.',
+        dontExample: 'The SM opens each standup by telling each person which ticket to pick up next.'
+      },
+      {
+        do: 'Act as the interrupt buffer — shield the team from incoming requests.',
+        dont: 'Let urgent requests land directly on team members.',
+        doWhy: 'Every unfiltered interrupt pulls a team member out of focused work. The cognitive cost of switching tasks is real and cumulative. The SM absorbs incoming pressure, triages it, and routes it through proper intake — so the team can finish what they started.',
+        dontWhy: 'When stakeholders can reach team members directly with urgent asks, the sprint becomes ungoverned. The team context-switches constantly and commitments quietly fall apart.',
+        doExample: 'A manager sends a direct message to a team member with an urgent request mid-sprint. The SM intercepts, logs it as an interrupt, and routes it to the PO for a priority decision.',
+        dontExample: 'Team members field ad hoc requests throughout the week. By Thursday, half the sprint work hasn\'t moved because everyone\'s been pulled in different directions.'
+      },
+      {
+        do: 'Make problems visible — including the uncomfortable ones.',
+        dont: 'Clean up the board before a review to avoid hard questions.',
+        doWhy: 'A team that only surfaces good news never improves. The SM\'s credibility depends on honest reporting — blocked work, unplanned interrupts, and missed commitments are data, not failures.',
+        dontWhy: 'Hiding friction protects optics for one meeting and buries the evidence needed to fix the system. The same problems resurface — larger.',
+        doExample: 'Sprint Review shows three blocked cards and two unplanned interrupts that were absorbed. The SM presents them plainly and opens the floor for root cause discussion.',
+        dontExample: 'Blocked items are quietly moved to the next sprint backlog before the review so the board looks clean.'
+      },
+      {
+        do: 'Hold the line on sprint scope and agreements.',
+        dont: 'Absorb every urgent request without flagging the impact.',
+        doWhy: 'Stability is what allows a team to build rhythm, measure velocity, and improve over time. A sprint that changes shape every few days produces no reliable signal and exhausts the team.',
+        dontWhy: 'Saying yes to everything feels helpful in the moment. It teaches stakeholders that the sprint has no real boundary — and the team pays the cost.',
+        doExample: 'A new request arrives mid-sprint. The SM acknowledges it, logs it in the backlog, and confirms with the PO whether it displaces anything currently in progress.',
+        dontExample: 'The SM accepts mid-sprint additions to avoid conflict — the team ends the sprint with 40% of their original commitment unfinished.'
+      }
+    ]
+  },
+  {
+    id: 'tm',
+    emoji: '👥',
+    name: 'Team Member',
+    abbr: 'Dev',
+    rows: [
+      {
+        do: 'Finish one thing before starting the next.',
+        dont: 'Open multiple cards at once.',
+        doWhy: 'Work that is finished delivers value. Work that is in progress delivers nothing yet. Think of it like a patient chart — a half-completed assessment doesn\'t help anyone. The team\'s job is to move work all the way across the board, not to keep things moving.',
+        dontWhy: 'Starting too many things at once means nothing finishes on time. It also hides the real state of the sprint — the board looks busy but nothing is actually done.',
+        doExample: 'A team member sees a story nearly complete across the board. Instead of pulling new work, the team finishes it together first.',
+        dontExample: 'By Wednesday, six cards are in progress and none are close to done. The sprint ends with partial work across the board.'
+      },
+      {
+        do: 'Be honest about what the team can realistically finish.',
+        dont: 'Over-commit to please others.',
+        doWhy: 'A realistic commitment is a promise the team can keep. Honest capacity signals are how planning improves over time — the data only works if it\'s true.',
+        dontWhy: 'Optimistic commitments feel good in planning and create crises on day nine. Credibility is built on commitments kept — not commitments made.',
+        doExample: 'The team reviews their last three sprints and commits to a volume of work that matches what they\'ve actually completed.',
+        dontExample: 'The team agrees to ten stories to avoid disappointment — and finishes six, again, with the same explanation as last sprint.'
+      },
+      {
+        do: 'Trust the team to self-organize around the work.',
+        dont: 'Wait for someone to assign the next task.',
+        doWhy: 'Self-organizing teams — not individuals — decide how best to accomplish their goals. The Agile Manifesto is explicit: the best outcomes emerge from self-organizing teams. The board is the shared signal. The team pulls work together.',
+        dontWhy: 'Waiting for direction creates a bottleneck that doesn\'t need to exist. The board tells the team what needs attention — the team decides together how to respond.',
+        doExample: 'The team sees a story stalling mid-sprint. Without being asked, two members shift focus to help move it across the finish line.',
+        dontExample: 'Work sits idle for two days because the person originally assigned is blocked and no one picked it up.'
+      },
+      {
+        do: 'Name blockers and defects the moment they appear.',
+        dont: 'Work around a problem silently.',
+        doWhy: 'A bug or blocker caught the same day it appears takes minutes to address. The same issue found a week later — after more work was built on top of it — can take days. Short feedback loops are the whole point of a two-week sprint.',
+        dontWhy: 'Silent workarounds accumulate. The team builds on a shaky foundation without knowing it, and the cost of fixing it compounds every day it goes unnamed.',
+        doExample: 'A team member discovers a data mapping issue on day two. They raise it at standup immediately — it\'s resolved before anyone else builds on the affected workflow.',
+        dontExample: 'A known issue is quietly worked around for a week. By the time it surfaces, four other stories depend on the broken logic.'
+      },
+      {
+        do: 'Own quality — don\'t pass problems forward.',
+        dont: 'Close a card knowing something isn\'t right.',
+        doWhy: 'Quality is part of done. A problem passed to the next team, the next sprint, or production costs exponentially more to fix. The 24x rule is real: issues caught during the build take an hour to fix. The same issue found after go-live takes a week.',
+        dontWhy: 'Closing cards with known issues creates invisible debt. The team inherits it later — usually at the worst possible time.',
+        doExample: 'Before closing a story, the team tests the edge cases they know exist. One fails. They fix it before marking done.',
+        dontExample: 'A card is moved to done with a known untested condition — "we\'ll catch it in QA." It ships to production instead.'
+      },
+      {
+        do: 'Show working results at the end of every sprint — even if rough.',
+        dont: 'Wait until everything is polished to involve the customer.',
+        doWhy: 'People don\'t fully know what they want until they see what they don\'t want. An early demo — even an imperfect one — surfaces misalignment while it\'s still cheap to fix. Waiting for a finished product means feedback arrives too late to act on.',
+        dontWhy: 'A polished demo at the end of a long build confirms what was built — it doesn\'t improve it. By then, changing direction is expensive.',
+        doExample: 'The team demos a working but unfinished workflow. The customer immediately identifies that the approval step is in the wrong place — caught in week two, not week eight.',
+        dontExample: 'The team spends three sprints building to a "ready to show" state. The customer\'s first reaction identifies a fundamental design problem.'
+      },
+      {
+        do: 'Divide the work together at sprint start.',
+        dont: 'Let work silently default to the same people every sprint.',
+        doWhy: 'Self-organizing teams decide how to break and distribute work — not out of habit, but out of deliberate choice. Shared ownership builds depth across the team, removes single points of failure, and keeps everyone\'s capacity honest.',
+        dontWhy: 'When the same people always take the same work, the team builds silos without meaning to. If one person is out, that work stops.',
+        doExample: 'At sprint planning, the team looks at the work together and deliberately pairs less experienced members with complex stories to build capability.',
+        dontExample: 'Work gets silently picked up by the same two people every sprint because it\'s faster — until one of them is out sick and nothing moves.'
+      }
+    ]
+  }
+];
+
+function buildTable() {
+  const wrap = document.getElementById('tableWrap');
+
+  roles.forEach(role => {
+    // Role section
+    const section = document.createElement('div');
+    section.className = `role-section ${role.id}`;
+
+    // Header row
+    const headerRow = document.createElement('div');
+    headerRow.className = 'role-header-row';
+    headerRow.innerHTML = `
+      <div class="role-badge">
+        <div class="role-emoji">${role.emoji}</div>
+        <div class="role-name">${role.name}</div>
+        <div class="role-abbr">${role.abbr}</div>
+      </div>
+      <div class="col-do-head">
+        <span class="col-head-icon">✔</span>
+        <span class="col-head-label">Do This</span>
+      </div>
+      <div class="col-dont-head">
+        <span class="col-head-icon">✕</span>
+        <span class="col-head-label">Not This</span>
+      </div>
+    `;
+    section.appendChild(headerRow);
+
+    // Rows container
+    const rowsContainer = document.createElement('div');
+    rowsContainer.className = 'role-rows';
+
+    role.rows.forEach((item, idx) => {
+      const rowId = `${role.id}-${idx}`;
+
+      // Main row
+      const row = document.createElement('div');
+      row.className = 'behavior-row';
+      row.setAttribute('data-id', rowId);
+      row.setAttribute('tabindex', '0');
+      row.setAttribute('role', 'button');
+      row.setAttribute('aria-expanded', 'false');
+      row.innerHTML = `
+        <div class="row-role-spacer"></div>
+        <div class="cell cell-do">
+          <span class="cell-icon">✔</span>
+          <span class="cell-text">${item.do}</span>
+        </div>
+        <div class="cell cell-dont">
+          <span class="cell-icon">✕</span>
+          <span class="cell-text">${item.dont}</span>
+        </div>
+        <div class="cell-expand">+ details</div>
+      `;
+
+      // Expand panel
+      const panel = document.createElement('div');
+      panel.className = 'expand-panel';
+      panel.setAttribute('data-panel', rowId);
+      panel.innerHTML = `
+        <div class="expand-spacer"></div>
+        <div class="expand-cell">
+          <div class="expand-label">💡 Why It Matters</div>
+          <div class="expand-why"><p>${item.doWhy}</p></div>
+          <div class="expand-label">🌍 Real-World Example · Do</div>
+          <div class="expand-example"><p>${item.doExample}</p></div>
+        </div>
+        <div class="expand-cell">
+          <div class="expand-label">💡 Why It Matters</div>
+          <div class="expand-why"><p>${item.dontWhy}</p></div>
+          <div class="expand-label">🌍 Real-World Example · Don't</div>
+          <div class="expand-example"><p>${item.dontExample}</p></div>
+        </div>
+      `;
+
+      const toggleRow = () => {
+        const isOpen = row.classList.contains('open');
+        document.querySelectorAll('.behavior-row.open').forEach(r => { r.classList.remove('open'); r.setAttribute('aria-expanded','false'); });
+        document.querySelectorAll('.expand-panel.open').forEach(p => p.classList.remove('open'));
+        if (!isOpen) {
+          row.classList.add('open');
+          row.setAttribute('aria-expanded', 'true');
+          panel.classList.add('open');
+          row.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      };
+      row.addEventListener('click', toggleRow);
+      row.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleRow(); } });
+
+      rowsContainer.appendChild(row);
+      rowsContainer.appendChild(panel);
+    });
+
+    section.appendChild(rowsContainer);
+    wrap.appendChild(section);
+  });
+}
+
+buildTable();
+</script>
+</body>
+</html>

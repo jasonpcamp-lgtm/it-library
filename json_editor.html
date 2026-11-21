@@ -1,0 +1,855 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Presentation Library — JSON Editor</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Mono:wght@400;500&family=Sora:wght@300;400;500;600&display=swap');
+
+    :root {
+      --bg0: #070a0f;
+      --bg1: #0a0f18;
+      --bg2: #0e1420;
+      --bg3: #121922;
+      --ink: #f2f4f7;
+      --muted: #8ea2b8;
+      --rule: #141b26;
+      --accent: #d6b15a;
+      --accent2: #caa24c;
+      --green: #4caa6e;
+      --red: #b85c5c;
+      --blue: #4c8faa;
+      --purple: #a07bc4;
+      --max: 860px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body { height: 100%; }
+
+    body {
+      color: var(--ink);
+      background:
+        radial-gradient(1200px 600px at 20% 0%, rgba(35,55,90,.25), transparent 55%),
+        radial-gradient(900px 500px at 80% 20%, rgba(120,90,35,.12), transparent 60%),
+        linear-gradient(180deg, var(--bg0), var(--bg1));
+      font-family: 'Sora', ui-sans-serif, system-ui, sans-serif;
+      min-height: 100vh;
+    }
+
+    .wrap {
+      max-width: var(--max);
+      margin: 0 auto;
+      padding: 44px 22px 100px;
+    }
+
+    /* ── HEADER ── */
+    .eyebrow {
+      font-size: 10px;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      color: rgba(242,244,247,.4);
+      margin-bottom: 12px;
+    }
+
+    h1 {
+      font-family: 'DM Serif Display', ui-serif, Georgia, serif;
+      font-size: clamp(32px, 5vw, 50px);
+      font-weight: 400;
+      line-height: 1.05;
+      margin-bottom: 10px;
+    }
+
+    .lead {
+      font-size: 13px;
+      line-height: 1.7;
+      color: var(--muted);
+      max-width: 70ch;
+      margin-bottom: 36px;
+    }
+
+    hr {
+      border: 0;
+      border-top: 1px solid var(--rule);
+      margin: 28px 0;
+    }
+
+    /* ── ZONES ── */
+    .zone-label {
+      font-size: 10px;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      color: rgba(242,244,247,.35);
+      margin-bottom: 12px;
+    }
+
+    /* ── IMPORT ZONE ── */
+    .import-zone {
+      border: 1.5px dashed rgba(214,177,90,.2);
+      border-radius: 6px;
+      padding: 20px;
+      margin-bottom: 10px;
+      transition: border-color .2s;
+    }
+
+    .import-zone:hover { border-color: rgba(214,177,90,.45); }
+    .import-zone.drag-over { border-color: var(--accent); background: rgba(214,177,90,.04); }
+
+    .import-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 8px 18px;
+      border-radius: 999px;
+      border: 1.5px solid rgba(214,177,90,.3);
+      background: transparent;
+      color: var(--accent);
+      font-family: 'Sora', sans-serif;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all .18s ease;
+      white-space: nowrap;
+    }
+
+    .btn:hover {
+      background: var(--accent);
+      color: #0a0c10;
+      box-shadow: 0 0 20px rgba(214,177,90,.35);
+    }
+
+    .btn.green {
+      border-color: rgba(76,170,110,.4);
+      color: var(--green);
+    }
+    .btn.green:hover {
+      background: var(--green);
+      color: #fff;
+      box-shadow: 0 0 20px rgba(76,170,110,.35);
+    }
+
+    .btn.red {
+      border-color: rgba(184,92,92,.35);
+      color: var(--red);
+    }
+    .btn.red:hover {
+      background: var(--red);
+      color: #fff;
+      box-shadow: 0 0 20px rgba(184,92,92,.3);
+    }
+
+    .btn.blue {
+      border-color: rgba(76,143,170,.4);
+      color: var(--blue);
+    }
+    .btn.blue:hover {
+      background: var(--blue);
+      color: #fff;
+      box-shadow: 0 0 20px rgba(76,143,170,.35);
+    }
+
+    .btn.sm {
+      padding: 5px 12px;
+      font-size: 10px;
+    }
+
+    .import-hint {
+      font-size: 11px;
+      color: rgba(242,244,247,.3);
+    }
+
+    #file-input { display: none; }
+
+    /* ── STATS BAR ── */
+    .stats-bar {
+      display: flex;
+      gap: 24px;
+      padding: 14px 0;
+      margin-bottom: 4px;
+      flex-wrap: wrap;
+    }
+
+    .stat {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .stat-val {
+      font-family: 'DM Mono', monospace;
+      font-size: 22px;
+      font-weight: 500;
+      color: var(--accent);
+    }
+
+    .stat-lbl {
+      font-size: 10px;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: rgba(242,244,247,.35);
+    }
+
+    /* ── ADD FORM ── */
+    .add-form {
+      background: var(--bg2);
+      border: 1px solid var(--rule);
+      border-radius: 6px;
+      padding: 22px 24px;
+      margin-bottom: 28px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-group.full { grid-column: 1 / -1; }
+
+    label {
+      font-size: 10px;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: rgba(242,244,247,.4);
+    }
+
+    input[type="text"],
+    textarea {
+      background: var(--bg3);
+      border: 1px solid var(--rule);
+      border-radius: 4px;
+      color: var(--ink);
+      font-family: 'Sora', sans-serif;
+      font-size: 13px;
+      padding: 9px 12px;
+      outline: none;
+      transition: border-color .18s;
+      width: 100%;
+      resize: none;
+    }
+
+    input[type="text"]:focus,
+    textarea:focus {
+      border-color: rgba(214,177,90,.45);
+    }
+
+    input::placeholder, textarea::placeholder {
+      color: rgba(142,162,184,.35);
+    }
+
+    /* TAG PILLS */
+    .tag-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 2px;
+    }
+
+    .tag-pill {
+      padding: 5px 14px;
+      border-radius: 999px;
+      border: 1.5px solid rgba(255,255,255,.08);
+      background: transparent;
+      color: rgba(242,244,247,.4);
+      font-family: 'Sora', sans-serif;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: .08em;
+      cursor: pointer;
+      transition: all .15s ease;
+      user-select: none;
+    }
+
+    .tag-pill[data-tag="Agile"].active    { background: rgba(76,143,170,.2); border-color: var(--blue); color: var(--blue); }
+    .tag-pill[data-tag="ITSM"].active     { background: rgba(160,123,196,.2); border-color: var(--purple); color: var(--purple); }
+    .tag-pill[data-tag="ITIL"].active     { background: rgba(76,170,110,.2); border-color: var(--green); color: var(--green); }
+    .tag-pill[data-tag="ServiceNow"].active { background: rgba(214,177,90,.15); border-color: var(--accent); color: var(--accent); }
+
+    .tag-pill:hover { border-color: rgba(255,255,255,.2); color: var(--ink); }
+
+    .form-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      margin-top: 6px;
+    }
+
+    /* ── ENTRY LIST ── */
+    .entry-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .entry {
+      border-top: 1px solid var(--rule);
+      padding: 16px 0;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 16px;
+      align-items: start;
+      transition: background .15s;
+    }
+
+    .entry:last-child { border-bottom: 1px solid var(--rule); }
+
+    .entry-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: 16px;
+      font-weight: 400;
+      margin-bottom: 4px;
+      line-height: 1.3;
+    }
+
+    .entry-desc {
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 7px;
+      line-height: 1.55;
+      max-width: 70ch;
+    }
+
+    .entry-meta {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .entry-file {
+      font-family: 'DM Mono', monospace;
+      font-size: 10.5px;
+      color: rgba(214,177,90,.6);
+    }
+
+    .entry-date {
+      font-size: 10px;
+      color: rgba(142,162,184,.45);
+      letter-spacing: .06em;
+    }
+
+    .cat-badge {
+      font-size: 9.5px;
+      font-weight: 600;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      padding: 2px 8px;
+      border-radius: 999px;
+      border: 1px solid;
+    }
+
+    .cat-badge.Agile     { color: var(--blue); border-color: rgba(76,143,170,.35); background: rgba(76,143,170,.08); }
+    .cat-badge.ITSM      { color: var(--purple); border-color: rgba(160,123,196,.35); background: rgba(160,123,196,.08); }
+    .cat-badge.ITIL      { color: var(--green); border-color: rgba(76,170,110,.35); background: rgba(76,170,110,.08); }
+    .cat-badge.ServiceNow { color: var(--accent); border-color: rgba(214,177,90,.35); background: rgba(214,177,90,.08); }
+
+    .entry-actions {
+      display: flex;
+      gap: 8px;
+      flex-shrink: 0;
+      padding-top: 2px;
+    }
+
+    /* ── EDIT INLINE ── */
+    .entry.editing {
+      background: rgba(214,177,90,.03);
+      border-radius: 6px;
+      padding: 16px;
+      border: 1px solid rgba(214,177,90,.15);
+      margin: 4px 0;
+    }
+
+    .edit-form { width: 100%; }
+
+    .edit-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .edit-actions {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+    }
+
+    /* ── EMPTY STATE ── */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: rgba(142,162,184,.35);
+      font-size: 13px;
+    }
+
+    .empty-icon {
+      font-size: 36px;
+      margin-bottom: 12px;
+      opacity: .4;
+    }
+
+    /* ── DOWNLOAD BAR ── */
+    .download-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(7,10,15,.92);
+      border-top: 1px solid var(--rule);
+      backdrop-filter: blur(12px);
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      z-index: 100;
+    }
+
+    .download-status {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .download-status strong {
+      color: var(--ink);
+      font-weight: 600;
+    }
+
+    .dl-actions { display: flex; gap: 10px; }
+
+    /* ── TOAST ── */
+    .toast {
+      position: fixed;
+      top: 24px;
+      right: 24px;
+      background: var(--bg2);
+      border: 1px solid var(--rule);
+      border-left: 3px solid var(--green);
+      border-radius: 4px;
+      padding: 12px 18px;
+      font-size: 12.5px;
+      color: var(--ink);
+      opacity: 0;
+      transform: translateY(-8px);
+      transition: all .25s ease;
+      z-index: 200;
+      pointer-events: none;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .toast.error { border-left-color: var(--red); }
+
+    @media(max-width: 560px) {
+      .form-grid, .edit-grid { grid-template-columns: 1fr; }
+      .form-group.full { grid-column: 1; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="eyebrow">Presentation Library</div>
+  <h1>JSON Editor</h1>
+  <p class="lead">Load your <code style="font-family:'DM Mono',monospace;font-size:12px;color:var(--accent2)">presentations.json</code> file, add or edit entries, then download the updated file. No server. No sync. All local.</p>
+
+  <hr>
+
+  <!-- IMPORT -->
+  <div class="zone-label">Load JSON</div>
+  <div class="import-zone" id="drop-zone">
+    <div class="import-row">
+      <button class="btn" onclick="document.getElementById('file-input').click()">↑ Open File</button>
+      <button class="btn blue" onclick="pasteJSON()">Paste JSON</button>
+      <span class="import-hint">or drag &amp; drop your .json file here</span>
+    </div>
+    <input type="file" id="file-input" accept=".json" onchange="loadFile(event)" />
+  </div>
+
+  <hr>
+
+  <!-- STATS -->
+  <div class="stats-bar" id="stats-bar" style="display:none">
+    <div class="stat">
+      <div class="stat-val" id="stat-total">0</div>
+      <div class="stat-lbl">Total Entries</div>
+    </div>
+    <div class="stat">
+      <div class="stat-val" id="stat-agile" style="color:var(--blue)">0</div>
+      <div class="stat-lbl">Agile</div>
+    </div>
+    <div class="stat">
+      <div class="stat-val" id="stat-itsm" style="color:var(--purple)">0</div>
+      <div class="stat-lbl">ITSM</div>
+    </div>
+    <div class="stat">
+      <div class="stat-val" id="stat-itil" style="color:var(--green)">0</div>
+      <div class="stat-lbl">ITIL</div>
+    </div>
+  </div>
+
+  <!-- ADD NEW -->
+  <div class="zone-label">Add New Entry</div>
+  <div class="add-form">
+    <div class="form-grid">
+      <div class="form-group full">
+        <label>Title</label>
+        <input type="text" id="new-title" placeholder="e.g. Scrum Ceremonies — Field Guide" />
+      </div>
+      <div class="form-group full">
+        <label>Description</label>
+        <textarea id="new-desc" rows="2" placeholder="One sentence. What does this file do for the reader?"></textarea>
+      </div>
+      <div class="form-group">
+        <label>File Path or URL</label>
+        <input type="text" id="new-file" placeholder="presentations/filename.html" />
+      </div>
+      <div class="form-group">
+        <label>Date Updated</label>
+        <input type="text" id="new-date" placeholder="YYYY-MM-DD" />
+      </div>
+      <div class="form-group full">
+        <label>Categories</label>
+        <div class="tag-group" id="new-tags">
+          <span class="tag-pill" data-tag="Agile" onclick="toggleTag(this)">Agile</span>
+          <span class="tag-pill" data-tag="ITSM" onclick="toggleTag(this)">ITSM</span>
+          <span class="tag-pill" data-tag="ITIL" onclick="toggleTag(this)">ITIL</span>
+          <span class="tag-pill" data-tag="ServiceNow" onclick="toggleTag(this)">ServiceNow</span>
+        </div>
+      </div>
+    </div>
+    <div class="form-actions">
+      <button class="btn" onclick="clearForm()">Clear</button>
+      <button class="btn green" onclick="addEntry()">+ Add Entry</button>
+    </div>
+  </div>
+
+  <!-- ENTRY LIST -->
+  <div class="zone-label" id="list-label" style="display:none">Current Entries</div>
+  <div class="entry-list" id="entry-list">
+    <div class="empty-state">
+      <div class="empty-icon">⬡</div>
+      Load a JSON file or add your first entry above.
+    </div>
+  </div>
+</div>
+
+<!-- FIXED DOWNLOAD BAR -->
+<div class="download-bar">
+  <div class="download-status">
+    <strong id="dl-count">0</strong> entries loaded
+    &nbsp;·&nbsp;
+    <span id="dl-filename" style="font-family:'DM Mono',monospace;font-size:11px;color:var(--accent2)">no file</span>
+  </div>
+  <div class="dl-actions">
+    <button class="btn" onclick="copyJSON()">Copy JSON</button>
+    <button class="btn green" onclick="downloadJSON()">↓ Download JSON</button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+  let entries = [];
+  let sourceFilename = 'presentations.json';
+
+  // ── TODAY'S DATE DEFAULT ──
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('new-date').value = today;
+
+  // ── DRAG & DROP ──
+  const dropZone = document.getElementById('drop-zone');
+  dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+  dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+  dropZone.addEventListener('drop', e => {
+    e.preventDefault();
+    dropZone.classList.remove('drag-over');
+    const file = e.dataTransfer.files[0];
+    if (file) readFile(file);
+  });
+
+  // ── LOAD FILE ──
+  function loadFile(event) {
+    const file = event.target.files[0];
+    if (file) readFile(file);
+    // Reset so the same file can be re-selected and trigger change again
+    event.target.value = '';
+  }
+
+  function readFile(file) {
+    sourceFilename = file.name;
+    const reader = new FileReader();
+    reader.onload = e => {
+      try {
+        const parsed = JSON.parse(e.target.result);
+        entries = parsed;
+        renderAll();
+        toast(`Loaded ${entries.length} entries from ${file.name}`);
+        document.getElementById('dl-filename').textContent = file.name;
+      } catch(err) {
+        toast('Invalid JSON file — could not parse.', true);
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  // ── PASTE JSON ──
+  function pasteJSON() {
+    // Remove any existing modal
+    const existing = document.getElementById('paste-modal');
+    if (existing) existing.remove();
+
+    const modal = document.createElement('div');
+    modal.id = 'paste-modal';
+    modal.style.cssText = `
+      position:fixed;inset:0;background:rgba(7,10,15,.88);backdrop-filter:blur(8px);
+      z-index:300;display:flex;align-items:center;justify-content:center;padding:24px;
+    `;
+    modal.innerHTML = `
+      <div style="background:#0e1420;border:1px solid #141b26;border-radius:8px;padding:28px;width:100%;max-width:560px;">
+        <div style="font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:rgba(242,244,247,.35);margin-bottom:10px;">Paste JSON</div>
+        <textarea id="paste-area" rows="10" placeholder='[ { "title": "..." }, ... ]'
+          style="width:100%;background:#121922;border:1px solid #141b26;border-radius:4px;
+                 color:#f2f4f7;font-family:'DM Mono',monospace;font-size:12px;padding:10px 12px;
+                 outline:none;resize:vertical;box-sizing:border-box;"></textarea>
+        <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:14px;">
+          <button class="btn red sm" onclick="document.getElementById('paste-modal').remove()">Cancel</button>
+          <button class="btn green sm" onclick="confirmPaste()">Load JSON</button>
+        </div>
+      </div>`;
+    document.body.appendChild(modal);
+    setTimeout(() => document.getElementById('paste-area').focus(), 50);
+  }
+
+  function confirmPaste() {
+    const raw = document.getElementById('paste-area').value.trim();
+    if (!raw) return;
+    try {
+      const parsed = JSON.parse(raw);
+      if (!Array.isArray(parsed)) { toast('JSON must be an array [ ... ]', true); return; }
+      entries = parsed;
+      document.getElementById('dl-filename').textContent = sourceFilename;
+      renderAll();
+      toast(`Loaded ${entries.length} entries`);
+      document.getElementById('paste-modal').remove();
+    } catch {
+      toast('Could not parse — check your JSON syntax.', true);
+    }
+  }
+
+  // ── RENDER ──
+  function renderAll() {
+    renderStats();
+    renderList();
+    document.getElementById('dl-count').textContent = entries.length;
+    document.getElementById('stats-bar').style.display = entries.length > 0 ? 'flex' : 'none';
+    document.getElementById('list-label').style.display = entries.length > 0 ? 'block' : 'none';
+  }
+
+  function renderStats() {
+    document.getElementById('stat-total').textContent = entries.length;
+    const count = tag => entries.filter(e => {
+      const c = e.category;
+      return Array.isArray(c) ? c.includes(tag) : c === tag;
+    }).length;
+    document.getElementById('stat-agile').textContent = count('Agile');
+    document.getElementById('stat-itsm').textContent = count('ITSM');
+    document.getElementById('stat-itil').textContent = count('ITIL');
+  }
+
+  function renderList() {
+    const el = document.getElementById('entry-list');
+    if (entries.length === 0) {
+      el.innerHTML = `<div class="empty-state"><div class="empty-icon">⬡</div>No entries yet.</div>`;
+      return;
+    }
+    el.innerHTML = entries.map((entry, i) => buildEntryHTML(entry, i)).join('');
+  }
+
+  function getCats(entry) {
+    const c = entry.category;
+    if (!c) return [];
+    return Array.isArray(c) ? c : [c];
+  }
+
+  function buildEntryHTML(entry, i) {
+    const cats = getCats(entry);
+    const badges = cats.map(c => `<span class="cat-badge ${c}">${c}</span>`).join('');
+    return `
+      <div class="entry" id="entry-${i}">
+        <div>
+          <div class="entry-title">${escHtml(entry.title || '')}</div>
+          <div class="entry-desc">${escHtml(entry.description || '')}</div>
+          <div class="entry-meta">
+            ${badges}
+            <span class="entry-file">${escHtml(entry.file || '')}</span>
+            <span class="entry-date">${entry.updated || ''}</span>
+          </div>
+        </div>
+        <div class="entry-actions">
+          <button class="btn sm blue" onclick="editEntry(${i})">Edit</button>
+          <button class="btn sm red" onclick="deleteEntry(${i})">Delete</button>
+        </div>
+      </div>`;
+  }
+
+  // ── ADD ──
+  function addEntry() {
+    const title = document.getElementById('new-title').value.trim();
+    const desc  = document.getElementById('new-desc').value.trim();
+    const file  = document.getElementById('new-file').value.trim();
+    const date  = document.getElementById('new-date').value.trim();
+    const tags  = getActiveTags('new-tags');
+
+    if (!title) { toast('Title is required.', true); return; }
+    if (!file)  { toast('File path is required.', true); return; }
+    if (tags.length === 0) { toast('Select at least one category.', true); return; }
+
+    const category = tags.length === 1 ? tags[0] : tags;
+
+    entries.push({ title, description: desc, category, file, updated: date || today });
+    if (document.getElementById('dl-filename').textContent === 'no file') {
+      document.getElementById('dl-filename').textContent = sourceFilename;
+    }
+    renderAll();
+    clearForm();
+    toast(`"${title}" added — ${entries.length} total entries.`);
+  }
+
+  // ── EDIT ──
+  function editEntry(i) {
+    const entry = entries[i];
+    const cats  = getCats(entry);
+    const tagPills = ['Agile','ITSM','ITIL','ServiceNow'].map(t =>
+      `<span class="tag-pill ${cats.includes(t)?'active':''}" data-tag="${t}" onclick="toggleTag(this)">${t}</span>`
+    ).join('');
+
+    const el = document.getElementById(`entry-${i}`);
+    el.classList.add('editing');
+    el.innerHTML = `
+      <div class="edit-form" style="grid-column:1/-1">
+        <div class="edit-grid">
+          <div class="form-group full">
+            <label>Title</label>
+            <input type="text" id="edit-title-${i}" value="${escHtml(entry.title||'')}" />
+          </div>
+          <div class="form-group full">
+            <label>Description</label>
+            <textarea id="edit-desc-${i}" rows="2"></textarea>
+          </div>
+          <div class="form-group">
+            <label>File Path or URL</label>
+            <input type="text" id="edit-file-${i}" value="${escHtml(entry.file||'')}" />
+          </div>
+          <div class="form-group">
+            <label>Date Updated</label>
+            <input type="text" id="edit-date-${i}" value="${entry.updated||''}" />
+          </div>
+          <div class="form-group full">
+            <label>Categories</label>
+            <div class="tag-group" id="edit-tags-${i}">${tagPills}</div>
+          </div>
+        </div>
+        <div class="edit-actions">
+          <button class="btn sm red" onclick="cancelEdit(${i})">Cancel</button>
+          <button class="btn sm green" onclick="saveEdit(${i})">Save</button>
+        </div>
+      </div>`;
+    // Set textarea via .value to avoid HTML entity issues with quotes
+    document.getElementById(`edit-desc-${i}`).value = entry.description || '';
+  }
+
+  function saveEdit(i) {
+    const title = document.getElementById(`edit-title-${i}`).value.trim();
+    const desc  = document.getElementById(`edit-desc-${i}`).value.trim();
+    const file  = document.getElementById(`edit-file-${i}`).value.trim();
+    const date  = document.getElementById(`edit-date-${i}`).value.trim();
+    const tags  = getActiveTags(`edit-tags-${i}`);
+
+    if (!title) { toast('Title is required.', true); return; }
+
+    const category = tags.length === 1 ? tags[0] : tags.length > 1 ? tags : entries[i].category;
+    entries[i] = { title, description: desc, category, file, updated: date };
+    renderAll();
+    toast(`Entry updated.`);
+  }
+
+  function cancelEdit(i) { renderList(); }
+
+  // ── DELETE ──
+  function deleteEntry(i) {
+    const name = entries[i].title;
+    if (!confirm(`Delete "${name}"?`)) return;
+    entries.splice(i, 1);
+    renderAll();
+    toast(`"${name}" removed.`);
+  }
+
+  // ── TAGS ──
+  function toggleTag(el) {
+    el.classList.toggle('active');
+  }
+
+  function getActiveTags(containerId) {
+    return [...document.querySelectorAll(`#${containerId} .tag-pill.active`)].map(p => p.dataset.tag);
+  }
+
+  // ── CLEAR FORM ──
+  function clearForm() {
+    document.getElementById('new-title').value = '';
+    document.getElementById('new-desc').value  = '';
+    document.getElementById('new-file').value  = '';
+    document.getElementById('new-date').value  = today;
+    document.querySelectorAll('#new-tags .tag-pill').forEach(p => p.classList.remove('active'));
+  }
+
+  // ── DOWNLOAD ──
+  function downloadJSON() {
+    const blob = new Blob([JSON.stringify(entries, null, 2)], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = sourceFilename;
+    a.click();
+    toast(`Downloaded ${sourceFilename}`);
+  }
+
+  function copyJSON() {
+    navigator.clipboard.writeText(JSON.stringify(entries, null, 2))
+      .then(() => toast('JSON copied to clipboard.'))
+      .catch(() => toast('Copy failed — try downloading instead.', true));
+  }
+
+  // ── TOAST ──
+  function toast(msg, isError = false) {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.className = 'toast show' + (isError ? ' error' : '');
+    clearTimeout(el._t);
+    el._t = setTimeout(() => el.classList.remove('show'), 3000);
+  }
+
+  // ── ESCAPE HTML ──
+  function escHtml(str) {
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+</script>
+</body>
+</html>

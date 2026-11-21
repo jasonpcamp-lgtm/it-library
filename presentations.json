@@ -1,0 +1,141 @@
+[
+  {
+    "title": "Agile WSJF Epic Planning Tool",
+    "description": "Use this tool to facilitate Epic planning with your team.",
+    "category": "Agile",
+    "file": "presentations/epic_wsjf_toolkit_v4.html",
+    "updated": "2026-03-24"
+  },
+  {
+    "title": "Work Type Funnel",
+    "description": "How work enters, gets classified, and flows through the team — from intake to execution.",
+    "category": [
+      "Agile",
+      "ITIL"
+    ],
+    "file": "presentations/work_type_decision_funnel.html",
+    "updated": "2026-03-24"
+  },
+  {
+    "title": "Problem Management as a Practice",
+    "description": "Problem Management vs Major Incident Management as a Practice.",
+    "category": "ITSM",
+    "file": "presentations/mim-vs-problem-mgmt-v4.html",
+    "updated": "2026-03-20"
+  },
+  {
+    "title": "Agile Ceremonies in Visual Timeline",
+    "description": "This visual shows the main ceremonies and roles aligned to a timebox for visual reference. Interactive!",
+    "category": "Agile",
+    "file": "https://chatgpt.com/canvas/shared/694977fce56c8191a8bda5a32ba80380",
+    "updated": "2026-03-24"
+  },
+  {
+    "title": "Problem Management is the Problem",
+    "description": "Executive Summary of != Current Problem Practice.",
+    "category": "ITSM",
+    "file": "presentations/mim-vs-problem-cio.pdf",
+    "updated": "2026-03-24"
+  },
+  {
+    "title": "Agile Scrum Team - The 3 Roles",
+    "description": "DOs and DONTs for the 3 Scrum Team Roles.",
+    "category": "Agile",
+    "file": "presentations/scrum_team_3_roles.html",
+    "updated": "2026-03-24"
+  },
+  {
+    "title": "ITIL Service Managment Practice - Quality Work Logs",
+    "description": "Learn how to create quality notes on tickets.",
+    "category": [
+      "Agile",
+      "ITSM",
+      "ITIL"
+    ],
+    "file": "presentations/ITIL_Quality_Work_Notes_SOP.pdf",
+    "updated": "2026-03-24",
+    "hidden": true
+  },
+  {
+    "title": "ITIL Service Managment Practice - 7 Questions to Ask for Work Logs",
+    "description": "Ask these 7 questions with entering or reviewing ticket work logs.",
+    "category": [
+      "Agile",
+      "ITSM",
+      "ITIL"
+    ],
+    "file": "presentations/work-notes-quality.html",
+    "updated": "2026-03-25"
+  },
+  {
+    "title": "Scrum Master Role and Responsibilities",
+    "description": "Review the roles and daily responsibilities of a scrum master.",
+    "category": "Agile",
+    "file": "presentations/scrum_master_role_respons.html",
+    "updated": "2026-03-26"
+  },
+  {
+    "title": "Agile Principles",
+    "description": "Review the 12 principles used adopted by the agile framework.",
+    "category": "Agile",
+    "file": "presentations/Agile-principles.png",
+    "updated": "2026-03-24"
+  },
+  {
+    "title": "Agile Brings Relief",
+    "description": "What does agile do for your team?",
+    "category": "Agile",
+    "file": "presentations/agile_brings_relief.html",
+    "updated": "2026-03-26"
+  },
+  {
+    "title": "The Science behind Agile Methods - Scrum Master Guide",
+    "description": "Do more with less. Slow down to speed up.",
+    "category": "Agile",
+    "file": "presentations/why_do_agile_scrum_master.html",
+    "updated": "2026-03-26"
+  },
+  {
+    "title": "Vocab for ServiceNow and Agile",
+    "description": "Terms used by the ServiceNow platform for agile.",
+    "category": "Agile",
+    "file": "presentations/servicenow_vocab_agile.html",
+    "updated": "2026-03-26"
+  },
+  {
+    "title": "Scrum Master Checklist",
+    "description": "Use this checklist to track your scrum master tasks.",
+    "category": "Agile",
+    "file": "presentations/scrum-master-checklist.html",
+    "updated": "2026-03-26"
+  },
+  {
+    "title": "Scrum Ceremonies — Field Guide",
+    "description": "Interactive reference for PO, Scrum Master, and Team Member participation in each Scrum ceremony.",
+    "category": "Agile",
+    "file": "presentations/scrum_ceremonies.html",
+    "updated": "2026-03-27"
+  },
+  {
+    "title": "Example SLA Matrix",
+    "description": "Click here to review an example SLA Matrix defined by Impact and Urgency.",
+    "category": "ITIL",
+    "file": "presentations/sla_matrix.html",
+    "updated": "2026-03-31"
+  },
+  {
+    "title": "Scrum Poker",
+    "description": "Use this interactive tool to participate in a poker session for relative sizing.",
+    "category": "Agile",
+    "file": "presentations/sprint_poker.html",
+    "updated": "2026-03-27",
+    "hidden": true
+  },
+  {
+    "title": "Analyze WBS of a Task",
+    "description": "Use this tool to figure out if a project task has enough information to complete work.",
+    "category": "ITIL",
+    "file": "presentations/wbs_intake_tool.html",
+    "updated": "2026-03-31"
+  }
+]

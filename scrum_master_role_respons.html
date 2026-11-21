@@ -1,0 +1,436 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Scrum Master Roles & Responsibilities</title>
+
+  <style>
+    :root{
+      --bg0:#070a0f;
+      --bg1:#0a0f18;
+      --ink:#f2f4f7;
+      --muted:#8ea2b8;
+      --rule:#141b26;
+      --accent:#d6b15a;   /* warm gold */
+      --accent2:#caa24c;  /* slightly deeper gold */
+      --max: 980px;
+    }
+
+    html,body{height:100%}
+    body{
+      margin:0;
+      color:var(--ink);
+      background:
+        radial-gradient(1200px 600px at 20% 0%, rgba(35,55,90,.25), transparent 55%),
+        radial-gradient(900px 500px at 80% 20%, rgba(120,90,35,.12), transparent 60%),
+        linear-gradient(180deg, var(--bg0), var(--bg1));
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      letter-spacing: .1px;
+    }
+
+    .wrap{
+      max-width: var(--max);
+      margin: 0 auto;
+      padding: 44px 22px 86px;
+    }
+
+    .eyebrow, .section-label{
+      font-size: 11px;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      color: rgba(242,244,247,.65);
+    }
+    .eyebrow{ margin-bottom: 14px; }
+
+    h1{
+      margin: 0 0 14px;
+      font-family: ui-serif, Georgia, "Times New Roman", Times, serif;
+      font-size: clamp(44px, 6vw, 64px);
+      line-height: 1.02;
+      font-weight: 700;
+    }
+
+    .lead{
+      max-width: 78ch;
+      margin: 0 0 34px;
+      font-size: 14px;
+      line-height: 1.7;
+      color: var(--muted);
+    }
+
+    hr{
+      border:0;
+      border-top: 1px solid var(--rule);
+      margin: 26px 0;
+    }
+
+    .section-head{
+      margin: 0 0 10px;
+      font-family: ui-serif, Georgia, "Times New Roman", Times, serif;
+      font-size: 18px;
+      font-weight: 650;
+      color: rgba(242,244,247,.92);
+    }
+
+    /* Cards */
+    .card{
+      padding: 18px 0 20px;
+      border-top: 1px solid var(--rule);
+    }
+
+    .card-grid{
+      display: grid;
+      grid-template-columns: 44px 1fr;
+      column-gap: 18px;
+      align-items: start;
+    }
+
+    .num{
+      font-size: 11px;
+      letter-spacing: .16em;
+      color: var(--accent);
+      margin-top: 6px;
+      user-select: none;
+    }
+
+    .card h2{
+      margin: 0;
+      font-family: ui-serif, Georgia, "Times New Roman", Times, serif;
+      font-size: 18px;
+      line-height: 1.2;
+      font-weight: 650;
+      color: var(--ink);
+    }
+
+    .question{
+      margin: 8px 0 10px;
+      font-size: 12px;
+      line-height: 1.5;
+      font-style: italic;
+      color: var(--accent2);
+    }
+
+    .desc{
+      margin: 0;
+      font-size: 13px;
+      line-height: 1.7;
+      color: rgba(242,244,247,.74);
+      max-width: 92ch;
+    }
+
+    .bullets{
+      margin: 0;
+      padding-left: 18px;
+      color: rgba(242,244,247,.74);
+      font-size: 13px;
+      line-height: 1.7;
+    }
+    .bullets li{ margin: 6px 0; }
+
+    /* Small footer */
+    .foot{
+      margin-top: 30px;
+      padding-top: 18px;
+      border-top: 1px solid var(--rule);
+      color: rgba(242,244,247,.55);
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    /* Optional: subtle link style */
+    a{
+      color: rgba(242,244,247,.75);
+      text-decoration-color: rgba(214,177,90,.45);
+      text-underline-offset: 3px;
+    }
+    a:hover{
+      color: rgba(242,244,247,.9);
+      text-decoration-color: rgba(214,177,90,.8);
+    }
+  </style>
+</head>
+
+<body>
+  <main class="wrap">
+    <div class="eyebrow">AGILE PRACTICE — REFERENCE STANDARD</div>
+
+    <h1>Scrum Master Roles &amp; Responsibilities</h1>
+
+    <p class="lead">
+      The Scrum Master helps deliver against team commitments for projects, enhancements, incidents, and stories.
+      This is done by acting as a servant leader, removing obstacles, pushing efficiencies, and driving continuous improvement.
+      The Scrum Master helps the team deliver high-value work and products.
+    </p>
+
+    <hr>
+
+    <div class="section-label">CORE QUESTIONS</div>
+    <div class="section-head">Asks these questions to all team members, including themselves</div>
+
+    <section class="card">
+      <div class="card-grid">
+        <div class="num">01</div>
+        <div>
+          <h2>Work Stagnation</h2>
+          <div class="question">"Where is work sitting, not being worked on?"</div>
+          <p class="desc">
+            Identify queues, handoff points, and ownership gaps. Work that is “waiting” is usually the fastest path to improvement.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-grid">
+        <div class="num">02</div>
+        <div>
+          <h2>Non-Working Time</h2>
+          <div class="question">"How long are cards sitting in a non-working state?"</div>
+          <p class="desc">
+            Track how long work spends paused, pending, or waiting. Time not spent progressing work is where flow breaks down.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-grid">
+        <div class="num">03</div>
+        <div>
+          <h2>Board Visibility</h2>
+          <div class="question">"Where can you see the work not being done on the board?"</div>
+          <p class="desc">
+            Ensure the board tells the truth. Hidden work creates surprise, risk, and missed commitments.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-grid">
+        <div class="num">04</div>
+        <div>
+          <h2>Impediment Removal</h2>
+          <div class="question">"How can you remove impediments?"</div>
+          <p class="desc">
+            Remove friction: access, approvals, environment issues, unclear requirements, and dependency delays.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-grid">
+        <div class="num">05</div>
+        <div>
+          <h2>Blocked Work</h2>
+          <div class="question">"What is marked Blocked?"</div>
+          <p class="desc">
+            Blocked work should never be invisible. Make it explicit, time-box follow-ups, and assign a next action.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-grid">
+        <div class="num">06</div>
+        <div>
+          <h2>Lead Time</h2>
+          <div class="question">"What is the average lead time once a card is 'started'?"</div>
+          <p class="desc">
+            Lead time reveals capacity, workflow health, and predictability. Use it to set expectations and improve flow.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-grid">
+        <div class="num">07</div>
+        <div>
+          <h2>Throughput</h2>
+          <div class="question">"Do you know team throughput?"</div>
+          <p class="desc">
+            Throughput is the team’s delivery reality. Use it to guide planning, not hope or pressure.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-grid">
+        <div class="num">08</div>
+        <div>
+          <h2>Demo Readiness</h2>
+          <div class="question">"What can we demo soon and often?"</div>
+          <p class="desc">
+            Demonstrations validate progress, reduce rework, and build trust. Optimize for small, frequent proof of value.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-grid">
+        <div class="num">09</div>
+        <div>
+          <h2>Stop Doing</h2>
+          <div class="question">"What are doing that we shouldn’t?"</div>
+          <p class="desc">
+            Reduce waste: unnecessary meetings, unclear intake, rework loops, and “busy work” that doesn’t move outcomes.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <hr>
+
+    <div class="section-label">RESPONSIBILITIES</div>
+    <div class="section-head">Performs these tasks</div>
+
+    <section class="card">
+      <div class="card-grid">
+        <div class="num">01</div>
+        <div>
+          <h2>PMO Collaboration</h2>
+          <div class="question">"How does the team align to portfolio governance?"</div>
+          <ul class="bullets">
+            <li>Collaborates with the PMO</li>
+            <li>Enters demands</li>
+            <li>Participates in PMO activities</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-grid">
+        <div class="num">02</div>
+        <div>
+          <h2>Access &amp; Operational Enablement</h2>
+          <div class="question">"What does the team need to execute without delay?"</div>
+          <ul class="bullets">
+            <li>Assists with support access</li>
+            <li>Shields the team — acts as interrupt buffer and triage</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-grid">
+        <div class="num">03</div>
+        <div>
+          <h2>Quality in Delivery</h2>
+          <div class="question">"Is the work defined, testable, and documented inside the story?"</div>
+          <ul class="bullets">
+            <li>Develops strategies for testing and helps document within the story</li>
+            <li>Performs acceptance criteria discovery and input</li>
+            <li>Converts work to the correct ticket type</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-grid">
+        <div class="num">04</div>
+        <div>
+          <h2>Blocker Removal</h2>
+          <div class="question">"What is stopping progress and who can move it?"</div>
+          <ul class="bullets">
+            <li>Assists the Product Owner with removing blockers</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-grid">
+        <div class="num">05</div>
+        <div>
+          <h2>Agile Ways of Working</h2>
+          <div class="question">"Are we following the process we agreed to—without rigidity?"</div>
+          <ul class="bullets">
+            <li>Promotes agile principles, ways of working, and adherence to the process</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-grid">
+        <div class="num">06</div>
+        <div>
+          <h2>Cadence &amp; Ceremonies</h2>
+          <div class="question">"Is the team meeting rhythm driving execution and learning?"</div>
+          <ul class="bullets">
+            <li>Conducts daily scrums</li>
+            <li>Facilitates and manages the flow of ceremonies, including sprint planning and retros</li>
+            <li>Schedules ad hoc retros</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-grid">
+        <div class="num">07</div>
+        <div>
+          <h2>Customer Engagement</h2>
+          <div class="question">"Are we validating value with the customer early and often?"</div>
+          <ul class="bullets">
+            <li>Collaborates with customers for demos</li>
+            <li>Obtains UAT signoff from the catalog form</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-grid">
+        <div class="num">08</div>
+        <div>
+          <h2>Backlog Refinement</h2>
+          <div class="question">"Is the backlog ready, prioritized, and understandable?"</div>
+          <ul class="bullets">
+            <li>Refines product backlog with the Product Owner</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-grid">
+        <div class="num">09</div>
+        <div>
+          <h2>Daily Progress Monitoring</h2>
+          <div class="question">"What do the metrics say today—and what action follows?"</div>
+          <ul class="bullets">
+            <li>Monitors progress by reviewing burn down charts and metrics on a daily basis</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-grid">
+        <div class="num">10</div>
+        <div>
+          <h2>Production Change Coordination</h2>
+          <div class="question">"Are releases controlled, communicated, and successful?"</div>
+          <ul class="bullets">
+            <li>Coordinates change requests for pushes to PROD</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <div class="foot">
+      <div>Tip: Keep this page short, specific, and operational. If you want a printable version, I can generate a second “one-page” variant.</div>
+    </div>
+  </main>
+</body>
+</html>

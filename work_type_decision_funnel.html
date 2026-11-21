@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Work Type Triage</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@300;400;600;700&family=Barlow+Condensed:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  /* Colorblind-safe palette — distinguishable for deuteranopia, protanopia, tritanopia.
+     Uses blue / orange / teal / purple-slate — avoids red-green-only signals.
+     Shape, text labels, and bold borders carry meaning independently of hue. */
+  :root {
+    --bg:      #f0f4f8;       /* cool off-white — reduces glare */
+    --surface: #e8edf4;
+    --border:  #b0baca;       /* darker border — more visible */
+    --text:    #0a1118;       /* near-black — maximum contrast */
+    --muted:   #2c3a4a;       /* dark slate — replaces light gray, WCAG AA on all surfaces */
+    --rule:    #9aa5b4;
+
+    --incident-color:  #0050aa;
+    --incident-bg:     #dce8f8;
+    --request-color:   #006358;
+    --request-bg:      #d4f0ec;
+    --change-color:    #6b4200;
+    --change-bg:       #fdefd4;
+    --task-color:      #352880;
+    --task-bg:         #e8e4f8;
+    --event-color:     #a03d00;
+    --event-bg:        #fce4d4;
+    --escalate-color:  #2c3a4a;
+    --escalate-bg:     #e4e8ee;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Barlow', sans-serif;
+    font-size: 18px;
+    line-height: 1.7;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 28px;
+  }
+
+  .stage {
+    width: 100%;
+    max-width: 740px;
+  }
+
+  /* TOP BAR */
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 48px;
+    border-bottom: 2px solid var(--rule);
+    padding-bottom: 16px;
+  }
+
+  .brand {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .reset-btn {
+    background: none;
+    border: 2px solid var(--border);
+    color: var(--muted);
+    font-family: 'Barlow', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    padding: 8px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.15s;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .reset-btn.visible { opacity: 1; pointer-events: auto; }
+  .reset-btn:hover { border-color: var(--text); color: var(--text); }
+
+  /* BREADCRUMB */
+  .breadcrumb {
+    min-height: 28px;
+    margin-bottom: 36px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .crumb-sep { font-size: 16px; color: var(--rule); font-weight: 700; }
+  .crumb-answer { font-size: 16px; color: var(--muted); font-weight: 700; }
+
+  /* START */
+  .start-wrap { text-align: center; padding: 40px 0; }
+
+  .start-btn {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 32px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    background: var(--text);
+    color: #fff;
+    border: none;
+    padding: 28px 80px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .start-btn:hover { background: #1a2b3e; transform: scale(1.02); }
+  .start-hint { margin-top: 20px; font-size: 19px; color: var(--muted); font-weight: 600; }
+
+  /* QUESTION */
+  .question-wrap { margin-bottom: 36px; }
+
+  .question-step {
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 14px;
+  }
+
+  .question-text {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: clamp(36px, 6vw, 54px);
+    font-weight: 700;
+    line-height: 1.15;
+    color: var(--text);
+  }
+
+  .question-sub {
+    margin-top: 16px;
+    font-size: 19px;
+    font-weight: 600;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+
+  /* CHOICES */
+  .choices { display: flex; flex-direction: column; gap: 14px; }
+
+  .choice {
+    background: #ffffff;
+    border: 2px solid var(--border);
+    color: var(--text);
+    font-family: 'Barlow', sans-serif;
+    font-size: 20px;
+    font-weight: 600;
+    padding: 22px 64px 22px 24px;
+    border-radius: 6px;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.12s ease;
+    display: flex;
+    align-items: flex-start;
+    gap: 18px;
+    position: relative;
+  }
+
+  .choice::after {
+    content: '→';
+    position: absolute;
+    right: 24px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--muted);
+    font-size: 22px;
+    transition: transform 0.12s, color 0.12s;
+  }
+
+  .choice:hover {
+    border-color: var(--text);
+    background: #fff;
+    transform: translateX(5px);
+    box-shadow: 0 3px 14px rgba(0,0,0,0.1);
+  }
+
+  .choice:hover::after { transform: translateY(-50%) translateX(5px); color: var(--text); }
+  .choice:active { transform: translateX(7px) scale(0.99); }
+
+  .choice-key {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    background: var(--border);
+    padding: 4px 10px;
+    border-radius: 3px;
+    flex-shrink: 0;
+    text-transform: uppercase;
+    margin-top: 3px;
+  }
+
+  .choice-content { display: flex; flex-direction: column; gap: 5px; }
+  .choice-label { line-height: 1.35; }
+  .choice-hint { font-size: 16px; font-weight: 600; color: var(--muted); line-height: 1.6; }
+
+  /* INCIDENT RACING THEME */
+  .result-header.incident-header {
+    background-image:
+      repeating-linear-gradient(
+        -55deg,
+        transparent,
+        transparent 12px,
+        rgba(255,255,255,0.18) 12px,
+        rgba(255,255,255,0.18) 16px
+      ) !important;
+    background-blend-mode: overlay;
+  }
+
+  .choice.choice-incident {
+    border-left: 5px solid #0050aa;
+  }
+
+  .choice.choice-incident .choice-key {
+    background: #0050aa;
+    color: #fff;
+  }
+
+  /* RESULT */
+  .result-wrap { display: none; }
+  .result-wrap.visible { display: block; animation: fadeUp 0.22s ease forwards; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Result header band */
+  .result-header {
+    border-radius: 6px;
+    padding: 28px 32px;
+    margin-bottom: 28px;
+    border-left: 10px solid currentColor;
+  }
+
+  .result-eyebrow {
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    opacity: 0.8;
+  }
+
+  .result-type {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: clamp(52px, 10vw, 82px);
+    font-weight: 700;
+    line-height: 0.95;
+    margin-bottom: 10px;
+  }
+
+  .result-plain {
+    font-size: 22px;
+    font-weight: 600;
+    opacity: 0.85;
+  }
+
+  /* Result body */
+  .result-why {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--muted);
+    line-height: 1.8;
+    margin-bottom: 16px;
+    padding: 20px 24px;
+    background: #ffffff;
+    border-radius: 6px;
+    border-left: 4px solid var(--rule);
+  }
+
+  .result-why strong { color: var(--text); font-weight: 700; }
+
+  .result-cols {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+
+  @media (max-width: 520px) { .result-cols { grid-template-columns: 1fr; } }
+
+  .result-col-block {
+    background: #ffffff;
+    border-radius: 6px;
+    padding: 20px 22px;
+    border: 1px solid var(--border);
+  }
+
+  .result-block-label {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+
+  .result-sla {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 8px;
+    white-space: pre-line;
+  }
+
+  .result-note { font-size: 16px; font-weight: 600; color: var(--muted); line-height: 1.7; }
+
+  /* Actions */
+  .result-actions-label {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 14px;
+  }
+
+  .result-actions { list-style: none; display: flex; flex-direction: column; gap: 12px; margin-bottom: 28px; }
+
+  .result-actions li {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.7;
+    padding: 16px 18px;
+    background: #ffffff;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+  }
+
+  .action-num {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: #fff;
+    background: var(--muted);
+    min-width: 30px;
+    height: 30px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .result-callout {
+    display: none;
+    margin-bottom: 20px;
+    padding: 16px 20px;
+    background: #fffbe6;
+    border: 2px solid #c9a800;
+    border-radius: 6px;
+    font-size: 18px;
+    font-weight: 700;
+    color: #3d2e00;
+    line-height: 1.6;
+  }
+
+  .result-callout.visible { display: block; }
+
+  .sub-bullets {
+    list-style: none;
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .sub-bullet {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--muted);
+    line-height: 1.5;
+    padding-left: 4px;
+  }
+
+  .screen { transition: opacity 0.15s, transform 0.15s; }
+  .screen.out { opacity: 0; transform: translateX(-10px); pointer-events: none; }
+</style>
+</head>
+<body>
+
+<div class="stage">
+  <div class="topbar">
+    <div class="brand">Work Type Triage</div>
+    <button class="reset-btn" id="resetBtn" onclick="reset()">← Start over</button>
+  </div>
+
+  <div class="breadcrumb" id="breadcrumb"></div>
+
+  <div id="screenStart" class="screen start-wrap">
+    <button class="start-btn" onclick="begin()">New Interrupt</button>
+    <div class="start-hint">One question at a time. Three clicks to classification.</div>
+  </div>
+
+  <div id="screenQuestion" class="screen" style="display:none">
+    <div class="question-wrap">
+      <div class="question-step" id="qStep"></div>
+      <div class="question-text" id="qText"></div>
+      <div class="question-sub" id="qSub"></div>
+    </div>
+    <div class="choices" id="choicesWrap"></div>
+  </div>
+
+  <div id="screenResult" class="screen result-wrap">
+    <div class="result-header" id="rHeader">
+      <div class="result-eyebrow">Work Type</div>
+      <div class="result-type" id="rType"></div>
+      <div class="result-plain" id="rPlain"></div>
+    </div>
+    <div class="result-why" id="rWhy"></div>
+    <div class="result-callout" id="rCallout"></div>
+    <div class="result-cols">
+      <div class="result-col-block">
+        <div class="result-block-label">Response expectation</div>
+        <div class="result-sla" id="rSla"></div>
+        <div class="result-note" id="rSlaNote"></div>
+      </div>
+      <div class="result-col-block">
+        <div class="result-block-label">Do not</div>
+        <div class="result-note" id="rDont"></div>
+      </div>
+    </div>
+    <div class="result-actions-label">What to do now</div>
+    <ul class="result-actions" id="rActions"></ul>
+  </div>
+</div>
+
+<script>
+const TREE = {
+
+  // ── OPENING GATE ─────────────────────────────────────────────────────────
+  root: {
+    step: 'The one question that matters',
+    question: 'Does this person have it — or not?',
+    sub: null,
+    choices: [
+      {
+        label: 'They have it and it is not working',
+        hint: 'Something is failing that was working before.',
+        next: 'resultIncident'
+      },
+      {
+        label: 'The service exists but is not working for them',
+        hint: 'They are trying to use something the org has — and it is failing.',
+        next: 'resultIncident'
+      },
+      {
+        label: 'They do not have it and need it delivered',
+        hint: 'e.g. new access, account, software, device, or onboarding.',
+        next: 'neverHadIt'
+      },
+      {
+        label: 'This is work I am initiating',
+        hint: 'Not a user request — a change, enhancement, project task, etc.',
+        next: 'myWork'
+      },
+    ]
+  },
+
+  // ── NEVER HAD IT ──────────────────────────────────────────────────────────
+  neverHadIt: {
+    step: 'Step 2 of 2',
+    question: 'Is this something we already know how to deliver?',
+    sub: 'It exists in the service catalog. There is a defined process, an owner, and a delivery timeline.',
+    choices: [
+      {
+        label: 'Yes — standard request, known process',
+        hint: 'Access grants, new accounts, software installs, hardware orders, onboarding.',
+        next: 'resultRequest'
+      },
+      {
+        label: 'No — it is new, undefined, or needs approval first',
+        hint: 'No catalog item exists, or scope is unclear.',
+        next: 'resultEscalate'
+      },
+    ]
+  },
+
+  // ── MY WORK ───────────────────────────────────────────────────────────────
+  myWork: {
+    step: 'Step 2 of 2',
+    question: 'What practice area does this fall under?',
+    sub: null,
+    choices: [
+      {
+        label: 'Change Enablement',
+        hint: 'Change request, enhancement, or improvement to an existing service.',
+        next: 'resultChange'
+      },
+      {
+        label: 'Planned Delivery',
+        hint: 'Project task, sprint work, maintenance, or scheduled deployment.',
+        next: 'resultTask'
+      },
+      {
+        label: 'Operations & Event Management',
+        hint: 'Access provisioning, alert triage, or configuration work.',
+        next: 'resultEvent'
+      },
+    ]
+  },
+
+  // ── RESULTS ───────────────────────────────────────────────────────────────
+  resultIncident: {
+    result: {
+      type: '🏁 Incident',
+      plain: 'They had it. Now they don\'t. Restore it.',
+      color: '#0057b8',
+      bgColor: '#e8f0fb',
+      isIncident: true,
+      why: '<strong>Why Incident:</strong> The service existed and was expected to work. Whether the user relied on it daily or encountered it for the first time — if it failed, that is an Incident. You cannot repair what was never set up. But if it was set up and it is broken, that is yours to restore.',
+      callout: 'If you can show the user how to fix it without touching the system — it was never broken.',
+      sla: 'Follow internal SLAs',
+      slaNote: '',
+      dont: 'Work in secret.',
+      actions: [
+        'Notify affected users. Set a time expectation now.',
+        'Route to the correct resolver group.',
+        'Restore service — that is the goal.',
+        { text: 'Document resolution notes:', bullets: [
+          'Symptoms',
+          'Business impact',
+          'Configuration items affected',
+          'Actions completed',
+          'Actions planned',
+          'Timestamp and who was involved'
+        ]}
+      ]
+    }
+  },
+
+  resultRequest: {
+    result: {
+      type: 'Service Request',
+      plain: 'They never had it. Deliver it.',
+      color: '#007a6e',
+      bgColor: '#e0f5f3',
+      why: '<strong>Why Service Request:</strong> Nothing is broken. They are asking for something they have never had. You cannot fix a car someone doesn\'t own yet. This is a delivery. Set the expectation before you hang up.',
+      sla: '1 – 5 business days',
+      slaNote: 'Clock starts at log time. Use catalog SLA — not urgency.',
+      dont: 'Do not log this as an Incident. Do not start work outside the service catalog without authorization.',
+      actions: [
+        'Confirm the request is in the service catalog',
+        'Log as Service Request — not an Incident',
+        'Tell the user the delivery date before the call ends',
+        'Fulfill via standard process',
+        'Not in catalog? Escalate before starting any work'
+      ]
+    }
+  },
+
+  resultEscalate: {
+    result: {
+      type: 'Needs Authorization',
+      plain: 'No catalog item. Do not start work yet.',
+      color: '#3a4a5c',
+      bgColor: '#edf0f4',
+      why: '<strong>Why escalate:</strong> No catalog item means no defined process, no SLA, and no authorization. Starting without these creates unmanaged risk for you and the user.',
+      sla: 'Escalate immediately',
+      slaNote: 'Do not begin work. Give the user a follow-up time.',
+      dont: 'Do not begin work without authorization. Do not leave the user without a response.',
+      actions: [
+        'Tell the user you will follow up — give a specific time',
+        'Escalate to your manager or service owner',
+        'Document what the user needs in plain language',
+        'Determine if a new catalog item is needed',
+        'Once authorized, log as a Service Request and proceed'
+      ]
+    }
+  },
+
+  resultChange: {
+    result: {
+      type: 'Change Request',
+      plain: 'You are modifying something in production.',
+      color: '#7b4f00',
+      bgColor: '#fef3dc',
+      why: '<strong>Why Change Request:</strong> The system works — but you are about to alter it. Any production modification carries risk. Authorization is required before you touch anything.',
+      sla: 'Standard: pre-approved\nNormal: CAB cycle\nEmergency: expedited',
+      slaNote: 'Type determines approval path. Do not execute before authorization.',
+      dont: 'Do not execute before approval is documented. Do not skip the rollback plan.',
+      actions: [
+        'Classify: Standard / Normal / Emergency',
+        'Document risk, impact, and rollback plan',
+        'Route for approval — CAB if Normal or Emergency',
+        'Execute only after sign-off is on record',
+        'Post-implementation review required for Normal and Emergency'
+      ]
+    }
+  },
+
+  resultTask: {
+    result: {
+      type: 'Task',
+      plain: 'Planned work. Put it in the backlog.',
+      color: '#3d2f8f',
+      bgColor: '#eeebfa',
+      why: '<strong>Why Task:</strong> This was anticipated. It has a home — a sprint, a project, a maintenance window. It is not an interrupt. Protect sprint capacity.',
+      sla: 'Sprint or project schedule',
+      slaNote: 'Do not pull mid-sprint unless it has become an emergency. Do collaborate in agile ceremonies about the task.',
+      dont: 'Do not let this displace active Incidents. Do not begin without logging it.',
+      actions: [
+        'Confirm this is truly planned — not a disguised Incident',
+        'Add to the sprint backlog or project plan',
+        'Decompose work and estimate effort',
+        'Track to delivery within the committed schedule'
+      ]
+    }
+  },
+
+  resultEvent: {
+    result: {
+      type: 'Event',
+      plain: 'An alert. Triage before acting.',
+      color: '#b84c00',
+      bgColor: '#fdeee4',
+      why: '<strong>Why Event:</strong> Monitoring flagged a state change. That is not the same as a confirmed failure. Triage determines whether this becomes an Incident — or gets closed as noise.',
+      sla: 'Triage: < 30 min',
+      slaNote: 'Promote to Incident only if service impact is confirmed.',
+      dont: 'Do not auto-escalate every alert to an Incident. Do not dismiss it without documenting your call.',
+      actions: [
+        'Acknowledge the alert — log who received it and when',
+        'Is there confirmed user-facing or service impact?',
+        'Yes → create an Incident and link this Event',
+        'No → document your assessment and close the Event',
+        'Flag if alert tuning is needed to reduce noise'
+      ]
+    }
+  }
+};
+
+// ── ENGINE ────────────────────────────────────────────────────────────────
+let history = [];
+let currentNodeId = null;
+
+function showScreen(id) {
+  ['screenStart','screenQuestion','screenResult'].forEach(s => {
+    const el = document.getElementById(s);
+    el.style.display = 'none';
+    el.classList.remove('out','visible');
+  });
+  const target = document.getElementById(id);
+  target.style.display = 'block';
+  if (id === 'screenResult') target.classList.add('visible');
+}
+
+function begin() { history = []; navigate('root'); }
+
+function reset() {
+  history = [];
+  currentNodeId = null;
+  document.onkeydown = null;
+  document.getElementById('breadcrumb').innerHTML = '';
+  document.getElementById('resetBtn').classList.remove('visible');
+  showScreen('screenStart');
+}
+
+function navigate(nodeId) {
+  currentNodeId = nodeId;
+  const node = TREE[nodeId];
+  document.getElementById('resetBtn').classList.add('visible');
+  renderBreadcrumb();
+  if (node.result) { renderResult(node.result); return; }
+  renderQuestion(node);
+}
+
+function choose(nodeId, label, next) {
+  history.push({ nodeId, label });
+  const qs = document.getElementById('screenQuestion');
+  qs.classList.add('out');
+  setTimeout(() => navigate(next), 150);
+}
+
+function renderQuestion(node) {
+  document.getElementById('qStep').textContent = node.step;
+  document.getElementById('qText').textContent = node.question;
+  const sub = document.getElementById('qSub');
+  sub.textContent = node.sub || '';
+  sub.style.display = node.sub ? 'block' : 'none';
+
+  const wrap = document.getElementById('choicesWrap');
+  wrap.innerHTML = node.choices.map((c, i) => `
+    <button class="choice" data-index="${i}">
+      <span class="choice-key">${String.fromCharCode(65+i)}</span>
+      <div class="choice-content">
+        <span class="choice-label"></span>
+        ${c.hint ? `<span class="choice-hint"></span>` : ''}
+      </div>
+    </button>
+  `).join('');
+
+  // Set text content via DOM (safe — no HTML injection risk)
+  wrap.querySelectorAll('.choice').forEach((btn, i) => {
+    const c = node.choices[i];
+    btn.querySelector('.choice-label').textContent = c.label;
+    if (c.hint) btn.querySelector('.choice-hint').textContent = c.hint;
+    if (c.next === 'resultIncident') btn.classList.add('choice-incident');
+    btn.addEventListener('click', () => choose(currentNodeId, c.label, c.next));
+  });
+
+  showScreen('screenQuestion');
+
+  document.onkeydown = (e) => {
+    const idx = e.key.toUpperCase().charCodeAt(0) - 65;
+    if (idx >= 0 && idx < node.choices.length) {
+      choose(currentNodeId, node.choices[idx].label, node.choices[idx].next);
+    }
+  };
+}
+
+function renderResult(r) {
+  document.onkeydown = null;
+
+  const header = document.getElementById('rHeader');
+  header.style.background = r.bgColor;
+  header.style.color = r.color;
+  header.style.borderLeftColor = r.color;
+  if (r.isIncident) {
+    header.classList.add('incident-header');
+  } else {
+    header.classList.remove('incident-header');
+  }
+
+  document.getElementById('rType').textContent = r.type;
+  document.getElementById('rPlain').textContent = r.plain;
+  document.getElementById('rWhy').innerHTML = r.why;
+  document.getElementById('rSla').textContent = r.sla;
+  document.getElementById('rSlaNote').textContent = r.slaNote;
+  document.getElementById('rDont').textContent = r.dont;
+
+  const callout = document.getElementById('rCallout');
+  if (r.callout) {
+    callout.textContent = r.callout;
+    callout.classList.add('visible');
+  } else {
+    callout.textContent = '';
+    callout.classList.remove('visible');
+  }
+
+  document.getElementById('rActions').innerHTML = r.actions.map((a,i) => {
+    if (typeof a === 'string') {
+      return `<li><span class="action-num" style="background:${r.color}">${i+1}</span><span>${a}</span></li>`;
+    } else {
+      const bullets = a.bullets.map(b => `<li class="sub-bullet">— ${b}</li>`).join('');
+      return `<li><span class="action-num" style="background:${r.color}">${i+1}</span><span>${a.text}<ul class="sub-bullets">${bullets}</ul></span></li>`;
+    }
+  }).join('');
+
+  showScreen('screenResult');
+}
+
+function renderBreadcrumb() {
+  if (!history.length) { document.getElementById('breadcrumb').innerHTML = ''; return; }
+  document.getElementById('breadcrumb').innerHTML = history.map((h, i) => {
+    const short = h.label.split('—')[0].trim().split(' ').slice(0,6).join(' ');
+    return `${i > 0 ? '<span class="crumb-sep">›</span>' : ''}<span class="crumb-answer">${short}</span>`;
+  }).join('');
+}
+
+showScreen('screenStart');
+</script>
+</body>
+</html>

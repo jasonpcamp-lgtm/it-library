@@ -1,0 +1,889 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Scrum Ceremonies — Field Guide</title>
+
+  <style>
+    :root{
+      --bg0:#070a0f;
+      --bg1:#0a0f18;
+      --ink:#f2f4f7;
+      --muted:#8ea2b8;
+      --rule:#141b26;
+      --accent:#d6b15a;
+      --accent2:#caa24c;
+      --accent3:#3a8fc4;
+      --green:#4caa6e;
+      --red:#b85c5c;
+      --max:1020px;
+
+      --po:#4c8faa;
+      --sm:#a07bc4;
+      --tm:#4caa6e;
+    }
+
+    html,body{height:100%}
+    body{
+      margin:0;
+      color:var(--ink);
+      background:
+        radial-gradient(1200px 600px at 20% 0%, rgba(35,55,90,.25), transparent 55%),
+        radial-gradient(900px 500px at 80% 20%, rgba(120,90,35,.12), transparent 60%),
+        linear-gradient(180deg, var(--bg0), var(--bg1));
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      min-height: 100vh;
+    }
+
+    .wrap{
+      max-width: var(--max);
+      margin: 0 auto;
+      padding: 44px 22px 100px;
+    }
+
+    .eyebrow{
+      font-size: 11px;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      color: rgba(242,244,247,.55);
+      margin-bottom: 14px;
+    }
+
+    h1{
+      margin: 0 0 14px;
+      font-family: ui-serif, Georgia, "Times New Roman", Times, serif;
+      font-size: clamp(38px, 5.5vw, 58px);
+      line-height: 1.04;
+      font-weight: 700;
+    }
+
+    .lead{
+      max-width: 90ch;
+      margin-bottom: 34px;
+      font-size: 14px;
+      line-height: 1.7;
+      color: var(--muted);
+    }
+
+    hr{
+      border:0;
+      border-top: 1px solid var(--rule);
+      margin: 28px 0;
+    }
+
+    /* ROLE FILTER */
+    .role-filter{
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 30px;
+      align-items: center;
+    }
+
+    .filter-label{
+      font-size: 11px;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+      color: rgba(242,244,247,.35);
+      margin-right: 2px;
+    }
+
+    .role-btn{
+      padding: 9px 22px;
+      border-radius: 999px;
+      border: 1.5px solid rgba(255,255,255,.1);
+      background: rgba(255,255,255,.04);
+      color: rgba(242,244,247,.45);
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all .2s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .role-btn::before{
+      content:'';
+      position:absolute;
+      inset:0;
+      border-radius:999px;
+      opacity:0;
+      transition: opacity .2s ease;
+    }
+
+    .role-btn:hover{
+      border-color: rgba(255,255,255,.25);
+      color: var(--ink);
+      transform: translateY(-1px);
+    }
+
+    /* PO — blue */
+    .role-btn[data-role="po"]{
+      border-color: rgba(76,143,170,.2);
+    }
+    .role-btn[data-role="po"]:hover{
+      border-color: rgba(76,143,170,.5);
+      color: var(--po);
+      box-shadow: 0 0 18px rgba(76,143,170,.15);
+    }
+    .role-btn[data-role="po"].active{
+      background: var(--po);
+      border-color: var(--po);
+      color: #fff;
+      box-shadow: 0 0 28px rgba(76,143,170,.55), 0 2px 8px rgba(0,0,0,.4);
+      transform: translateY(-1px);
+    }
+
+    /* SM — purple */
+    .role-btn[data-role="sm"]{
+      border-color: rgba(160,123,196,.2);
+    }
+    .role-btn[data-role="sm"]:hover{
+      border-color: rgba(160,123,196,.5);
+      color: var(--sm);
+      box-shadow: 0 0 18px rgba(160,123,196,.15);
+    }
+    .role-btn[data-role="sm"].active{
+      background: var(--sm);
+      border-color: var(--sm);
+      color: #fff;
+      box-shadow: 0 0 28px rgba(160,123,196,.55), 0 2px 8px rgba(0,0,0,.4);
+      transform: translateY(-1px);
+    }
+
+    /* TM — green */
+    .role-btn[data-role="tm"]{
+      border-color: rgba(76,170,110,.2);
+    }
+    .role-btn[data-role="tm"]:hover{
+      border-color: rgba(76,170,110,.5);
+      color: var(--tm);
+      box-shadow: 0 0 18px rgba(76,170,110,.15);
+    }
+    .role-btn[data-role="tm"].active{
+      background: var(--tm);
+      border-color: var(--tm);
+      color: #fff;
+      box-shadow: 0 0 28px rgba(76,170,110,.55), 0 2px 8px rgba(0,0,0,.4);
+      transform: translateY(-1px);
+    }
+
+    /* CEREMONY CARDS */
+    .ceremony{
+      margin-bottom: 8px;
+      border-top: 1px solid var(--rule);
+    }
+
+    .ceremony-header{
+      display: grid;
+      grid-template-columns: 44px 1fr auto;
+      gap: 18px;
+      align-items: start;
+      padding: 20px 0 18px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .ceremony-header:hover .ceremony-title{ color: var(--accent); }
+
+    .ceremony-num{
+      font-size: 11px;
+      letter-spacing: .16em;
+      color: var(--accent);
+      margin-top: 5px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .ceremony-title{
+      font-family: ui-serif, Georgia, serif;
+      font-size: 20px;
+      font-weight: 650;
+      margin: 0 0 6px;
+      transition: color .15s;
+    }
+
+    .ceremony-meta{
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .chevron{
+      color: var(--muted);
+      font-size: 16px;
+      margin-top: 4px;
+      transition: transform .2s ease;
+      flex-shrink: 0;
+    }
+
+    .ceremony.open .chevron{ transform: rotate(180deg); }
+
+    /* CEREMONY BODY */
+    .ceremony-body{
+      display: none;
+      padding-bottom: 28px;
+    }
+
+    .ceremony.open .ceremony-body{
+      display: block;
+    }
+
+    /* PURPOSE BAR — shown only for SM view */
+    .purpose-bar{
+      background: rgba(160,123,196,.07);
+      border-left: 2px solid var(--sm);
+      padding: 10px 14px;
+      font-size: 12.5px;
+      color: rgba(242,244,247,.68);
+      line-height: 1.6;
+      margin-bottom: 18px;
+      border-radius: 0 3px 3px 0;
+    }
+
+    .purpose-bar strong{ color: var(--sm); font-size: 11px; letter-spacing:.1em; text-transform:uppercase; display:block; margin-bottom:4px; }
+
+    /* ROLE ROWS */
+    .role-rows{ display: flex; flex-direction: column; gap: 0; }
+
+    .role-row{
+      display: grid;
+      grid-template-columns: 130px 1fr 1fr;
+      gap: 0;
+      border-top: 1px solid rgba(20,27,38,.8);
+      padding: 16px 0;
+      transition: opacity .2s;
+    }
+
+    .role-row.faded{ opacity: .22; pointer-events: none; }
+    .role-row.highlighted{ background: transparent; }
+
+    .role-cell{
+      padding: 0 16px;
+      font-size: 13px;
+      line-height: 1.65;
+    }
+
+    .role-cell:first-child{ padding-left: 0; }
+
+    .role-label{
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      padding-top: 2px;
+    }
+
+    .role-dot{
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      margin-top: 5px;
+      flex-shrink: 0;
+    }
+
+    .role-name{
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: .04em;
+      line-height: 1.4;
+    }
+
+    .role-row[data-role="po"] .role-dot{ background: var(--po); }
+    .role-row[data-role="po"] .role-name{ color: var(--po); }
+    .role-row[data-role="sm"] .role-dot{ background: var(--sm); }
+    .role-row[data-role="sm"] .role-name{ color: var(--sm); }
+    .role-row[data-role="tm"] .role-dot{ background: var(--tm); }
+    .role-row[data-role="tm"] .role-name{ color: var(--tm); }
+
+    .col-label{
+      font-size: 10px;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: rgba(242,244,247,.35);
+      margin-bottom: 8px;
+    }
+
+    .do-list, .dont-list{
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .do-list li, .dont-list li{
+      font-size: 12.5px;
+      line-height: 1.55;
+      color: rgba(242,244,247,.78);
+      padding-left: 14px;
+      position: relative;
+    }
+
+    .do-list li::before{
+      content: '✓';
+      position: absolute;
+      left: 0;
+      color: var(--green);
+      font-size: 10px;
+      top: 2px;
+    }
+
+    .dont-list li::before{
+      content: '×';
+      position: absolute;
+      left: 0;
+      color: var(--red);
+      font-size: 12px;
+      top: 0px;
+      line-height: 1.4;
+    }
+
+    /* EXAMPLE EXPAND */
+    .example-toggle{
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 14px;
+      font-size: 11px;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--accent2);
+      cursor: pointer;
+      border: none;
+      background: none;
+      padding: 0;
+      transition: color .15s;
+    }
+
+    .example-toggle:hover{ color: var(--accent); }
+
+    .example-icon{ font-size: 13px; transition: transform .2s; }
+    .example-toggle.open .example-icon{ transform: rotate(45deg); }
+
+    .example-box{
+      display: none;
+      margin-top: 10px;
+      padding: 12px 14px;
+      background: rgba(214,177,90,.05);
+      border-left: 2px solid rgba(214,177,90,.3);
+      border-radius: 0 3px 3px 0;
+      font-size: 12.5px;
+      font-style: italic;
+      color: rgba(242,244,247,.6);
+      line-height: 1.65;
+    }
+
+    .example-box.open{ display: block; }
+
+    /* ROW HEADER for columns */
+    .col-headers{
+      display: grid;
+      grid-template-columns: 130px 1fr 1fr;
+      gap: 0;
+      padding: 0 0 10px;
+      border-bottom: 1px solid var(--rule);
+      margin-bottom: 0;
+    }
+
+    .col-hdr{
+      padding: 0 16px;
+      font-size: 10px;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+      color: rgba(242,244,247,.3);
+    }
+
+    .col-hdr:first-child{ padding-left: 0; }
+
+    /* SM full view extra info */
+    .sm-only{
+      display: none;
+    }
+
+    body.view-sm .sm-only{ display: block; }
+
+    /* SECTION LABEL */
+    .section-label{
+      font-size: 11px;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      color: rgba(242,244,247,.55);
+      margin-bottom: 10px;
+    }
+
+    /* Responsive */
+    @media(max-width: 640px){
+      .role-row{
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+      .col-headers{ display: none; }
+      .role-cell{ padding: 0; }
+    }
+  </style>
+</head>
+
+<body>
+<main class="wrap">
+
+  <div class="eyebrow">SCRUM CEREMONIES — FIELD GUIDE</div>
+  <h1>Ceremonies &amp; Your Role</h1>
+
+  <p class="lead">
+    Select your role. The Scrum Master view shows full context for every ceremony — purpose, facilitation cues, and what to drive toward. PO and Team Member views show what to do and what to avoid.
+  </p>
+
+  <hr>
+
+  <!-- ROLE FILTER -->
+  <div class="role-filter">
+    <span class="filter-label">I am a —</span>
+    <button class="role-btn active" data-role="sm" onclick="setRole('sm')">Scrum Master</button>
+    <button class="role-btn" data-role="po" onclick="setRole('po')">Product Owner</button>
+    <button class="role-btn" data-role="tm" onclick="setRole('tm')">Team Member</button>
+  </div>
+
+  <hr>
+
+  <div class="section-label">Ceremonies</div>
+
+  <!-- ── CEREMONY 1: DAILY STAND-UP ── -->
+  <div class="ceremony" id="cer-standup">
+    <div class="ceremony-header" onclick="toggleCeremony('cer-standup')">
+      <div class="ceremony-num">01</div>
+      <div>
+        <div class="ceremony-title">Daily Stand-up</div>
+        <div class="ceremony-meta">15 min · Every day · Sprint Goal alignment</div>
+      </div>
+      <div class="chevron">▾</div>
+    </div>
+    <div class="ceremony-body">
+      <div class="purpose-bar sm-only">
+        <strong>Scrum Master Context</strong>
+        The stand-up is not a status report to management — it is a team synchronization for the Sprint Goal.
+        Three questions drive it: Are we on track? Is anyone blocked? Who needs help?
+        Your job is to protect the time box and move impediments offline immediately.
+      </div>
+      <div class="col-headers">
+        <div class="col-hdr">Role</div>
+        <div class="col-hdr">✓ Do</div>
+        <div class="col-hdr">× Don't</div>
+      </div>
+      <div class="role-rows">
+
+        <div class="role-row" data-role="po">
+          <div class="role-cell">
+            <div class="role-label">
+              <div class="role-dot"></div>
+              <div>
+                <div class="role-name">Product Owner</div>
+              </div>
+            </div>
+          </div>
+          <div class="role-cell">
+            <ul class="do-list">
+              <li>Listen for Sprint Goal risk</li>
+              <li>Note follow-ups</li>
+              <li>Clarify priority quickly if asked</li>
+            </ul>
+            <button class="example-toggle" onclick="toggleExample(this)"><span class="example-icon">+</span> Example</button>
+            <div class="example-box">Hears "waiting on access" and says: "That risks the goal — I'll escalate right after this."</div>
+          </div>
+          <div class="role-cell">
+            <ul class="dont-list">
+              <li>Assign work</li>
+              <li>Status-manage the team</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="role-row" data-role="sm">
+          <div class="role-cell">
+            <div class="role-label">
+              <div class="role-dot"></div>
+              <div>
+                <div class="role-name">Scrum Master</div>
+              </div>
+            </div>
+          </div>
+          <div class="role-cell">
+            <ul class="do-list">
+              <li>Ask: On track? Blocked? Who needs help?</li>
+              <li>Keep it time-boxed (15 min)</li>
+              <li>Capture impediments immediately</li>
+            </ul>
+            <button class="example-toggle" onclick="toggleExample(this)"><span class="example-icon">+</span> Example</button>
+            <div class="example-box">Asks: "What's stopping this card from moving today?" and captures the action offline — does not solve it in the standup.</div>
+          </div>
+          <div class="role-cell">
+            <ul class="dont-list">
+              <li>Problem-solve live in the meeting</li>
+              <li>Speak for the team</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="role-row" data-role="tm">
+          <div class="role-cell">
+            <div class="role-label">
+              <div class="role-dot"></div>
+              <div>
+                <div class="role-name">Team Member</div>
+              </div>
+            </div>
+          </div>
+          <div class="role-cell">
+            <ul class="do-list">
+              <li>Update your card before or during</li>
+              <li>Share progress toward Sprint Goal</li>
+              <li>Raise blockers clearly and directly</li>
+            </ul>
+            <button class="example-toggle" onclick="toggleExample(this)"><span class="example-icon">+</span> Example</button>
+            <div class="example-box">"Blocked waiting on firewall rule — moved card to Blocked." Done.</div>
+          </div>
+          <div class="role-cell">
+            <ul class="dont-list">
+              <li>Hide issues or minimize blockers</li>
+              <li>Dive into solution details</li>
+            </ul>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ── CEREMONY 2: SPRINT PLANNING ── -->
+  <div class="ceremony" id="cer-planning">
+    <div class="ceremony-header" onclick="toggleCeremony('cer-planning')">
+      <div class="ceremony-num">02</div>
+      <div>
+        <div class="ceremony-title">Sprint Planning</div>
+        <div class="ceremony-meta">2–4 hrs · Start of sprint · Capacity & commitment</div>
+      </div>
+      <div class="chevron">▾</div>
+    </div>
+    <div class="ceremony-body">
+      <div class="purpose-bar sm-only">
+        <strong>Scrum Master Context</strong>
+        Planning is where the team commits to a Sprint Goal — not a task list.
+        Your role is to protect capacity from scope creep and ensure stories are ready before the team pulls them.
+        Push back early; a bloated sprint fails the team and the Product Owner.
+      </div>
+      <div class="col-headers">
+        <div class="col-hdr">Role</div>
+        <div class="col-hdr">✓ Do</div>
+        <div class="col-hdr">× Don't</div>
+      </div>
+      <div class="role-rows">
+
+        <div class="role-row" data-role="po">
+          <div class="role-cell">
+            <div class="role-label"><div class="role-dot"></div><div class="role-name">Product Owner</div></div>
+          </div>
+          <div class="role-cell">
+            <ul class="do-list">
+              <li>Explain the why behind each story</li>
+              <li>Present an ordered, ready backlog</li>
+              <li>Answer questions — be available</li>
+            </ul>
+            <button class="example-toggle" onclick="toggleExample(this)"><span class="example-icon">+</span> Example</button>
+            <div class="example-box">Explains: "This story reduces Service Desk handoffs — that's the value. Everything else is lower priority."</div>
+          </div>
+          <div class="role-cell">
+            <ul class="dont-list">
+              <li>Pre-commit scope or dates</li>
+              <li>Push stories that aren't ready</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="role-row" data-role="sm">
+          <div class="role-cell">
+            <div class="role-label"><div class="role-dot"></div><div class="role-name">Scrum Master</div></div>
+          </div>
+          <div class="role-cell">
+            <ul class="do-list">
+              <li>Facilitate scope vs. capacity conversation</li>
+              <li>Protect the team's bandwidth</li>
+              <li>Ensure a clear Sprint Goal exits planning</li>
+            </ul>
+            <button class="example-toggle" onclick="toggleExample(this)"><span class="example-icon">+</span> Example</button>
+            <div class="example-box">Pushes back: "We're already at capacity — what do we trade off to add this story?" Forces the decision rather than absorbing it silently.</div>
+          </div>
+          <div class="role-cell">
+            <ul class="dont-list">
+              <li>Push commitment beyond capacity</li>
+              <li>Let stories enter without acceptance criteria</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="role-row" data-role="tm">
+          <div class="role-cell">
+            <div class="role-label"><div class="role-dot"></div><div class="role-name">Team Member</div></div>
+          </div>
+          <div class="role-cell">
+            <ul class="do-list">
+              <li>Pull only what the team can realistically finish</li>
+              <li>Ask questions before committing</li>
+              <li>Flag risks and dependencies early</li>
+            </ul>
+            <button class="example-toggle" onclick="toggleExample(this)"><span class="example-icon">+</span> Example</button>
+            <div class="example-box">Team says: "We can take 3 stories, not 5 — two engineers are out Thursday and Friday."</div>
+          </div>
+          <div class="role-cell">
+            <ul class="dont-list">
+              <li>Commit without understanding the work</li>
+              <li>Stay silent on risks</li>
+            </ul>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ── CEREMONY 3: BACKLOG REFINEMENT ── -->
+  <div class="ceremony" id="cer-grooming">
+    <div class="ceremony-header" onclick="toggleCeremony('cer-grooming')">
+      <div class="ceremony-num">03</div>
+      <div>
+        <div class="ceremony-title">Backlog Refinement</div>
+        <div class="ceremony-meta">1 hr · Mid-sprint · Readiness for next sprint</div>
+      </div>
+      <div class="chevron">▾</div>
+    </div>
+    <div class="ceremony-body">
+      <div class="purpose-bar sm-only">
+        <strong>Scrum Master Context</strong>
+        Refinement is about shared understanding — not just sizing.
+        The team should leave knowing what "done" looks like for each story.
+        If confusion persists after discussion, the story is not ready.
+        Your job is to facilitate clarity, not own it.
+      </div>
+      <div class="col-headers">
+        <div class="col-hdr">Role</div>
+        <div class="col-hdr">✓ Do</div>
+        <div class="col-hdr">× Don't</div>
+      </div>
+      <div class="role-rows">
+
+        <div class="role-row" data-role="po">
+          <div class="role-cell">
+            <div class="role-label"><div class="role-dot"></div><div class="role-name">Product Owner</div></div>
+          </div>
+          <div class="role-cell">
+            <ul class="do-list">
+              <li>Order and prioritize the backlog</li>
+              <li>Provide acceptance criteria before the meeting</li>
+              <li>Own the backlog — come prepared</li>
+            </ul>
+            <button class="example-toggle" onclick="toggleExample(this)"><span class="example-icon">+</span> Example</button>
+            <div class="example-box">Re-orders backlog after learning a dependency will delay another team — adjusts before the team pulls the wrong thing.</div>
+          </div>
+          <div class="role-cell">
+            <ul class="dont-list">
+              <li>Skip refinement or show up unprepared</li>
+              <li>Present stories without acceptance criteria</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="role-row" data-role="sm">
+          <div class="role-cell">
+            <div class="role-label"><div class="role-dot"></div><div class="role-name">Scrum Master</div></div>
+          </div>
+          <div class="role-cell">
+            <ul class="do-list">
+              <li>Facilitate — keep discussion focused</li>
+              <li>Surface confusion before it becomes a blocker</li>
+              <li>Ask: "What would done look like here?"</li>
+            </ul>
+            <button class="example-toggle" onclick="toggleExample(this)"><span class="example-icon">+</span> Example</button>
+            <div class="example-box">Notices the team is debating implementation rather than scope — redirects: "Let's first agree on what the story delivers. How can we implement it later."</div>
+          </div>
+          <div class="role-cell">
+            <ul class="dont-list">
+              <li>Own the backlog or write acceptance criteria</li>
+              <li>Let unclear stories pass into planning</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="role-row" data-role="tm">
+          <div class="role-cell">
+            <div class="role-label"><div class="role-dot"></div><div class="role-name">Team Member</div></div>
+          </div>
+          <div class="role-cell">
+            <ul class="do-list">
+              <li>Ask questions — surface confusion now, not in sprint</li>
+              <li>Suggest splitting large stories</li>
+              <li>Flag risks and dependencies early</li>
+            </ul>
+            <button class="example-toggle" onclick="toggleExample(this)"><span class="example-icon">+</span> Example</button>
+            <div class="example-box">Suggests splitting a story: "Config and automation are two different efforts — if we split it, we can ship config this sprint."</div>
+          </div>
+          <div class="role-cell">
+            <ul class="dont-list">
+              <li>Defer questions to planning</li>
+              <li>Accept a story you don't understand</li>
+            </ul>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ── CEREMONY 4: SPRINT RETROSPECTIVE ── -->
+  <div class="ceremony" id="cer-retro">
+    <div class="ceremony-header" onclick="toggleCeremony('cer-retro')">
+      <div class="ceremony-num">04</div>
+      <div>
+        <div class="ceremony-title">Sprint Retrospective</div>
+        <div class="ceremony-meta">1 hr · End of sprint · Inspect &amp; adapt</div>
+      </div>
+      <div class="chevron">▾</div>
+    </div>
+    <div class="ceremony-body">
+      <div class="purpose-bar sm-only">
+        <strong>Scrum Master Context</strong>
+        Retro is your ceremony. Create psychological safety first — without it, nothing real surfaces.
+        Redirect blame from people to systems. Drive toward at least one concrete, actionable improvement.
+        Capture it as a Kaizen card and make it visible. Keep scope to this sprint — not the organization.
+      </div>
+      <div class="col-headers">
+        <div class="col-hdr">Role</div>
+        <div class="col-hdr">✓ Do</div>
+        <div class="col-hdr">× Don't</div>
+      </div>
+      <div class="role-rows">
+
+        <div class="role-row" data-role="po">
+          <div class="role-cell">
+            <div class="role-label"><div class="role-dot"></div><div class="role-name">Product Owner</div></div>
+          </div>
+          <div class="role-cell">
+            <ul class="do-list">
+              <li>Listen openly — this is feedback, not a report</li>
+              <li>Support improvements the team commits to</li>
+              <li>Acknowledge your own impact on the sprint</li>
+            </ul>
+            <button class="example-toggle" onclick="toggleExample(this)"><span class="example-icon">+</span> Example</button>
+            <div class="example-box">Says: "I didn't realize late story changes caused rework — I'll lock acceptance criteria 48 hours before sprint start."</div>
+          </div>
+          <div class="role-cell">
+            <ul class="dont-list">
+              <li>Defend past decisions</li>
+              <li>Redirect blame outward</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="role-row" data-role="sm">
+          <div class="role-cell">
+            <div class="role-label"><div class="role-dot"></div><div class="role-name">Scrum Master</div></div>
+          </div>
+          <div class="role-cell">
+            <ul class="do-list">
+              <li>Create safety — silence signals fear, not agreement</li>
+              <li>Shift blame from people to systems</li>
+              <li>Drive to one actionable improvement (Kaizen card)</li>
+              <li>Focus on this sprint — not org-wide issues</li>
+            </ul>
+            <button class="example-toggle" onclick="toggleExample(this)"><span class="example-icon">+</span> Example</button>
+            <div class="example-box">Redirects: "Let's focus on the process, not the person. What about how we handle change requests could we improve?" Then creates a Kaizen card before the meeting ends.</div>
+          </div>
+          <div class="role-cell">
+            <ul class="dont-list">
+              <li>Let blame settle on an individual</li>
+              <li>End without a committed action item</li>
+              <li>Let discussion drift to issues outside the sprint</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="role-row" data-role="tm">
+          <div class="role-cell">
+            <div class="role-label"><div class="role-dot"></div><div class="role-name">Team Member</div></div>
+          </div>
+          <div class="role-cell">
+            <ul class="do-list">
+              <li>Be honest — say what went wrong and what worked</li>
+              <li>Commit to one specific improvement</li>
+              <li>Stay and contribute — presence matters</li>
+            </ul>
+            <button class="example-toggle" onclick="toggleExample(this)"><span class="example-icon">+</span> Example</button>
+            <div class="example-box">Commits: "I'll update cards daily, not just at standup — that was my gap this sprint."</div>
+          </div>
+          <div class="role-cell">
+            <ul class="dont-list">
+              <li>Stay silent on what went wrong</li>
+              <li>Commit to change without intending to follow through</li>
+            </ul>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <hr>
+  <div style="color:rgba(242,244,247,.4);font-size:12px;margin-top:10px;">
+    Ceremonies work when roles are clear and communication is honest. This guide is a starting point — not a script.
+  </div>
+
+</main>
+
+<script>
+  let activeRole = 'sm';
+
+  function setRole(role) {
+    activeRole = role;
+
+    // Update button states
+    document.querySelectorAll('.role-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.role === role);
+    });
+
+    // Update body class for SM-only content
+    document.body.classList.toggle('view-sm', role === 'sm');
+
+    // Update row visibility
+    applyRoleFilter();
+  }
+
+  function applyRoleFilter() {
+    document.querySelectorAll('.role-row').forEach(row => {
+      if (row.dataset.role === activeRole) {
+        row.classList.remove('faded');
+        row.classList.add('highlighted');
+      } else {
+        row.classList.add('faded');
+        row.classList.remove('highlighted');
+      }
+    });
+  }
+
+  function toggleCeremony(id) {
+    const el = document.getElementById(id);
+    el.classList.toggle('open');
+  }
+
+  function toggleExample(btn) {
+    btn.classList.toggle('open');
+    const box = btn.nextElementSibling;
+    box.classList.toggle('open');
+  }
+
+  // Auto-open first ceremony and initialize SM view
+  document.addEventListener('DOMContentLoaded', () => {
+    toggleCeremony('cer-standup');
+    setRole('sm');
+  });
+</script>
+</body>
+</html>

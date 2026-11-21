@@ -1,0 +1,419 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Scrum Master Checklist</title>
+
+  <style>
+    :root{
+      --bg0:#070a0f;
+      --bg1:#0a0f18;
+      --ink:#f2f4f7;
+      --muted:#8ea2b8;
+      --rule:#141b26;
+      --accent:#d6b15a;   /* warm gold */
+      --accent2:#caa24c;
+      --ok:#6bd68a;
+      --max: 980px;
+    }
+
+    html,body{height:100%}
+    body{
+      margin:0;
+      color:var(--ink);
+      background:
+        radial-gradient(1200px 600px at 20% 0%, rgba(35,55,90,.25), transparent 55%),
+        radial-gradient(900px 500px at 80% 20%, rgba(120,90,35,.12), transparent 60%),
+        linear-gradient(180deg, var(--bg0), var(--bg1));
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      letter-spacing: .1px;
+    }
+
+    .wrap{
+      max-width: var(--max);
+      margin: 0 auto;
+      padding: 44px 22px 86px;
+    }
+
+    .eyebrow, .section-label{
+      font-size: 11px;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      color: rgba(242,244,247,.65);
+    }
+    .eyebrow{ margin-bottom: 14px; }
+
+    h1{
+      margin: 0 0 14px;
+      font-family: ui-serif, Georgia, "Times New Roman", Times, serif;
+      font-size: clamp(44px, 6vw, 64px);
+      line-height: 1.02;
+      font-weight: 700;
+    }
+
+    .lead{
+      max-width: 90ch;
+      margin: 0 0 22px;
+      font-size: 14px;
+      line-height: 1.7;
+      color: var(--muted);
+    }
+
+    hr{
+      border:0;
+      border-top: 1px solid var(--rule);
+      margin: 22px 0;
+    }
+
+    /* Top bar */
+    .toolbar{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      align-items:center;
+      justify-content:space-between;
+      margin: 10px 0 22px;
+      padding: 14px 0;
+      border-top: 1px solid var(--rule);
+      border-bottom: 1px solid var(--rule);
+    }
+
+    .progress{
+      display:flex;
+      align-items:baseline;
+      gap:10px;
+    }
+    .progress .count{
+      font-family: ui-serif, Georgia, "Times New Roman", Times, serif;
+      font-size: 18px;
+      font-weight: 650;
+      color: rgba(242,244,247,.92);
+    }
+    .progress .sub{
+      font-size: 12px;
+      color: rgba(242,244,247,.6);
+      letter-spacing:.08em;
+      text-transform: uppercase;
+    }
+
+    .actions{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      align-items:center;
+      justify-content:flex-end;
+    }
+
+    button{
+      border: 1px solid rgba(214,177,90,.35);
+      background: rgba(10,15,24,.6);
+      color: rgba(242,244,247,.86);
+      padding: 9px 12px;
+      border-radius: 10px;
+      font-size: 12px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: transform .05s ease, border-color .2s ease, background .2s ease;
+    }
+    button:hover{
+      border-color: rgba(214,177,90,.7);
+      background: rgba(10,15,24,.9);
+    }
+    button:active{ transform: translateY(1px); }
+
+    .hint{
+      font-size: 12px;
+      color: rgba(242,244,247,.55);
+      margin-top: 10px;
+    }
+
+    /* Checklist */
+    .section-label{ margin: 0 0 10px; }
+
+    .list{
+      margin-top: 8px;
+      border-top: 1px solid var(--rule);
+    }
+
+    .item{
+      display:grid;
+      grid-template-columns: 52px 1fr 110px;
+      gap: 12px;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--rule);
+      align-items:start;
+    }
+
+    .num{
+      font-size: 11px;
+      letter-spacing: .16em;
+      color: var(--accent);
+      margin-top: 6px;
+      user-select: none;
+    }
+
+    .task{
+      display:flex;
+      gap: 10px;
+      align-items:flex-start;
+      line-height: 1.55;
+    }
+
+    .task input[type="checkbox"]{
+      margin-top: 3px;
+      width: 18px;
+      height: 18px;
+      accent-color: var(--accent);
+      cursor:pointer;
+    }
+
+    .task label{
+      cursor:pointer;
+      font-size: 13px;
+      color: rgba(242,244,247,.82);
+      max-width: 95ch;
+    }
+
+    .meta{
+      text-align:right;
+      font-size: 11px;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: rgba(242,244,247,.55);
+      padding-top: 4px;
+      user-select:none;
+    }
+
+    .done label{
+      color: rgba(242,244,247,.58);
+      text-decoration: line-through;
+      text-decoration-thickness: 1px;
+      text-decoration-color: rgba(242,244,247,.25);
+    }
+    .done .meta{
+      color: rgba(107,214,138,.7);
+    }
+
+    /* Footer */
+    .foot{
+      margin-top: 28px;
+      padding-top: 18px;
+      border-top: 1px solid var(--rule);
+      color: rgba(242,244,247,.55);
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    /* Print / PDF */
+    @media print{
+      body{
+        background: #ffffff !important;
+        color:#111 !important;
+      }
+      .wrap{
+        max-width: none;
+        padding: 0;
+        margin: 0;
+      }
+      .eyebrow, .section-label, .lead, .hint, .foot, .progress .sub{
+        color:#333 !important;
+      }
+      h1, .progress .count{ color:#000 !important; }
+      .toolbar, button{ display:none !important; }
+      .item{ border-bottom: 1px solid #ddd !important; }
+      .list{ border-top: 1px solid #ddd !important; }
+      .num{ color:#555 !important; }
+      .task label{ color:#111 !important; }
+      .done label{ color:#555 !important; }
+      .meta{ color:#666 !important; }
+      a{ color:#000 !important; text-decoration:none !important; }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="wrap">
+    <div class="eyebrow">AGILE PRACTICE — SCRUM MASTER TOOL</div>
+
+    <h1>Scrum Master Checklist</h1>
+
+    <p class="lead">
+      Use this checklist to keep the Agile hierarchy clean, improve flow, and reinforce team operating discipline.
+      Checks persist locally in your browser. Use <strong>Print / Save PDF</strong> for a shareable snapshot.
+    </p>
+
+    <div class="toolbar" role="region" aria-label="Checklist toolbar">
+      <div class="progress" aria-live="polite">
+        <div class="count" id="progressCount">0 / 0 complete</div>
+        <div class="sub">progress</div>
+      </div>
+
+      <div class="actions">
+        <button type="button" id="btnCheckAll">Check all</button>
+        <button type="button" id="btnClear">Clear</button>
+        <button type="button" id="btnPrint">Print / Save PDF</button>
+      </div>
+    </div>
+
+    <div class="section-label">TASKS</div>
+    <div class="list" id="checklist"></div>
+
+    <div class="hint">
+      Tip: For PDF, use your browser print dialog (Chrome/Edge) → Destination: <em>Save as PDF</em>.
+    </div>
+
+    <div class="foot">
+      <div><strong>Note:</strong> This page saves completion state in your browser only (localStorage). Clearing browser storage will reset it.</div>
+    </div>
+  </main>
+
+  <script>
+    (function(){
+      const STORAGE_KEY = "scrum_master_checklist_v1";
+
+      const tasks = [
+        "Agile Hierarchy Categorization",
+        "Create Release for Q1, Q2, Q3 & Q4 for current fiscal year",
+        "Set Starting and End Sprint for each Sprint within the Release",
+        "Assign Product to Releases",
+        "Assign Sprints to each Release",
+        "Create Epic for any new PMO project received",
+        "Clean Epic Backlog, moving all stories into newly created Epics that align with enhancements, project or KTLO work",
+        "Check State of Epics that they are aligned to correct Releases and Sprints",
+        "Name/rename all Epics to conventions set by Product Coaches",
+        "Name/rename Releases to conventions as set by Product Coaches",
+        "Locate all orphaned stories and assign to Epic; create Epic if needed",
+        "Review stories older than a year; contact customer to see if it is still needed; close where appropriate",
+        "At the start of each fiscal year, review all Releases, Epics, Sprints and rename/edit where needed",
+        "Review each story TYPE daily. Work with the team to set Story Types carefully; set Release Story Types to the closest type",
+        "Review and track when story cards hit the Work in Progress column. Learn how to track Cycle Time for your time. Little's Law",
+        "Frequently check with your team to change state or drag story card across kanban board as needed",
+        "Check and assign Stories to correct Theme, Product, and Epic respectively",
+        "Review and share burndown with team frequently",
+        "Mark stories as blocked when something is reported; escalate blocks to your team lead",
+        "Coordinate Swarm meetings for the team",
+        "Create color scheme for Epics by PRODUCT and then PROJ/ENH",
+        "Query for Agile Enhancements by your team; close parent Enhancement > assign story for Agile Enhancement to Epic",
+        "Schedule team meetings to review Demands from PMO",
+        "Schedule Swarm meetings for the team to tackle work together",
+        "Reviews each story for Definition of Done and Acceptance Criteria",
+        "Review RACI (line by line) with team to set expectations; maintain RACI list",
+        "Conduct agile ceremonies each week: Sprint Planning, Retro, Demos, Stand Up, Ad Hoc Retros, and Refinement",
+        "Assign backup to conduct agile ceremonies if you are out, scheduled or unscheduled i.e. have a talked about plan in place",
+        "Attend PMO assessment meeting to review upstream demands and share with the team as needed",
+        "Plans Retro activities with your team; facilitate retro activity and place kaizen cards on next sprint",
+        "Track and change group capacity as needed according to story data; set capacity to Group",
+        "Act as central intake for team along with Product Owner; perform Interrupt Buffer role for the team. Vet Pulls from Backlog",
+        "Reflect DAILY - is there anything I can do to speed things up? Look for waste and remove it.",
+        "Track kaizen cards and actively engage with the team to drive continuous improvement",
+        "Work with team to formalize testing activities for stories"
+      ];
+
+      // Load saved state
+      let state = {};
+      try{
+        state = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}") || {};
+      }catch(e){
+        state = {};
+      }
+
+      const listEl = document.getElementById("checklist");
+      const progressEl = document.getElementById("progressCount");
+
+      function pad2(n){ return String(n).padStart(2,"0"); }
+
+      function render(){
+        listEl.innerHTML = "";
+
+        tasks.forEach((text, idx) => {
+          const id = "t_" + idx;
+          const checked = !!state[id];
+
+          const row = document.createElement("div");
+          row.className = "item" + (checked ? " done" : "");
+          row.setAttribute("data-id", id);
+
+          const num = document.createElement("div");
+          num.className = "num";
+          num.textContent = pad2(idx + 1);
+
+          const task = document.createElement("div");
+          task.className = "task";
+
+          const cb = document.createElement("input");
+          cb.type = "checkbox";
+          cb.id = id;
+          cb.checked = checked;
+          cb.addEventListener("change", () => {
+            state[id] = cb.checked;
+            save();
+            row.classList.toggle("done", cb.checked);
+            updateProgress();
+          });
+
+          const label = document.createElement("label");
+          label.htmlFor = id;
+          label.textContent = text;
+
+          task.appendChild(cb);
+          task.appendChild(label);
+
+          const meta = document.createElement("div");
+          meta.className = "meta";
+          meta.textContent = checked ? "Complete" : "Open";
+
+          // keep meta in sync
+          cb.addEventListener("change", () => {
+            meta.textContent = cb.checked ? "Complete" : "Open";
+          });
+
+          row.appendChild(num);
+          row.appendChild(task);
+          row.appendChild(meta);
+
+          listEl.appendChild(row);
+        });
+
+        updateProgress();
+      }
+
+      function updateProgress(){
+        const total = tasks.length;
+        let done = 0;
+        for (let i=0;i<total;i++){
+          if (state["t_" + i]) done++;
+        }
+        progressEl.textContent = `${done} / ${total} complete`;
+      }
+
+      function save(){
+        try{
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        }catch(e){
+          // If storage is blocked, silently degrade (no persistence).
+        }
+      }
+
+      document.getElementById("btnCheckAll").addEventListener("click", () => {
+        tasks.forEach((_, idx) => state["t_" + idx] = true);
+        save();
+        render();
+      });
+
+      document.getElementById("btnClear").addEventListener("click", () => {
+        state = {};
+        try{ localStorage.removeItem(STORAGE_KEY); }catch(e){}
+        render();
+      });
+
+      document.getElementById("btnPrint").addEventListener("click", () => {
+        window.print();
+      });
+
+      render();
+    })();
+  </script>
+</body>
+</html>

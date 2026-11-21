@@ -1,0 +1,315 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ServiceNow & Agile Vocabulary</title>
+
+  <style>
+    :root{
+      --bg0:#070a0f;
+      --bg1:#0a0f18;
+      --ink:#f2f4f7;
+      --muted:#8ea2b8;
+      --rule:#141b26;
+      --accent:#d6b15a;
+      --accent2:#caa24c;
+      --max: 980px;
+    }
+
+    html,body{height:100%}
+    body{
+      margin:0;
+      color:var(--ink);
+      background:
+        radial-gradient(1200px 600px at 20% 0%, rgba(35,55,90,.25), transparent 55%),
+        radial-gradient(900px 500px at 80% 20%, rgba(120,90,35,.12), transparent 60%),
+        linear-gradient(180deg, var(--bg0), var(--bg1));
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+    }
+
+    .wrap{
+      max-width: var(--max);
+      margin: 0 auto;
+      padding: 44px 22px 80px;
+    }
+
+    .eyebrow{
+      font-size: 11px;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      color: rgba(242,244,247,.65);
+      margin-bottom: 14px;
+    }
+
+    h1{
+      margin: 0 0 14px;
+      font-family: ui-serif, Georgia, "Times New Roman", Times, serif;
+      font-size: clamp(44px, 6vw, 64px);
+      line-height: 1.02;
+      font-weight: 700;
+    }
+
+    .lead{
+      max-width: 90ch;
+      margin-bottom: 34px;
+      font-size: 14px;
+      line-height: 1.7;
+      color: var(--muted);
+    }
+
+    hr{
+      border:0;
+      border-top: 1px solid var(--rule);
+      margin: 26px 0;
+    }
+
+    .section-label{
+      font-size: 11px;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      color: rgba(242,244,247,.65);
+      margin-bottom: 10px;
+    }
+
+    .card{
+      padding: 18px 0 20px;
+      border-top: 1px solid var(--rule);
+    }
+
+    .card-grid{
+      display:grid;
+      grid-template-columns: 44px 1fr;
+      gap:18px;
+    }
+
+    .num{
+      font-size:11px;
+      letter-spacing:.16em;
+      color:var(--accent);
+      margin-top:6px;
+    }
+
+    h2{
+      margin:0;
+      font-family: ui-serif, Georgia, serif;
+      font-size:18px;
+      font-weight:650;
+    }
+
+    .desc{
+      margin-top:8px;
+      font-size:13px;
+      line-height:1.7;
+      color:rgba(242,244,247,.74);
+      max-width:92ch;
+    }
+
+    .example{
+      margin-top:10px;
+      font-size:12px;
+      font-style:italic;
+      color:var(--accent2);
+    }
+  </style>
+</head>
+
+<body>
+<main class="wrap">
+  <div class="eyebrow">SERVICENOW & AGILE — VOCABULARY REFERENCE</div>
+  <h1>Agile &amp; ServiceNow Vocabulary</h1>
+
+  <p class="lead">
+    This page defines common Agile and ServiceNow terms as they are used operationally.
+    The goal is shared understanding, consistent language, and faster onboarding.
+  </p>
+
+  <hr>
+
+  <!-- FOUNDATIONS -->
+  <div class="section-label">Foundational Concepts</div>
+
+  <section class="card">
+    <div class="card-grid">
+      <div class="num">01</div>
+      <div>
+        <h2>Technical Debt</h2>
+        <p class="desc">
+          Technical debt is the accumulated cost of skipped fixes, unused capabilities,
+          or delayed upgrades that make future change harder, slower, or more expensive.
+          It is the price paid for shortcuts.
+        </p>
+        <div class="example">“Today’s quick fix is tomorrow’s slowdown.”</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="card-grid">
+      <div class="num">02</div>
+      <div>
+        <h2>Agile Hierarchy</h2>
+        <p class="desc">
+          The Agile Hierarchy represents how work flows from strategy to execution.
+        </p>
+        <div class="example">
+          Product → Theme (Why) → Epic (What) → Story (How) → Task (Steps) → Outcome
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <hr>
+
+  <!-- ROLES -->
+  <div class="section-label">Agile Roles</div>
+
+  <section class="card">
+    <div class="card-grid">
+      <div class="num">03</div>
+      <div>
+        <h2>Product Owner</h2>
+        <p class="desc">
+          Owns and grooms the backlog on behalf of customers and users.
+          Ensures work is prioritized based on value and outcomes.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="card-grid">
+      <div class="num">04</div>
+      <div>
+        <h2>Scrum Master</h2>
+        <p class="desc">
+          Plans and administers all Scrum activities.
+          Removes impediments, protects flow, and enables continuous improvement.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <hr>
+
+  <!-- ARTIFACTS -->
+  <div class="section-label">Core Agile Artifacts</div>
+
+  <section class="card">
+    <div class="card-grid">
+      <div class="num">05</div>
+      <div>
+        <h2>Story</h2>
+        <p class="desc">
+          A small, user-focused requirement that delivers value and can be completed
+          within a single sprint. Stories can have multiple tasks and multiple assignees.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="card-grid">
+      <div class="num">06</div>
+      <div>
+        <h2>Epic</h2>
+        <p class="desc">
+          A large body of work representing a major feature or enhancement.
+          Epics span multiple sprints and are broken down into stories.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="card-grid">
+      <div class="num">07</div>
+      <div>
+        <h2>Theme</h2>
+        <p class="desc">
+          The highest level of the requirements hierarchy.
+          Themes group epics by strategic goal or product capability.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="card-grid">
+      <div class="num">08</div>
+      <div>
+        <h2>Task</h2>
+        <p class="desc">
+          A discrete piece of work required to complete a story.
+          Tasks exist to coordinate execution—not to add scope.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <hr>
+
+  <!-- PLANNING -->
+  <div class="section-label">Planning & Delivery</div>
+
+  <section class="card">
+    <div class="card-grid">
+      <div class="num">09</div>
+      <div>
+        <h2>Release</h2>
+        <p class="desc">
+          A fixed timeframe representing when a set of features is planned for delivery.
+          Releases help establish capacity, sequencing, and expectations.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="card-grid">
+      <div class="num">10</div>
+      <div>
+        <h2>Unified Backlog</h2>
+        <p class="desc">
+          A single backlog containing stories, defects, incidents, and enhancements.
+          Enables unified prioritization without record conversion.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <hr>
+
+  <!-- METRICS -->
+  <div class="section-label">Flow & Metrics</div>
+
+  <section class="card">
+    <div class="card-grid">
+      <div class="num">11</div>
+      <div>
+        <h2>Velocity Chart</h2>
+        <p class="desc">
+          Displays historical delivery performance to help forecast future capacity.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="card-grid">
+      <div class="num">12</div>
+      <div>
+        <h2>Burndown Chart</h2>
+        <p class="desc">
+          Shows remaining work compared to ideal progress during a sprint.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <div style="margin-top:40px;color:rgba(242,244,247,.55);font-size:12px;">
+    This page is intended as a shared language reference. Precision in terminology drives better outcomes.
+  </div>
+</main>
+</body>
+</html>

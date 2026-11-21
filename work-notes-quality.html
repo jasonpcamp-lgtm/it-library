@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Work Notes Quality</title>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Playfair+Display:wght@700;900&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg:      #0d0f14;
+      --surface: #13161d;
+      --border:  #1e2330;
+      --accent:  #c8a96e;
+      --text:    #f0f3fa;
+      --muted:   #9ba8c0;
+      --required:#e05c5c;
+      --weighted:#5ca8e0;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-weight: 400;
+      line-height: 1.6;
+      min-height: 100vh;
+      padding: 0 0 80px;
+    }
+
+    /* ── HEADER ── */
+    header {
+      border-bottom: 1px solid var(--border);
+      padding: 52px 52px 40px;
+      position: relative;
+      overflow: hidden;
+    }
+    header::before {
+      content: '';
+      position: absolute;
+      top: -80px; right: -80px;
+      width: 360px; height: 360px;
+      background: radial-gradient(circle, rgba(200,169,110,0.06) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .eyebrow {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 16px;
+    }
+    header h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(30px, 4vw, 52px);
+      font-weight: 900;
+      color: #fff;
+      line-height: 1.05;
+      margin-bottom: 16px;
+    }
+    header p {
+      font-size: 15px;
+      color: #9ba8c0;
+      max-width: 500px;
+      line-height: 1.7;
+    }
+
+    /* ── SECTION DIVIDER ── */
+    .section-head {
+      padding: 44px 52px 16px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .section-head span {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+    .section-head::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* ── CARDS ── */
+    .criteria {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      padding: 0 52px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 28px 32px;
+      transition: border-color 0.2s;
+    }
+    .card:hover { border-color: rgba(200,169,110,0.3); }
+
+    .card-header {
+      display: flex;
+      align-items: baseline;
+      gap: 14px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+
+    .card-num {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 11px;
+      color: var(--accent);
+      opacity: 1;
+      min-width: 20px;
+    }
+
+    .card-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 18px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .tags {
+      display: flex;
+      gap: 6px;
+      margin-left: auto;
+    }
+    .tag {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 3px 8px;
+      border-radius: 2px;
+    }
+    .tag-required {
+      background: rgba(224,92,92,0.1);
+      color: var(--required);
+      border: 1px solid rgba(224,92,92,0.2);
+    }
+    .tag-weighted {
+      background: rgba(92,168,224,0.1);
+      color: var(--weighted);
+      border: 1px solid rgba(92,168,224,0.2);
+    }
+
+    .card-question {
+      font-size: 14px;
+      color: #e2b96a;
+      font-style: italic;
+      margin-bottom: 10px;
+      padding-left: 34px;
+      font-family: 'IBM Plex Mono', monospace;
+      opacity: 1;
+    }
+
+    .card-intent {
+      font-size: 15px;
+      color: var(--muted);
+      padding-left: 34px;
+      line-height: 1.8;
+      font-weight: 400;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      margin: 56px 52px 0;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    footer p {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 10px;
+      color: var(--muted);
+      letter-spacing: 0.1em;
+    }
+    .footer-badges {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .footer-badge {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 4px 10px;
+      border: 1px solid var(--border);
+      color: var(--muted);
+    }
+
+    @media (max-width: 640px) {
+      header, .criteria, .section-head, footer { padding-left: 20px; padding-right: 20px; }
+      .tags { margin-left: 0; margin-top: 6px; }
+      .card-question, .card-intent { padding-left: 0; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="eyebrow">ITSM · Reference Standard</div>
+    <h1>Work Notes<br/>Quality</h1>
+    <p>Seven questions every IT technician should be able to answer before closing, re-routing, reassigning, or escalating a ticket. Not a checklist — a discipline.</p>
+  </header>
+
+  <div class="section-head"><span>The Seven Fields</span></div>
+
+  <div class="criteria">
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-num">01</span>
+        <span class="card-title">Symptoms Described</span>
+      </div>
+      <div class="card-question">"What exactly is happening?"</div>
+      <div class="card-intent">Forces the technician to document observable reality — not assumptions, not causes. Errors, behaviors, and conditions that someone else could recognize without having been there.</div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-num">02</span>
+        <span class="card-title">Business Impact Explained</span>
+      </div>
+      <div class="card-question">"Who is hurting, and how badly?"</div>
+      <div class="card-intent">Anchors the ticket to real-world consequence. Scope, severity, and timing tell leadership, on-call teams, and vendors whether this warrants urgency — without them having to ask.</div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-num">03</span>
+        <span class="card-title">Configuration Items (CIs) Affected</span>
+      </div>
+      <div class="card-question">"What systems are involved?"</div>
+      <div class="card-intent">Names the infrastructure at stake. CI names allow anyone picking up the ticket to immediately identify what is in scope — and what downstream dependencies may be at risk.</div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-num">04</span>
+        <span class="card-title">Actions Completed</span>
+      </div>
+      <div class="card-question">"What have we already tried — and what happened?"</div>
+      <div class="card-intent">Prevents duplicate effort and documents institutional knowledge. Results matter as much as the actions — a step that failed narrows the problem space just as much as one that succeeded.</div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-num">05</span>
+        <span class="card-title">Actions Planned</span>
+      </div>
+      <div class="card-question">"What happens next, who owns it, and when?"</div>
+      <div class="card-intent">Ensures the ticket has forward motion. A work note without a next step is a dead end. Owner and ETA make accountability visible — to the team, to the customer, and to anyone reviewing later.</div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-num">06</span>
+        <span class="card-title">Timestamp Present</span>
+      </div>
+      <div class="card-question">"When did this happen, and when was this written?"</div>
+      <div class="card-intent">Time-anchors the narrative. System timestamps record when the note was logged; contextual timestamps establish the actual timeline of events — critical for incident reconstruction and SLA review.</div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span class="card-num">07</span>
+        <span class="card-title">People Involved Identified</span>
+      </div>
+      <div class="card-question">"Who did what?"</div>
+      <div class="card-intent">Puts names and roles on the record. Key contacts, responding teams, vendors, and on-call personnel — documented so that handoffs are clean, accountability is clear, and follow-up goes to the right person.</div>
+    </div>
+
+  </div>
+
+  <footer>
+    <p>Work Notes Quality Standard</p>
+  </footer>
+
+</body>
+</html>

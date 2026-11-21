@@ -1,0 +1,2072 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Working Out Loud — A Better Way to Work</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700;1,300&family=DM+Serif+Display:ital@0;1&display=swap');
+
+  :root {
+    --black: #0a0a0a;
+    --dark: #111318;
+    --surface: #181c24;
+    --surface2: #1e2330;
+    --border: #2a3040;
+    --gold: #f0b429;
+    --gold-dim: #c49520;
+    --teal: #2dd4bf;
+    --red: #f56565;
+    --white: #f4f1eb;
+    --muted: #8892a4;
+    --accent: #f0b429;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    height: 100%;
+    background: var(--black);
+    color: var(--white);
+    font-family: 'DM Sans', sans-serif;
+    overflow: hidden;
+  }
+
+  /* SLIDE SYSTEM */
+  .deck { width: 100vw; height: 100vh; position: relative; }
+
+  .slide {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.6s ease;
+    padding: 60px;
+    overflow: hidden;
+  }
+
+  .slide.active {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  /* NAV */
+  .nav {
+    position: fixed;
+    bottom: 32px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    z-index: 100;
+    background: rgba(10,10,10,0.8);
+    border: 1px solid var(--border);
+    padding: 10px 20px;
+    border-radius: 50px;
+    backdrop-filter: blur(10px);
+  }
+
+  .nav button {
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    padding: 6px 14px;
+    border-radius: 30px;
+    transition: all 0.2s;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .nav button:hover { color: var(--white); background: var(--surface); }
+  .nav button.active-nav { color: var(--gold); background: rgba(240,180,41,0.12); border: 1px solid rgba(240,180,41,0.3); }
+
+  .nav-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+  }
+
+  .nav-section button {
+    pointer-events: none;
+  }
+
+  .nav-dots {
+    display: flex;
+    gap: 4px;
+    height: 6px;
+    align-items: center;
+  }
+
+  .nav-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--border);
+    cursor: pointer;
+    pointer-events: all;
+    transition: all 0.2s;
+    flex-shrink: 0;
+  }
+
+  .nav-dot.nav-dot-section {
+    background: rgba(240,180,41,0.3);
+  }
+
+  .nav-dot.nav-dot-active {
+    background: var(--gold);
+    width: 7px;
+    height: 7px;
+  }
+
+  .slide-counter {
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 300;
+    letter-spacing: 0.1em;
+    min-width: 60px;
+    text-align: center;
+  }
+
+  .nav-arrow {
+    background: none;
+    border: 1px solid var(--border) !important;
+    color: var(--white) !important;
+    width: 32px;
+    height: 32px;
+    padding: 0 !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px !important;
+  }
+  .nav-arrow:hover { border-color: var(--gold) !important; color: var(--gold) !important; }
+
+  /* PROGRESS BAR */
+  .progress {
+    position: fixed;
+    top: 0; left: 0;
+    height: 2px;
+    background: var(--gold);
+    transition: width 0.4s ease;
+    z-index: 200;
+  }
+
+  /* KEYBOARD HINT */
+  .hint {
+    position: fixed;
+    top: 20px;
+    right: 24px;
+    color: var(--muted);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    opacity: 0.5;
+  }
+
+  /* ============================================================
+     SLIDE DESIGNS
+  ============================================================ */
+
+  /* SLIDE 1 — TITLE */
+  #s1 {
+    background: var(--black);
+    justify-content: center;
+    align-items: flex-start;
+    padding: 80px 100px;
+  }
+
+  .s1-eyebrow {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 32px;
+    opacity: 0;
+    animation: fadeUp 0.8s ease 0.3s forwards;
+  }
+
+  .s1-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(72px, 10vw, 140px);
+    line-height: 0.92;
+    color: var(--white);
+    margin-bottom: 40px;
+    opacity: 0;
+    animation: fadeUp 0.8s ease 0.5s forwards;
+  }
+
+  .s1-title span { color: var(--gold); }
+
+  .s1-sub {
+    font-family: 'DM Serif Display', serif;
+    font-style: italic;
+    font-size: clamp(18px, 2.2vw, 26px);
+    color: var(--muted);
+    max-width: 560px;
+    line-height: 1.5;
+    opacity: 0;
+    animation: fadeUp 0.8s ease 0.7s forwards;
+    margin-bottom: 48px;
+  }
+
+  .s1-rule {
+    width: 60px;
+    height: 2px;
+    background: var(--gold);
+    opacity: 0;
+    animation: fadeUp 0.8s ease 0.9s forwards;
+    margin-bottom: 32px;
+  }
+
+  .s1-meta {
+    font-size: 13px;
+    color: var(--muted);
+    font-weight: 300;
+    opacity: 0;
+    animation: fadeUp 0.8s ease 1.1s forwards;
+    letter-spacing: 0.05em;
+  }
+
+  .s1-bg-text {
+    position: absolute;
+    right: -20px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 380px;
+    color: rgba(240,180,41,0.04);
+    line-height: 1;
+    pointer-events: none;
+    white-space: nowrap;
+  }
+
+  /* SLIDE 2 — THE HONEST QUESTION */
+  #s2 {
+    background: var(--dark);
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+  }
+
+  .big-question {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(48px, 7vw, 100px);
+    line-height: 1;
+    color: var(--white);
+    max-width: 900px;
+    margin-bottom: 32px;
+  }
+
+  .big-question span { color: var(--gold); }
+
+  .question-sub {
+    font-family: 'DM Serif Display', serif;
+    font-style: italic;
+    font-size: clamp(16px, 2vw, 22px);
+    color: var(--muted);
+    max-width: 600px;
+    line-height: 1.6;
+  }
+
+  /* SLIDE 3 — WHAT KNOWLEDGE WORKERS WANT */
+  #s3 { background: var(--surface); }
+
+  .three-col {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+    width: 100%;
+    max-width: 1100px;
+    margin-top: 48px;
+  }
+
+  .col-card {
+    background: var(--dark);
+    padding: 48px 36px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .col-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--gold);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.4s ease;
+  }
+
+  .col-card:hover::before { transform: scaleX(1); }
+
+  .col-number {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 80px;
+    color: rgba(240,180,41,0.12);
+    line-height: 1;
+    margin-bottom: 16px;
+  }
+
+  .col-heading {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 36px;
+    color: var(--gold);
+    letter-spacing: 0.02em;
+    margin-bottom: 16px;
+  }
+
+  .col-body {
+    font-size: 15px;
+    line-height: 1.7;
+    color: var(--muted);
+    font-weight: 300;
+  }
+
+  /* SLIDE 4 — THE COST OF CONTEXT SWITCHING */
+  #s4 { background: var(--black); }
+
+  .data-table {
+    width: 100%;
+    max-width: 800px;
+    border-collapse: collapse;
+    margin-top: 40px;
+  }
+
+  .data-table th {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold);
+    padding: 16px 24px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .data-table td {
+    padding: 18px 24px;
+    font-size: 15px;
+    border-bottom: 1px solid rgba(42,48,64,0.5);
+    transition: background 0.2s;
+  }
+
+  .data-table tr:hover td { background: var(--surface); }
+
+  .data-table td:first-child {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    color: var(--white);
+    width: 80px;
+  }
+
+  .data-table td:nth-child(2) { color: var(--teal); font-weight: 500; }
+
+  .data-table td:last-child { color: var(--red); font-weight: 500; }
+
+  .source-note {
+    margin-top: 24px;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+    opacity: 0.6;
+  }
+
+  /* SLIDE 5 — HUMAN NATURE */
+  #s5 { background: var(--surface); }
+
+  .human-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    max-width: 1000px;
+    width: 100%;
+    margin-top: 40px;
+  }
+
+  .human-card {
+    background: var(--dark);
+    border: 1px solid var(--border);
+    padding: 32px;
+    border-radius: 2px;
+    position: relative;
+  }
+
+  .human-card-label {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 12px;
+  }
+
+  .human-card-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 22px;
+    color: var(--white);
+    margin-bottom: 12px;
+    line-height: 1.3;
+  }
+
+  .human-card-body {
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--muted);
+    font-weight: 300;
+  }
+
+  /* SLIDE 6 — THE SYSTEM PROBLEM */
+  #s6 {
+    background: var(--black);
+    align-items: flex-start;
+    padding: 80px 100px;
+  }
+
+  .system-statement {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(48px, 6vw, 86px);
+    line-height: 1;
+    max-width: 900px;
+    margin-bottom: 48px;
+  }
+
+  .system-statement span { color: var(--gold); }
+
+  .stat-row {
+    display: flex;
+    gap: 48px;
+    margin-top: 40px;
+    flex-wrap: wrap;
+  }
+
+  .stat-item { min-width: 160px; max-width: 220px; }
+
+  .stat-number {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 72px;
+    color: var(--gold);
+    line-height: 1;
+  }
+
+  .stat-label {
+    font-size: 13px;
+    color: var(--muted);
+    font-weight: 300;
+    line-height: 1.5;
+    margin-top: 8px;
+    max-width: 180px;
+  }
+
+  /* SLIDE 7 — WHAT AGILE ACTUALLY IS */
+  #s7 {
+    background: var(--surface);
+    text-align: center;
+  }
+
+  .principle-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    max-width: 800px;
+    width: 100%;
+    margin-top: 40px;
+    text-align: left;
+  }
+
+  .principle-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+    padding: 24px 28px;
+    background: var(--dark);
+    border-left: 3px solid transparent;
+    transition: border-color 0.3s;
+    cursor: default;
+  }
+
+  .principle-item:hover { border-left-color: var(--gold); }
+
+  .principle-icon {
+    font-size: 22px;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .principle-text strong {
+    display: block;
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--white);
+    margin-bottom: 6px;
+  }
+
+  .principle-text span {
+    font-size: 14px;
+    color: var(--muted);
+    font-weight: 300;
+    line-height: 1.6;
+  }
+
+  /* SLIDE 8 — CYNEFIN */
+  #s8 { background: var(--black); }
+
+  .cynefin-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3px;
+    max-width: 900px;
+    width: 100%;
+    margin-top: 36px;
+  }
+
+  .cynefin-quad {
+    padding: 32px 36px;
+    position: relative;
+  }
+
+  .cynefin-quad.complex { background: rgba(45,212,191,0.08); border: 1px solid rgba(45,212,191,0.2); }
+  .cynefin-quad.complicated { background: rgba(99,102,241,0.08); border: 1px solid rgba(99,102,241,0.2); }
+  .cynefin-quad.simple { background: rgba(74,222,128,0.06); border: 1px solid rgba(74,222,128,0.15); }
+  .cynefin-quad.chaotic { background: rgba(245,101,101,0.06); border: 1px solid rgba(245,101,101,0.15); }
+
+  .cynefin-label {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    letter-spacing: 0.05em;
+    margin-bottom: 8px;
+  }
+
+  .complex .cynefin-label { color: var(--teal); }
+  .complicated .cynefin-label { color: #818cf8; }
+  .simple .cynefin-label { color: #4ade80; }
+  .chaotic .cynefin-label { color: var(--red); }
+
+  .cynefin-method {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+    margin-bottom: 12px;
+  }
+
+  .cynefin-tools {
+    font-size: 13px;
+    color: rgba(244,241,235,0.5);
+    font-weight: 300;
+    line-height: 1.6;
+  }
+
+  .cynefin-tools strong { color: var(--gold); font-weight: 500; }
+
+  /* SLIDE 9 — THE COST OF DOING NOTHING */
+  #s9 {
+    background: var(--surface);
+    align-items: flex-start;
+    padding: 80px 100px;
+  }
+
+  .burnout-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    max-width: 1000px;
+    width: 100%;
+    margin-top: 40px;
+  }
+
+  .burnout-grid .burnout-item:last-child {
+    grid-column: 2;
+  }
+
+  .burnout-item {
+    padding: 24px;
+    background: var(--dark);
+    border-top: 2px solid var(--red);
+  }
+
+  .burnout-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--white);
+    margin-bottom: 8px;
+  }
+
+  .burnout-desc {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.6;
+    font-weight: 300;
+  }
+
+  .burnout-callout {
+    margin-top: 32px;
+    padding: 24px 32px;
+    background: rgba(245,101,101,0.08);
+    border: 1px solid rgba(245,101,101,0.2);
+    max-width: 1000px;
+    width: 100%;
+  }
+
+  .burnout-callout p {
+    font-family: 'DM Serif Display', serif;
+    font-style: italic;
+    font-size: 22px;
+    color: var(--white);
+    line-height: 1.6;
+  }
+
+  .burnout-callout strong { color: var(--red); font-style: normal; font-family: 'DM Sans', sans-serif; }
+
+  /* SLIDE 10 — FLOW EFFICIENCY */
+  #s10 { background: var(--black); text-align: center; overflow-y: auto; justify-content: flex-start; padding-top: 40px; padding-bottom: 80px; }
+
+  .flow-visual {
+    max-width: 800px;
+    width: 100%;
+    margin: 36px auto 0;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 40px;
+  }
+
+  .flow-bar-wrap {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+
+  .flow-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    width: 80px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  .flow-bar {
+    flex: 1;
+    height: 40px;
+    border-radius: 2px;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+  }
+
+  .flow-wait {
+    background: repeating-linear-gradient(45deg, rgba(240,180,41,0.15) 0px, rgba(240,180,41,0.15) 8px, transparent 8px, transparent 16px);
+    flex: 9;
+    height: 100%;
+  }
+
+  .flow-work {
+    background: var(--gold);
+    flex: 1;
+    height: 100%;
+  }
+
+  .flow-pct {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 20px;
+    padding: 0 12px;
+    color: var(--gold);
+  }
+
+  .flow-formula {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    color: var(--white);
+    letter-spacing: 0.05em;
+    margin-top: 16px;
+  }
+
+  .flow-formula span { color: var(--gold); }
+
+  /* SLIDE 11 — THE INDIVIDUAL PROBLEM */
+  #s11 {
+    background: var(--surface);
+    text-align: center;
+  }
+
+  .individual-visual {
+    display: flex;
+    gap: 40px;
+    margin-top: 48px;
+    align-items: flex-start;
+    max-width: 900px;
+  }
+
+  .ind-col {
+    flex: 1;
+    text-align: center;
+  }
+
+  .ind-icon {
+    font-size: 88px;
+    margin-bottom: 16px;
+    line-height: 1;
+  }
+
+  .ind-col-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    margin-bottom: 12px;
+    letter-spacing: 0.05em;
+  }
+
+  .ind-col.danger .ind-col-title { color: var(--red); }
+  .ind-col.safe .ind-col-title { color: var(--teal); }
+
+  .ind-col-body {
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--muted);
+    font-weight: 300;
+  }
+
+  .ind-vs {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 48px;
+    color: var(--border);
+    align-self: center;
+    padding-top: 40px;
+  }
+
+  /* SLIDE 12 — THE EXPERIMENT */
+  #s12 {
+    background: var(--black);
+    align-items: flex-start;
+    padding: 80px 100px;
+  }
+
+  .experiment-intro {
+    font-family: 'DM Serif Display', serif;
+    font-style: italic;
+    font-size: clamp(18px, 2.2vw, 26px);
+    color: var(--muted);
+    max-width: 700px;
+    line-height: 1.6;
+    margin-bottom: 40px;
+  }
+
+  .experiment-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 3px;
+    max-width: 1000px;
+    width: 100%;
+  }
+
+  .exp-card {
+    background: var(--surface);
+    padding: 32px 28px;
+    border-top: 2px solid var(--gold);
+  }
+
+  .exp-step {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 14px;
+    letter-spacing: 0.2em;
+    color: var(--gold);
+    margin-bottom: 12px;
+  }
+
+  .exp-title {
+    font-size: 18px;
+    font-weight: 500;
+    color: var(--white);
+    margin-bottom: 12px;
+    line-height: 1.3;
+  }
+
+  .exp-body {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.7;
+    font-weight: 300;
+  }
+
+  /* SLIDE 13 — WHAT WE WON'T DO */
+  #s13 { background: var(--surface); text-align: center; }
+
+  .wont-do-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    max-width: 800px;
+    width: 100%;
+    margin-top: 36px;
+    text-align: left;
+  }
+
+  .wont-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 20px 24px;
+    background: var(--dark);
+    border: 1px solid var(--border);
+  }
+
+  .wont-x {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    color: var(--red);
+    flex-shrink: 0;
+    line-height: 1;
+    margin-top: 2px;
+  }
+
+  .wont-text {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  .wont-text strong {
+    display: block;
+    color: var(--white);
+    font-weight: 500;
+    margin-bottom: 4px;
+    font-size: 15px;
+  }
+
+  /* SLIDE 14 — THE THREE VOICES */
+  #s14 { background: var(--black); text-align: center; }
+
+  .voices-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    max-width: 700px;
+    width: 100%;
+    margin-top: 40px;
+    text-align: left;
+  }
+
+  .voice-item {
+    display: flex;
+    gap: 24px;
+    align-items: flex-start;
+    padding: 24px 28px;
+    background: var(--surface);
+    border-left: 3px solid var(--red);
+  }
+
+  .voice-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    color: var(--red);
+    min-width: 180px;
+    max-width: 220px;
+    letter-spacing: 0.05em;
+    flex-shrink: 0;
+  }
+
+  .voice-desc {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.6;
+    font-weight: 300;
+    padding-top: 4px;
+  }
+
+  .voices-footer {
+    margin-top: 24px;
+    font-family: 'DM Serif Display', serif;
+    font-style: italic;
+    font-size: 18px;
+    color: var(--gold);
+    max-width: 700px;
+    text-align: center;
+    line-height: 1.5;
+  }
+
+  /* SLIDE 15 — WHAT CHANGED ON OUR TEAM */
+  #s15 {
+    background: var(--surface);
+    align-items: flex-start;
+    padding: 80px 100px;
+  }
+
+  .testimony-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    max-width: 1000px;
+    width: 100%;
+    margin-top: 36px;
+  }
+
+  .testimony-item {
+    padding: 24px 28px;
+    background: var(--dark);
+    border-left: 3px solid var(--teal);
+  }
+
+  .testimony-label {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--teal);
+    margin-bottom: 10px;
+  }
+
+  .testimony-text {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.7;
+    font-weight: 300;
+  }
+
+  .testimony-text strong { color: var(--white); font-weight: 500; }
+
+  /* SLIDE 16 — THE ABYSS */
+  #s16 { background: var(--black); text-align: center; }
+
+  .abyss-list {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    max-width: 900px;
+    width: 100%;
+    margin-top: 36px;
+    text-align: left;
+  }
+
+  .abyss-item {
+    padding: 16px 20px;
+    background: rgba(245,101,101,0.06);
+    border: 1px solid rgba(245,101,101,0.15);
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.5;
+    font-weight: 300;
+  }
+
+  .abyss-item::before {
+    content: '↓';
+    display: block;
+    color: var(--red);
+    font-size: 16px;
+    margin-bottom: 6px;
+  }
+
+  .abyss-footer {
+    margin-top: 28px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 32px;
+    color: var(--gold);
+    letter-spacing: 0.05em;
+  }
+
+  /* SLIDE 17 — THE CLOSING PRINCIPLE */
+  #s17 {
+    background: var(--black);
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+  }
+
+  .closing-eyebrow {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 32px;
+  }
+
+  .closing-statement {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(48px, 7vw, 100px);
+    line-height: 1;
+    max-width: 900px;
+    margin-bottom: 40px;
+  }
+
+  .closing-statement span { color: var(--gold); }
+
+  .closing-sub {
+    font-family: 'DM Serif Display', serif;
+    font-style: italic;
+    font-size: clamp(16px, 2vw, 22px);
+    color: var(--muted);
+    max-width: 640px;
+    line-height: 1.7;
+    margin-bottom: 48px;
+  }
+
+  .closing-rule {
+    width: 60px;
+    height: 2px;
+    background: var(--gold);
+    margin: 0 auto 32px;
+  }
+
+  .closing-cta {
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--gold);
+  }
+
+  /* SHARED SLIDE HEADER */
+  .slide-header {
+    text-align: center;
+    margin-bottom: 0;
+    width: 100%;
+    max-width: 1000px;
+  }
+
+  .slide-header.left { text-align: left; }
+
+  .slide-eyebrow {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 16px;
+  }
+
+  .slide-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(36px, 4.5vw, 60px);
+    line-height: 1;
+    color: var(--white);
+    margin-bottom: 8px;
+  }
+
+  .slide-title span { color: var(--gold); }
+
+  .slide-subtitle {
+    font-size: 15px;
+    color: var(--muted);
+    font-weight: 300;
+    line-height: 1.5;
+  }
+
+  /* ANIMATIONS */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .slide.active .slide-header,
+  .slide.active .three-col,
+  .slide.active .human-grid,
+  .slide.active .principle-list,
+  .slide.active .cynefin-grid,
+  .slide.active .burnout-grid,
+  .slide.active .flow-visual,
+  .slide.active .individual-visual,
+  .slide.active .experiment-grid,
+  .slide.active .wont-do-grid,
+  .slide.active .voices-wrap,
+  .slide.active .testimony-grid,
+  .slide.active .abyss-list,
+  .slide.active .big-question,
+  .slide.active .question-sub,
+  .slide.active .system-statement,
+  .slide.active .stat-row,
+  .slide.active .experiment-intro,
+  .slide.active .data-table,
+  .slide.active .closing-eyebrow,
+  .slide.active .closing-statement,
+  .slide.active .closing-sub,
+  .slide.active .closing-rule,
+  .slide.active .closing-cta,
+  .slide.active .burnout-callout,
+  .slide.active .source-note,
+  .slide.active .flow-formula,
+  .slide.active .voices-footer,
+  .slide.active .abyss-footer {
+    animation: fadeUp 0.7s ease forwards;
+  }
+
+  .slide.active .three-col { animation-delay: 0.15s; }
+  .slide.active .human-grid { animation-delay: 0.15s; }
+  .slide.active .data-table { animation-delay: 0.15s; }
+  .slide.active .cynefin-grid { animation-delay: 0.15s; }
+  .slide.active .experiment-grid { animation-delay: 0.15s; }
+  .slide.active .wont-do-grid { animation-delay: 0.15s; }
+  .slide.active .voices-wrap { animation-delay: 0.15s; }
+  .slide.active .testimony-grid { animation-delay: 0.15s; }
+  .slide.active .abyss-list { animation-delay: 0.15s; }
+  .slide.active .burnout-grid { animation-delay: 0.15s; }
+  .slide.active .burnout-callout { animation-delay: 0.3s; }
+  .slide.active .stat-row { animation-delay: 0.2s; }
+  .slide.active .closing-sub { animation-delay: 0.2s; }
+  .slide.active .closing-rule { animation-delay: 0.35s; }
+  .slide.active .closing-cta { animation-delay: 0.5s; }
+  .slide.active .voices-footer { animation-delay: 0.3s; }
+  .slide.active .abyss-footer { animation-delay: 0.3s; }
+  .slide.active .flow-formula { animation-delay: 0.3s; }
+  .slide.active .source-note { animation-delay: 0.4s; }
+  .slide.active .question-sub { animation-delay: 0.2s; }
+  .slide.active .experiment-intro { animation-delay: 0.1s; }
+
+  /* Initially hidden for animation */
+  .slide:not(.active) .slide-header,
+  .slide:not(.active) * { opacity: 0; }
+  .slide.active .slide-header { opacity: 1; }
+
+  /* Scrollable content for dense slides */
+  .slide-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    overflow-y: auto;
+    padding: 60px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+
+  .slide-inner::-webkit-scrollbar { width: 4px; }
+  .slide-inner::-webkit-scrollbar-track { background: transparent; }
+  .slide-inner::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  /* ============================================================
+     MOBILE RESPONSIVE
+  ============================================================ */
+  @media (max-width: 768px) {
+
+    /* Core slide padding */
+    .slide { padding: 20px 16px 90px; overflow-y: auto; justify-content: flex-start; }
+    #s1, #s6, #s9, #s12, #s15 { padding: 32px 20px 100px; align-items: flex-start; }
+
+    /* Hide keyboard hint */
+    .hint { display: none; }
+
+    /* Nav — tighter on mobile */
+    .nav { padding: 8px 12px; gap: 8px; bottom: 16px; max-width: calc(100vw - 32px); flex-wrap: wrap; justify-content: center; }
+    .nav button { font-size: 11px; padding: 4px 8px; }
+    .nav-arrow { width: 28px; height: 28px; }
+    .slide-counter { font-size: 11px; min-width: 44px; }
+
+    /* Title slide */
+    .s1-title { font-size: clamp(52px, 14vw, 80px); }
+    .s1-bg-text { display: none; }
+    .s1-eyebrow { margin-bottom: 20px; }
+    .s1-sub { font-size: 16px; }
+
+    /* Slide headers */
+    .slide-title { font-size: clamp(28px, 8vw, 44px); }
+    .slide-subtitle { font-size: 13px; }
+
+    /* Big question slide */
+    .big-question { font-size: clamp(36px, 10vw, 60px); padding: 0 8px; }
+    .question-sub { font-size: 15px; padding: 0 8px; }
+
+    /* Three-col → single col */
+    .three-col { grid-template-columns: 1fr; gap: 2px; margin-top: 24px; }
+    .col-card { padding: 28px 20px; }
+    .col-number { font-size: 52px; }
+    .col-heading { font-size: 26px; }
+
+    /* Human grid → single col */
+    .human-grid { grid-template-columns: 1fr; gap: 12px; margin-top: 24px; }
+    .human-card { padding: 20px; }
+
+    /* Data table */
+    .data-table { font-size: 13px; }
+    .data-table th, .data-table td { padding: 12px 14px; }
+    .data-table td:first-child { font-size: 22px; }
+
+    /* System problem stats */
+    .system-statement { font-size: clamp(36px, 9vw, 60px); margin-bottom: 24px; }
+    .stat-row { gap: 20px; margin-top: 24px; flex-wrap: wrap; }
+    .stat-item { min-width: calc(50% - 10px); }
+    .stat-number { font-size: 52px; }
+
+    /* Cynefin grid → single col */
+    .cynefin-grid { grid-template-columns: 1fr; gap: 3px; margin-top: 20px; }
+    .cynefin-quad { padding: 20px 20px; }
+
+    /* Burnout grid → single col */
+    .burnout-grid { grid-template-columns: 1fr; gap: 10px; margin-top: 24px; }
+    .burnout-callout { margin-top: 16px; padding: 16px 20px; }
+    .burnout-callout p { font-size: 15px; }
+
+    /* Flow visual */
+    .flow-visual { padding: 24px 16px; }
+    .flow-label { font-size: 10px; width: 56px; }
+    .flow-formula { font-size: 20px; }
+
+    /* Individual vs team */
+    .individual-visual { flex-direction: column; gap: 16px; align-items: center; }
+    .ind-vs { padding: 0; font-size: 32px; }
+    .ind-col { width: 100%; max-width: 420px; }
+
+    /* Experiment grid → single col */
+    .experiment-grid { grid-template-columns: 1fr; gap: 3px; margin-top: 20px; }
+    .exp-card { padding: 20px 18px; }
+    .experiment-intro { font-size: 16px; margin-bottom: 20px; }
+
+    /* Won't do grid → single col */
+    .wont-do-grid { grid-template-columns: 1fr; gap: 10px; margin-top: 20px; }
+
+    /* Voices */
+    .voices-wrap { margin-top: 20px; }
+    .voice-item { flex-direction: column; gap: 6px; padding: 16px 18px; }
+    .voice-name { font-size: 18px; min-width: unset; }
+
+    /* Testimony grid → single col */
+    .testimony-grid { grid-template-columns: 1fr; gap: 10px; margin-top: 20px; }
+
+    /* Abyss list → 2 col */
+    .abyss-list { grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 20px; }
+    .abyss-footer { font-size: 22px; margin-top: 16px; }
+
+    /* Closing slide */
+    .closing-statement { font-size: clamp(36px, 10vw, 64px); }
+    .closing-sub { font-size: 16px; }
+
+    /* Principle list */
+    .principle-list { margin-top: 20px; gap: 10px; }
+    .principle-item { padding: 16px 18px; }
+
+    /* Source note */
+    .source-note { font-size: 10px; text-align: center; }
+  }
+
+  @media (max-width: 480px) {
+    .abyss-list { grid-template-columns: 1fr; }
+    .stat-item { min-width: 100%; }
+    .data-table th:last-child, .data-table td:last-child { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="progress" id="progress"></div>
+<div class="hint">← → arrow keys to navigate</div>
+
+<div class="deck" id="deck">
+
+  <!-- SLIDE 1: TITLE -->
+  <div class="slide active" id="s1">
+    <div class="s1-bg-text">AGILE</div>
+    <div class="s1-eyebrow">Working Out Loud</div>
+    <div class="s1-title">A Better<br>Way to <span>Work.</span></div>
+    <div class="s1-rule"></div>
+    <div class="s1-sub">This isn't about methodology. It's about building a system that works with human nature — not against it.</div>
+    <div class="s1-meta">Use arrow keys or the navigation below to advance</div>
+  </div>
+
+  <!-- SLIDE 2: THE HONEST QUESTION -->
+  <div class="slide" id="s2">
+    <div class="big-question">Are you busy — or are you <span>getting things done?</span></div>
+    <div class="question-sub">Most knowledge workers are overwhelmed, reactive, and siloed. They're working hard. But work is sitting still. The question isn't effort — it's system design.</div>
+  </div>
+
+  <!-- SLIDE 3: WHAT KNOWLEDGE WORKERS NEED -->
+  <div class="slide" id="s3">
+    <div class="slide-header">
+      <div class="slide-eyebrow">Daniel Pink · Drive</div>
+      <div class="slide-title">What Every Knowledge Worker <span>Actually Needs</span></div>
+      <div class="slide-subtitle">Agile emerges from what humans already want. It creates the conditions for them to actually get it.</div>
+    </div>
+    <div class="three-col">
+      <div class="col-card">
+        <div class="col-number">01</div>
+        <div class="col-heading">Mastery</div>
+        <div class="col-body">The longing to own a craft is what drives knowledge workers — iterations honor that drive, creating tight feedback loops where real work reveals real growth.</div>
+      </div>
+      <div class="col-card">
+        <div class="col-number">02</div>
+        <div class="col-heading">Purpose</div>
+        <div class="col-body">Knowing why the work matters. When work is visible, prioritized, and connected to outcomes — people understand their contribution. Hidden work can't be prioritized. And work that can't be prioritized can't have purpose.</div>
+        <div style="margin-top:16px; padding:14px 16px; background:rgba(240,180,41,0.06); border-left:2px solid var(--gold); position:relative;">
+          <div style="font-family:'Bebas Neue',sans-serif; font-size:44px; color:rgba(240,180,41,0.12); line-height:0.8; position:absolute; top:6px; left:8px;">"</div>
+          <div style="font-family:'DM Serif Display',serif; font-style:italic; font-size:17px; color:var(--white); line-height:1.75; padding-left:18px;">When all you do is react, there's not enough time to do the hard mental work of figuring out whether you can accept new work. More projects get crammed onto the plate. <strong style="color:var(--gold); font-style:normal; font-family:'DM Sans',sans-serif;">It's the IT capacity death spiral.</strong></div>
+          <div style="font-size:9px; color:var(--muted); margin-top:8px; padding-left:18px; letter-spacing:0.1em; text-transform:uppercase;">Gene Kim · The Phoenix Project</div>
+        </div>
+      </div>
+      <div class="col-card">
+        <div class="col-number">03</div>
+        <div class="col-heading">Autonomy</div>
+        <div class="col-body">The team decides how to attack the work. Agile moves management from directing tasks to setting goals. Teams become self-organizing. That's not a risk — that's the point.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 4: CONTEXT SWITCHING COST -->
+  <div class="slide" id="s4">
+    <div class="slide-header">
+      <div class="slide-eyebrow">Jeff Sutherland · The Scrum Fieldbook</div>
+      <div class="slide-title">The Hidden Tax on <span>Every One of Us</span></div>
+      <div class="slide-subtitle">Every time work gets set down — for a meeting, a dependency, another fire — picking it back up costs more than you think. Here's what the math actually looks like.</div>
+      <div class="slide-subtitle" style="margin-top:10px; font-style:italic; opacity:0.7;">These aren't calendar percentages. They're how much of your mental capacity actually reaches each project after switching costs are paid.</div>
+    </div>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Projects</th>
+          <th>Effective Focus per Project</th>
+          <th>Lost to Switching</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>1</td><td>100% focused</td><td>0% lost</td></tr>
+        <tr><td>2</td><td>40% per project</td><td>20% gone</td></tr>
+        <tr><td>3</td><td>20% per project</td><td>40% gone</td></tr>
+        <tr><td>4</td><td>10% per project</td><td>60% gone</td></tr>
+        <tr><td>5</td><td>5% per project</td><td>75% gone</td></tr>
+      </tbody>
+    </table>
+    <div class="source-note">Source: The Scrum Fieldbook, Jeff Sutherland — co-creator of Scrum</div>
+  </div>
+
+  <!-- SLIDE 5: HUMAN NATURE -->
+  <div class="slide" id="s5">
+    <div class="slide-header">
+      <div class="slide-eyebrow">Working With Human Nature</div>
+      <div class="slide-title">Agile Doesn't Fix Humans. <span>It Accounts for Them.</span></div>
+      <div class="slide-subtitle">The system is designed around how we actually think, estimate, and behave.</div>
+    </div>
+    <div class="human-grid">
+      <div class="human-card">
+        <div class="human-card-label">Relative Sizing</div>
+        <div class="human-card-title">We're better at "bigger than" than "how long"</div>
+        <div class="human-card-body">Humans are terrible at estimating in hours — but we're naturally good at saying "this is bigger than that." Agile uses that ability instead of fighting it. We compare work to other work rather than guessing at time.</div>
+      </div>
+      <div class="human-card">
+        <div class="human-card-label">Humphreys Law</div>
+        <div class="human-card-title">People don't know what they want until they see what they don't</div>
+        <div class="human-card-body">Requirements written in a conference room are hypotheses. Demos turn hypotheses into real feedback. This is why agile shows the work early and often — not at the end when it's too late to change course.</div>
+      </div>
+      <div class="human-card">
+        <div class="human-card-label">Cone of Uncertainty</div>
+        <div class="human-card-title">Precision at the start of a project is an illusion</div>
+        <div class="human-card-body">At project start, estimates can vary 4x in either direction. Agile respects this. Short iterations replace guesswork with real information — rather than defending a number that was never reliable.</div>
+      </div>
+      <div class="human-card" style="border-color: var(--gold); background: rgba(240,180,41,0.04);">
+        <div class="human-card-label" style="color:var(--gold);">Procrastination</div>
+        <div class="human-card-title">Humans spike toward deadlines — so shorten the loop</div>
+        <div class="human-card-body">Everyone waits until the last minute — it's human nature. On a six-month project, that panic arrives late and hits hard. On a two-week sprint, the same behavior happens but the damage is small and contained. Four small crunches instead of one catastrophic one.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 5b: PROCRASTINATION VISUAL -->
+  <div class="slide" id="s5b" style="background: var(--black);">
+    <div class="slide-header">
+      <div class="slide-eyebrow">Human Behavior · Procrastination Spikes</div>
+      <div class="slide-title">Agile Doesn't Stop the Spike. <span>It Shrinks It.</span></div>
+      <div class="slide-subtitle">Humans naturally defer. The question is how much damage occurs when they do.</div>
+    </div>
+
+    <div style="width:100%; max-width:960px; margin-top:36px; display:grid; grid-template-columns:1fr 1fr; gap:24px;">
+
+      <!-- WATERFALL -->
+      <div style="background:var(--surface); border:1px solid var(--border); padding:28px 28px 20px;">
+        <div style="font-size:10px; font-weight:500; letter-spacing:0.25em; text-transform:uppercase; color:var(--red); margin-bottom:16px;">Waterfall / Long Timebox</div>
+        <svg viewBox="0 0 340 120" width="100%" style="display:block;">
+          <!-- baseline -->
+          <line x1="20" y1="105" x2="330" y2="105" stroke="#2a3040" stroke-width="1"/>
+          <!-- time axis label -->
+          <text x="175" y="118" text-anchor="middle" fill="#8892a4" font-size="9" font-family="DM Sans">Time</text>
+          <!-- Sprint 1 flat + spike -->
+          <polyline points="20,95 130,92 145,88 160,70 175,30 190,8 195,105" fill="rgba(245,101,101,0.18)" stroke="none"/>
+          <polyline points="20,95 130,92 145,88 160,70 175,30 190,8" fill="none" stroke="#f56565" stroke-width="2.5" stroke-linejoin="round"/>
+          <!-- deadline marker 1 -->
+          <line x1="195" y1="20" x2="195" y2="105" stroke="#f56565" stroke-width="1" stroke-dasharray="3,3"/>
+          <text x="197" y="30" fill="#f56565" font-size="8" font-family="DM Sans">Deadline</text>
+          <!-- Sprint 2 flat + spike -->
+          <polyline points="200,95 290,93 300,87 313,70 322,30 330,8" fill="none" stroke="#f56565" stroke-width="2.5" stroke-linejoin="round"/>
+          <polyline points="200,95 290,93 300,87 313,70 322,30 330,8 330,105 200,105" fill="rgba(245,101,101,0.12)" stroke="none"/>
+          <!-- spike label -->
+          <text x="155" y="25" text-anchor="middle" fill="#f56565" font-size="9" font-family="DM Sans" font-weight="500">One big spike</text>
+          <text x="155" y="35" text-anchor="middle" fill="#8892a4" font-size="8" font-family="DM Sans">High risk · Late feedback</text>
+        </svg>
+        <div style="font-size:12px; color:var(--muted); line-height:1.5; margin-top:8px;">Work drifts flat. Then panic. One catastrophic crunch at the end — too late to recover or incorporate feedback.</div>
+      </div>
+
+      <!-- AGILE -->
+      <div style="background:var(--surface); border:1px solid rgba(240,180,41,0.3); padding:28px 28px 20px;">
+        <div style="font-size:10px; font-weight:500; letter-spacing:0.25em; text-transform:uppercase; color:var(--gold); margin-bottom:16px;">Agile / 2-Week Sprints</div>
+        <svg viewBox="0 0 340 120" width="100%" style="display:block;">
+          <!-- baseline -->
+          <line x1="20" y1="105" x2="330" y2="105" stroke="#2a3040" stroke-width="1"/>
+          <text x="175" y="118" text-anchor="middle" fill="#8892a4" font-size="9" font-family="DM Sans">Time</text>
+
+          <!-- Sprint boundaries -->
+          <line x1="90" y1="15" x2="90" y2="105" stroke="#2a3040" stroke-width="1" stroke-dasharray="3,3"/>
+          <line x1="160" y1="15" x2="160" y2="105" stroke="#2a3040" stroke-width="1" stroke-dasharray="3,3"/>
+          <line x1="230" y1="15" x2="230" y2="105" stroke="#2a3040" stroke-width="1" stroke-dasharray="3,3"/>
+          <line x1="300" y1="15" x2="300" y2="105" stroke="#2a3040" stroke-width="1" stroke-dasharray="3,3"/>
+
+          <!-- Sprint labels -->
+          <text x="55" y="14" text-anchor="middle" fill="#8892a4" font-size="7.5" font-family="DM Sans">Sprint 1</text>
+          <text x="125" y="14" text-anchor="middle" fill="#8892a4" font-size="7.5" font-family="DM Sans">Sprint 2</text>
+          <text x="195" y="14" text-anchor="middle" fill="#8892a4" font-size="7.5" font-family="DM Sans">Sprint 3</text>
+          <text x="265" y="14" text-anchor="middle" fill="#8892a4" font-size="7.5" font-family="DM Sans">Sprint 4</text>
+
+          <!-- 4 small spikes with fills -->
+          <!-- S1 -->
+          <polyline points="20,98 55,96 70,88 78,72 85,48 90,28" fill="none" stroke="#f0b429" stroke-width="2.2" stroke-linejoin="round"/>
+          <polyline points="20,98 55,96 70,88 78,72 85,48 90,28 90,105 20,105" fill="rgba(240,180,41,0.12)" stroke="none"/>
+          <!-- S2 -->
+          <polyline points="92,98 125,96 138,88 147,72 154,50 160,30" fill="none" stroke="#f0b429" stroke-width="2.2" stroke-linejoin="round"/>
+          <polyline points="92,98 125,96 138,88 147,72 154,50 160,30 160,105 92,105" fill="rgba(240,180,41,0.10)" stroke="none"/>
+          <!-- S3 -->
+          <polyline points="162,98 195,96 208,88 217,72 224,50 230,30" fill="none" stroke="#f0b429" stroke-width="2.2" stroke-linejoin="round"/>
+          <polyline points="162,98 195,96 208,88 217,72 224,50 230,30 230,105 162,105" fill="rgba(240,180,41,0.10)" stroke="none"/>
+          <!-- S4 -->
+          <polyline points="232,98 265,96 278,88 287,72 294,50 300,30" fill="none" stroke="#f0b429" stroke-width="2.2" stroke-linejoin="round"/>
+          <polyline points="232,98 265,96 278,88 287,72 294,50 300,30 300,105 232,105" fill="rgba(240,180,41,0.10)" stroke="none"/>
+
+          <!-- learning/feedback dots -->
+          <circle cx="90" cy="28" r="4" fill="#2dd4bf"/>
+          <circle cx="160" cy="30" r="4" fill="#2dd4bf"/>
+          <circle cx="230" cy="30" r="4" fill="#2dd4bf"/>
+          <circle cx="300" cy="30" r="4" fill="#2dd4bf"/>
+
+          <text x="175" y="58" text-anchor="middle" fill="#f0b429" font-size="9" font-family="DM Sans" font-weight="500">4 small controlled spikes</text>
+          <text x="175" y="68" text-anchor="middle" fill="#8892a4" font-size="8" font-family="DM Sans">● = demo + feedback</text>
+        </svg>
+        <div style="font-size:12px; color:var(--muted); line-height:1.5; margin-top:8px;">Same human behavior. Compressed into two weeks. Damage is contained. Learning happens at every spike — not just the last one.</div>
+      </div>
+
+    </div>
+
+    <!-- Zoom in callout -->
+    <div style="margin-top:24px; max-width:960px; width:100%; padding:18px 28px; background:rgba(240,180,41,0.06); border-left:3px solid var(--gold); display:flex; gap:32px; align-items:center;">
+      <div>
+        <div style="font-size:10px; font-weight:500; letter-spacing:0.2em; text-transform:uppercase; color:var(--gold); margin-bottom:6px;">Zoom In — The 2-Week Sprint</div>
+        <div style="font-size:13px; color:var(--muted); line-height:1.6;">Week 1 is <strong style="color:var(--white);">learning</strong>. Week 2 is <strong style="color:var(--white);">demo and feedback</strong>. The shape is honest — slow start as the team finds footing, then acceleration toward a real feedback event. Every sprint is a complete loop.</div>
+      </div>
+      <svg viewBox="0 0 200 80" width="200" style="flex-shrink:0;">
+        <line x1="10" y1="70" x2="190" y2="70" stroke="#2a3040" stroke-width="1"/>
+        <line x1="100" y1="10" x2="100" y2="70" stroke="#2a3040" stroke-width="1" stroke-dasharray="3,3"/>
+        <text x="50" y="8" text-anchor="middle" fill="#8892a4" font-size="8" font-family="DM Sans">Week 1</text>
+        <text x="150" y="8" text-anchor="middle" fill="#8892a4" font-size="8" font-family="DM Sans">Week 2</text>
+        <!-- week 1 curve -->
+        <path d="M10,68 Q30,66 45,62 Q60,58 75,50 Q88,42 100,22" fill="none" stroke="#2dd4bf" stroke-width="2"/>
+        <text x="30" y="58" fill="#2dd4bf" font-size="7" font-family="DM Sans">Learning</text>
+        <!-- week 2 curve -->
+        <path d="M102,68 Q118,65 132,60 Q148,53 162,42 Q174,32 188,15" fill="none" stroke="#f0b429" stroke-width="2"/>
+        <text x="130" y="55" fill="#f0b429" font-size="7" font-family="DM Sans">Demo/Feedback</text>
+        <circle cx="100" cy="22" r="3.5" fill="#2dd4bf"/>
+        <circle cx="188" cy="15" r="3.5" fill="#f0b429"/>
+      </svg>
+    </div>
+  </div>
+
+  <!-- SLIDE 6: THE SYSTEM PROBLEM -->
+  <div class="slide" id="s6">
+    <div class="system-statement">Most work <span>isn't being worked on.</span></div>
+    <div class="slide-subtitle" style="max-width:760px; font-size:16px; color:var(--muted); line-height:1.7;">Work in knowledge organizations sits idle the vast majority of the time — waiting for decisions, approvals, handoffs, and attention. The problem isn't the people. It's the system.</div>
+    <div class="stat-row">
+      <div class="stat-item">
+        <div class="stat-number">≤10%</div>
+        <div class="stat-label">Think about the last ticket you submitted. How long did it sit before someone touched it? That gap is what this measures. Most organizations: <strong style="color:var(--white);">90% waiting, 10% actual work.</strong></div>
+        <div style="margin-top:10px; font-size:10px; color:rgba(136,146,164,0.6); letter-spacing:0.05em;">Jonathan Smart · <em>Sooner Safer Happier</em></div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number">3–5×</div>
+        <div class="stat-label">For every hour your team spends actually working on something, it sat untouched for 3 to 5 hours first. This isn't unique to us — it's the <strong style="color:var(--white);">industry average for IT product teams.</strong></div>
+        <div style="margin-top:10px; font-size:10px; color:rgba(136,146,164,0.6); letter-spacing:0.05em;">Scrum.org · Flow Efficiency Research</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number">85%</div>
+        <div class="stat-label">85% of effort in a typical knowledge organization is waste — work that doesn't move anything forward. Rework because requirements weren't clear. Meetings that produced no decision. Tasks completed for projects that were later cancelled. <strong style="color:var(--white);">Most of what we do never reaches the patient or the customer.</strong></div>
+        <div style="margin-top:10px; font-size:10px; color:rgba(136,146,164,0.6); letter-spacing:0.05em;">Jeff Sutherland · <em>Scrum: The Art of Doing Twice the Work in Half the Time</em></div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number">24×</div>
+        <div class="stat-label">A defect or bug found the same day it's introduced costs a fraction of what it costs to fix three weeks later — when the context is gone, the team has moved on, and the damage has spread. <strong style="color:var(--white);">Agile shrinks that gap deliberately by testing throughout, not at the end.</strong></div>
+        <div style="margin-top:10px; font-size:10px; color:rgba(136,146,164,0.6); letter-spacing:0.05em;">Jeff Sutherland · <em>Scrum: The Art of Doing Twice the Work in Half the Time</em></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 7: WHAT AGILE ACTUALLY IS -->
+  <div class="slide" id="s7">
+    <div class="slide-header">
+      <div class="slide-eyebrow">The 4 Pillars</div>
+      <div class="slide-title">What Agile <span>Actually Is</span></div>
+      <div class="slide-subtitle">Not a tool. Not a ceremony. A shift in what we value.</div>
+    </div>
+    <div class="principle-list">
+      <div class="principle-item">
+        <div class="principle-icon">👥</div>
+        <div class="principle-text">
+          <strong>Individuals and interactions over processes and tools</strong>
+          <span>Better processes and tools don't fix a broken system. The people closest to the work — talking to each other, solving problems together — do. Agile puts them first.</span>
+        </div>
+      </div>
+      <div class="principle-item">
+        <div class="principle-icon">🚢</div>
+        <div class="principle-text">
+          <strong>Working deliverables over comprehensive documentation</strong>
+          <span>People only know what they want when they see what they don't. The only way to find that out is to put something real in front of them. A working deliverable creates that conversation. A document never will.</span>
+        </div>
+      </div>
+      <div class="principle-item">
+        <div class="principle-icon">🤝</div>
+        <div class="principle-text">
+          <strong>Customer collaboration over contract negotiation</strong>
+          <span>Someone hands us a requirement and disappears. Six months later it's wrong. Agile replaces that handoff with a continuous conversation — so we build what's actually needed, not what was assumed.</span>
+        </div>
+      </div>
+      <div class="principle-item">
+        <div class="principle-icon">🔄</div>
+        <div class="principle-text">
+          <strong>Responding to change over following a plan</strong>
+          <span>The plan you make on day one will be wrong. That's not a failure — it's reality. What matters is building a team that can adapt when things change, not one that's locked into defending a document.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 8: CYNEFIN -->
+  <div class="slide" id="s8">
+    <div class="slide-header">
+      <div class="slide-eyebrow">Dave Snowden & Mary Boone · Harvard Business Review · 2007</div>
+      <div class="slide-title">You're Using the <span>Wrong Tool</span></div>
+      <div class="slide-subtitle">Most IT knowledge work lives in the Complex domain. We keep applying Complicated tools to it.</div>
+    </div>
+    <div class="cynefin-grid">
+      <div class="cynefin-quad complex">
+        <div class="cynefin-label">Complex</div>
+        <div class="cynefin-method">Probe → Sense → Respond</div>
+        <div class="cynefin-tools">You can't know the answer upfront. Try something small, see what happens, and adjust. <strong>This is how good IT work actually gets done.</strong> Agile, Scrum, Kanban belong here.</div>
+      </div>
+      <div class="cynefin-quad complicated">
+        <div class="cynefin-label">Complicated</div>
+        <div class="cynefin-method">Sense → Analyze → Respond</div>
+        <div class="cynefin-tools">Waterfall assumes you already know the answer. Plan everything upfront, execute in order, deliver at the end. That works here. <strong>The problem is — most IT work doesn't actually live here.</strong></div>
+      </div>
+      <div class="cynefin-quad chaotic">
+        <div class="cynefin-label">Chaotic</div>
+        <div class="cynefin-method">Act → Sense → Respond</div>
+        <div class="cynefin-tools">The building is on fire. You don't hold a meeting. Act first, stabilize the situation, then figure out what happened and why.</div>
+      </div>
+      <div class="cynefin-quad simple">
+        <div class="cynefin-label">Simple</div>
+        <div class="cynefin-method">Sense → Categorize → Respond</div>
+        <div class="cynefin-tools">You've done this a hundred times. The answer is known. Follow the established process and move on.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 9: BURNOUT -->
+  <div class="slide" id="s9">
+    <div class="slide-header left" style="max-width:1000px;">
+      <div class="slide-eyebrow">Accelerate · Nicole Forsgren, Jez Humble, Gene Kim</div>
+      <div class="slide-title">This Is Why <span>Good People Leave</span></div>
+    </div>
+    <div class="burnout-grid">
+      <div class="burnout-item">
+        <div class="burnout-title">Work Overload</div>
+        <div class="burnout-desc">Too much in flight, no way to finish anything. Limitless WIP is the accelerant.</div>
+      </div>
+      <div class="burnout-item">
+        <div class="burnout-title">Lack of Control</div>
+        <div class="burnout-desc">Work arrives from every direction. Priorities shift without warning. The team reacts constantly.</div>
+      </div>
+      <div class="burnout-item">
+        <div class="burnout-title">No Sense of Progress</div>
+        <div class="burnout-desc">You finish things — but the pile never gets smaller. Effort pours in and nothing feels like it moves forward. The work just keeps coming.</div>
+      </div>
+      <div class="burnout-item">
+        <div class="burnout-title">Breakdown of Community</div>
+        <div class="burnout-desc">Individuals own work in silos. No shared wins. No one to swarm a problem with.</div>
+      </div>
+      <div class="burnout-item">
+        <div class="burnout-title">No Way to Say No</div>
+        <div class="burnout-desc">Every request is urgent. Every stakeholder matters. But when everything is the top priority, nothing is. The team carries an impossible list with no way to push back.</div>
+      </div>
+      <div class="burnout-item">
+        <div class="burnout-title">The Weight Never Lifts</div>
+        <div class="burnout-desc">The processes, the meetings, the approvals — baked in long before anyone on this team arrived. Questioning them feels pointless. Removing them feels impossible. The work just gets heavier.</div>
+      </div>
+      <div class="burnout-item" style="border-top-color:var(--gold);">
+        <div class="burnout-title" style="color:var(--gold);">Leadership Gaps</div>
+        <div class="burnout-desc">People don't leave organizations. They leave leaders. When direction is unclear, credit flows up and blame flows down, or the team is invisible until something goes wrong — good people find the exit.</div>
+      </div>
+    </div>
+    <div class="burnout-callout">
+      <p>Organizations fix the person. <strong>The system is the problem.</strong> Human error is never the root cause of failure in systems — it is always a symptom of a system that set the conditions for failure.</p>
+    </div>
+  </div>
+
+  <!-- SLIDE 10: FLOW EFFICIENCY -->
+  <div class="slide" id="s10">
+    <div class="slide-header">
+      <div class="slide-eyebrow">Jonathan Smart · Sooner Safer Happier</div>
+      <div class="slide-title">Focus on the <span>Work, Not the Worker</span></div>
+      <div class="slide-subtitle">The bottleneck is almost never the people. It's the waiting.</div>
+      <div class="slide-subtitle" style="margin-top:10px; font-style:italic; opacity:0.7;">In plain terms: how much of the time your work is in flight is it actually being worked on — versus sitting, waiting, and blocked?</div>
+    </div>
+    <!-- Patient Journey Analogy -->
+    <div style="max-width:860px; width:100%; margin:20px auto 0; background:var(--surface); border:1px solid var(--border); padding:28px 32px;">
+      <div style="font-size:10px; font-weight:500; letter-spacing:0.25em; text-transform:uppercase; color:var(--gold); margin-bottom:16px;">You Already Know This — You've Seen It Every Day</div>
+      <div style="display:flex; align-items:center; gap:0; width:100%; margin-bottom:14px; flex-wrap:nowrap; overflow:hidden;">
+        <!-- Step 1: Admitted -->
+        <div style="display:flex; flex-direction:column; align-items:center; flex-shrink:0;">
+          <div style="width:36px; height:36px; border-radius:50%; background:var(--teal); display:flex; align-items:center; justify-content:center; font-size:16px;">🏥</div>
+          <div style="font-size:9px; color:var(--teal); margin-top:4px; text-align:center; font-weight:500; letter-spacing:0.05em;">ADMITTED</div>
+        </div>
+        <!-- Wait -->
+        <div style="flex:2; height:3px; background:repeating-linear-gradient(90deg, rgba(240,180,41,0.4) 0px, rgba(240,180,41,0.4) 6px, transparent 6px, transparent 12px); position:relative;">
+          <div style="position:absolute; top:-18px; left:50%; transform:translateX(-50%); font-size:9px; color:var(--muted); white-space:nowrap;">waiting for a bed</div>
+        </div>
+        <!-- Step 2 -->
+        <div style="display:flex; flex-direction:column; align-items:center; flex-shrink:0;">
+          <div style="width:36px; height:36px; border-radius:50%; background:var(--surface2); border:1px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:16px;">🛏️</div>
+          <div style="font-size:9px; color:var(--muted); margin-top:4px; text-align:center;">IN A BED</div>
+        </div>
+        <!-- Wait -->
+        <div style="flex:2; height:3px; background:repeating-linear-gradient(90deg, rgba(240,180,41,0.4) 0px, rgba(240,180,41,0.4) 6px, transparent 6px, transparent 12px); position:relative;">
+          <div style="position:absolute; top:-18px; left:50%; transform:translateX(-50%); font-size:9px; color:var(--muted); white-space:nowrap;">waiting for labs</div>
+        </div>
+        <!-- Step 3 -->
+        <div style="display:flex; flex-direction:column; align-items:center; flex-shrink:0;">
+          <div style="width:36px; height:36px; border-radius:50%; background:var(--surface2); border:1px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:16px;">🧪</div>
+          <div style="font-size:9px; color:var(--muted); margin-top:4px; text-align:center;">LABS BACK</div>
+        </div>
+        <!-- Wait -->
+        <div style="flex:2; height:3px; background:repeating-linear-gradient(90deg, rgba(240,180,41,0.4) 0px, rgba(240,180,41,0.4) 6px, transparent 6px, transparent 12px); position:relative;">
+          <div style="position:absolute; top:-18px; left:50%; transform:translateX(-50%); font-size:9px; color:var(--muted); white-space:nowrap;">waiting for doctor</div>
+        </div>
+        <!-- Step 4 -->
+        <div style="display:flex; flex-direction:column; align-items:center; flex-shrink:0;">
+          <div style="width:36px; height:36px; border-radius:50%; background:var(--teal); display:flex; align-items:center; justify-content:center; font-size:16px;">👨‍⚕️</div>
+          <div style="font-size:9px; color:var(--teal); margin-top:4px; text-align:center; font-weight:500; letter-spacing:0.05em;">DOCTOR VISITS</div>
+        </div>
+        <!-- Wait -->
+        <div style="flex:2; height:3px; background:repeating-linear-gradient(90deg, rgba(240,180,41,0.4) 0px, rgba(240,180,41,0.4) 6px, transparent 6px, transparent 12px); position:relative;">
+          <div style="position:absolute; top:-18px; left:50%; transform:translateX(-50%); font-size:9px; color:var(--muted); white-space:nowrap;">waiting for orders</div>
+        </div>
+        <!-- Step 5 -->
+        <div style="display:flex; flex-direction:column; align-items:center; flex-shrink:0;">
+          <div style="width:36px; height:36px; border-radius:50%; background:var(--surface2); border:1px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:16px;">📋</div>
+          <div style="font-size:9px; color:var(--muted); margin-top:4px; text-align:center;">ORDERS IN</div>
+        </div>
+        <!-- Wait -->
+        <div style="flex:2; height:3px; background:repeating-linear-gradient(90deg, rgba(240,180,41,0.4) 0px, rgba(240,180,41,0.4) 6px, transparent 6px, transparent 12px); position:relative;">
+          <div style="position:absolute; top:-18px; left:50%; transform:translateX(-50%); font-size:9px; color:var(--muted); white-space:nowrap;">waiting for transport</div>
+        </div>
+        <!-- Step 6 -->
+        <div style="display:flex; flex-direction:column; align-items:center; flex-shrink:0;">
+          <div style="width:36px; height:36px; border-radius:50%; background:var(--teal); display:flex; align-items:center; justify-content:center; font-size:16px;">🏠</div>
+          <div style="font-size:9px; color:var(--teal); margin-top:4px; text-align:center; font-weight:500; letter-spacing:0.05em;">GOES HOME</div>
+        </div>
+      </div>
+      <div style="font-family:'DM Serif Display',serif; font-style:italic; font-size:14px; color:var(--white); line-height:1.7; margin-top:18px; border-top:1px solid var(--border); padding-top:14px;">
+        The patient was here for 8 hours. A doctor spent 20 minutes with them. <strong style="font-style:normal; font-family:'DM Sans',sans-serif; color:var(--gold);">That's 4% flow efficiency — and every one of you has seen it.</strong>
+      </div>
+      <div style="font-family:'Bebas Neue',sans-serif; font-size:clamp(28px,3.5vw,48px); color:var(--white); letter-spacing:0.05em; margin-top:16px; line-height:1;">Your IT Work <span style="color:var(--gold);">Moves the Same Way.</span></div>
+    </div>
+
+    <div class="flow-visual" style="margin-top:16px;">
+      <div class="flow-bar-wrap">
+        <div class="flow-label">Typical</div>
+        <div class="flow-bar">
+          <div class="flow-wait" style="flex:9;"></div>
+          <div class="flow-work" style="flex:1;"></div>
+        </div>
+        <div class="flow-pct">~10%</div>
+      </div>
+      <div class="flow-bar-wrap">
+        <div class="flow-label" style="color:var(--teal);">Goal</div>
+        <div class="flow-bar">
+          <div class="flow-wait" style="flex:5;"></div>
+          <div class="flow-work" style="flex:5; background: var(--teal);"></div>
+        </div>
+        <div class="flow-pct" style="color:var(--teal);">50%+</div>
+      </div>
+      <div style="display:flex; gap:32px; margin-top:16px; font-size:12px; color:var(--muted);">
+        <span>▒ Waiting (handoffs, queues, blocked)</span>
+        <span style="color:var(--gold);">█ Actively being worked</span>
+      </div>
+    </div>
+    <div class="flow-formula">Work ÷ Lead Time × 100 = <span>Flow Efficiency %</span></div>
+  </div>
+
+  <!-- SLIDE 11: INDIVIDUAL VS TEAM -->
+  <div class="slide" id="s11">
+    <div class="slide-header">
+      <div class="slide-eyebrow">Business Continuity · The Phoenix Project</div>
+      <div class="slide-title">There Is No Continuity <span>in a Brent</span></div>
+      <div class="slide-subtitle">Every team has one. Life happens. The question is whether the work stops when it does.</div>
+    </div>
+    <div class="individual-visual">
+      <div class="ind-col danger">
+        <!-- Brent SVG character -->
+        <div style="display:flex; justify-content:center; margin-bottom:8px;">
+          <svg viewBox="0 0 120 150" width="130" style="display:block;">
+            <!-- Body / shirt -->
+            <rect x="35" y="72" width="50" height="45" rx="6" fill="#374151"/>
+            <!-- Shirt collar -->
+            <polygon points="55,72 60,82 65,72" fill="#1f2937"/>
+            <!-- Pocket protector -->
+            <rect x="38" y="78" width="14" height="16" rx="1" fill="#1e2330" stroke="#4b5563" stroke-width="0.8"/>
+            <line x1="42" y1="80" x2="42" y2="92" stroke="#f0b429" stroke-width="1"/>
+            <line x1="45" y1="80" x2="45" y2="92" stroke="#2dd4bf" stroke-width="1"/>
+            <line x1="48" y1="80" x2="48" y2="92" stroke="#f56565" stroke-width="1"/>
+            <!-- Arms — relaxed at sides -->
+            <path d="M35,82 Q22,90 18,100" fill="none" stroke="#374151" stroke-width="10" stroke-linecap="round"/>
+            <path d="M85,82 Q98,90 102,100" fill="none" stroke="#374151" stroke-width="10" stroke-linecap="round"/>
+            <!-- Hands -->
+            <circle cx="17" cy="102" r="6" fill="#fbbf24"/>
+            <circle cx="103" cy="102" r="6" fill="#fbbf24"/>
+            <!-- Legs -->
+            <rect x="44" y="115" width="14" height="24" rx="4" fill="#1f2937"/>
+            <rect x="62" y="115" width="14" height="24" rx="4" fill="#1f2937"/>
+            <!-- Shoes -->
+            <rect x="40" y="134" width="20" height="8" rx="3" fill="#111318"/>
+            <rect x="60" y="134" width="20" height="8" rx="3" fill="#111318"/>
+            <!-- Neck -->
+            <rect x="52" y="60" width="16" height="14" rx="3" fill="#fbbf24"/>
+            <!-- Head -->
+            <ellipse cx="60" cy="44" rx="26" ry="24" fill="#fbbf24"/>
+            <!-- Hair — thinning on top -->
+            <path d="M34,38 Q36,18 60,16 Q84,18 86,38" fill="#292524"/>
+            <path d="M38,28 Q44,22 52,20" fill="none" stroke="#292524" stroke-width="2"/>
+            <path d="M82,28 Q76,22 68,20" fill="none" stroke="#292524" stroke-width="2"/>
+            <!-- Glasses -->
+            <rect x="38" y="40" width="18" height="12" rx="4" fill="none" stroke="#9ca3af" stroke-width="1.5"/>
+            <rect x="64" y="40" width="18" height="12" rx="4" fill="none" stroke="#9ca3af" stroke-width="1.5"/>
+            <line x1="56" y1="46" x2="64" y2="46" stroke="#9ca3af" stroke-width="1.5"/>
+            <line x1="34" y1="46" x2="38" y2="46" stroke="#9ca3af" stroke-width="1.2"/>
+            <line x1="82" y1="46" x2="86" y2="46" stroke="#9ca3af" stroke-width="1.2"/>
+            <!-- Eyes — calm, friendly -->
+            <circle cx="47" cy="46" r="4" fill="white"/>
+            <circle cx="73" cy="46" r="4" fill="white"/>
+            <circle cx="47.5" cy="46.5" r="1.8" fill="#1f2937"/>
+            <circle cx="73.5" cy="46.5" r="1.8" fill="#1f2937"/>
+            <!-- Smile — warm, genuine -->
+            <path d="M50,57 Q60,64 70,57" fill="none" stroke="#92400e" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div style="font-family:'Bebas Neue',sans-serif; font-size:22px; color:var(--red); letter-spacing:0.05em; margin-bottom:4px;">Brent</div>
+        <div style="font-size:10px; color:var(--muted); letter-spacing:0.2em; text-transform:uppercase; margin-bottom:12px;">The Phoenix Project</div>
+        <div class="ind-col-body">Gets sick. Goes on vacation. Changes roles. Leaves the org. Takes institutional knowledge with him. The work stops. The team scrambles. The business pretends this isn't a risk.</div>
+        <div style="margin-top:16px; padding:20px 18px; background:rgba(245,101,101,0.06); border-left:3px solid var(--red); position:relative;">
+          <div style="font-family:'Bebas Neue',sans-serif; font-size:56px; color:rgba(245,101,101,0.15); line-height:0.8; position:absolute; top:8px; left:10px;">"</div>
+          <div style="font-size:13px; color:var(--muted); font-style:italic; padding-left:22px; margin-bottom:10px; line-height:1.6;">Brent is a character from <em>The Phoenix Project</em> — the most talented person on the IT team, and the one everything depends on. Sound familiar?</div>
+          <div style="font-family:'DM Serif Display',serif; font-style:italic; font-size:18px; color:var(--white); line-height:1.75; padding-left:22px;">Every time that we let Brent fix something that none of us can replicate, Brent gets a little smarter, and <strong style="color:var(--red); font-style:normal; font-family:'DM Sans',sans-serif;">the entire system gets dumber.</strong> We've got to put an end to that.</div>
+          <div style="font-size:9px; color:var(--muted); margin-top:10px; padding-left:22px; letter-spacing:0.1em; text-transform:uppercase;">Gene Kim · The Phoenix Project</div>
+        </div>
+      </div>
+
+      <div class="ind-vs">VS</div>
+
+      <div class="ind-col safe">
+        <div class="ind-icon">
+          <svg width="88" height="88" viewBox="0 0 88 88" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- Ball body -->
+            <ellipse cx="44" cy="44" rx="36" ry="22" fill="#2dd4bf" opacity="0.15" stroke="#2dd4bf" stroke-width="2"/>
+            <!-- Horizontal seam -->
+            <line x1="8" y1="44" x2="80" y2="44" stroke="#2dd4bf" stroke-width="1.5" stroke-dasharray="0"/>
+            <!-- Vertical center seam -->
+            <ellipse cx="44" cy="44" rx="12" ry="22" fill="none" stroke="#2dd4bf" stroke-width="1.5" opacity="0.5"/>
+            <!-- Lace stitches -->
+            <line x1="41" y1="37" x2="47" y2="37" stroke="#2dd4bf" stroke-width="2" stroke-linecap="round"/>
+            <line x1="41" y1="41" x2="47" y2="41" stroke="#2dd4bf" stroke-width="2" stroke-linecap="round"/>
+            <line x1="41" y1="45" x2="47" y2="45" stroke="#2dd4bf" stroke-width="2" stroke-linecap="round"/>
+            <line x1="41" y1="49" x2="47" y2="49" stroke="#2dd4bf" stroke-width="2" stroke-linecap="round"/>
+            <line x1="41" y1="53" x2="47" y2="53" stroke="#2dd4bf" stroke-width="2" stroke-linecap="round"/>
+            <!-- Center lace bar -->
+            <line x1="44" y1="36" x2="44" y2="54" stroke="#2dd4bf" stroke-width="1" opacity="0.6"/>
+          </svg>
+        </div>
+        <div class="ind-col-title">The Team</div>
+        <div class="ind-col-body">Owns the work collectively. Builds team members who each have a specialty but can cover for each other when needed. Has stable, predictable velocity. Absorbs disruption. No single point of failure. Swarming — when the whole team moves together toward what matters most — isn't a metaphor. It's a survival mechanism.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 12: THE EXPERIMENT -->
+  <div class="slide" id="s12">
+    <div class="slide-eyebrow" style="font-size:10px; font-weight:500; letter-spacing:0.3em; text-transform:uppercase; color:var(--gold); margin-bottom:12px;">Flow Delivery Experiment</div>
+    <div class="slide-title" style="font-family:'Bebas Neue',sans-serif; font-size:clamp(36px,4.5vw,60px); margin-bottom:16px;">This Is Not an <span style="color:var(--gold);">"Agile Rollout."</span></div>
+    <div class="experiment-intro">It's a two-week experiment. One team. Observable outcomes. Executive belief is not required — observable outcomes are.</div>
+    <div class="experiment-grid">
+      <div class="exp-card">
+        <div class="exp-step">Pre-work</div>
+        <div class="exp-title">Align Before You Begin</div>
+        <div class="exp-body">Role alignment, intake rules, baseline snapshot. Define what success looks like before the first sprint starts. Name the Flow Coordinator. Name the PO. Agree on pivot conditions.</div>
+      </div>
+      <div class="exp-card">
+        <div class="exp-step">Week One</div>
+        <div class="exp-title">Start the Shift</div>
+        <div class="exp-body">Board live. Interrupts logged. Daily flow sync. PO makes tradeoffs explicit. By end of week: interrupts are visible and counted, blocked work is explicit, tradeoffs are verbalized — not implied.</div>
+      </div>
+      <div class="exp-card">
+        <div class="exp-step">Week Two</div>
+        <div class="exp-title">Stabilize and Decide</div>
+        <div class="exp-body">Reinforce WIP limits, tighten intake, run retro. Decision gate: Continue if outcomes improve. Adjust if mechanics need tuning. Pivot if visibility can't be enforced.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 13: WHAT WE WON'T DO -->
+  <div class="slide" id="s13">
+    <div class="slide-header">
+      <div class="slide-eyebrow">Guardrails</div>
+      <div class="slide-title">What We <span>Will Not Do</span></div>
+      <div class="slide-subtitle">This experiment has teeth. It also has limits. Both matter.</div>
+    </div>
+    <div class="wont-do-grid">
+      <div class="wont-item">
+        <div class="wont-x">✕</div>
+        <div class="wont-text"><strong>No "We're Agile Now" Declaration</strong>This isn't a brand. It's a behavior change. Declarations create compliance theater.</div>
+      </div>
+      <div class="wont-item">
+        <div class="wont-x">✕</div>
+        <div class="wont-text"><strong>No Ceremony Compliance as a Permanent State</strong>When you're learning Agile for the first time, going through the motions is fine — that's how habits form. But ceremonies that never produce a decision or a course correction become theater. The goal is understanding why each one exists.</div>
+      </div>
+      <div class="wont-item">
+        <div class="wont-x">✕</div>
+        <div class="wont-text"><strong>No Hiding KTLO or Interruptions</strong>Making reactive work invisible to protect optics is exactly what we're fighting. Sunshine laws apply to everything.</div>
+      </div>
+      <div class="wont-item">
+        <div class="wont-x">✕</div>
+        <div class="wont-text"><strong>No Performance Scoring via Agile Metrics</strong>Velocity is not a productivity score. Story points are a planning tool. Measuring people with team metrics is a misuse of the data.</div>
+      </div>
+    </div>
+    <div style="margin-top:28px; padding:20px 28px; background:rgba(240,180,41,0.06); border:1px solid rgba(240,180,41,0.2); max-width:800px; width:100%;">
+      <p style="font-family:'DM Serif Display',serif; font-style:italic; font-size:22px; color:var(--white); line-height:1.6;">Agile is not the outcome. <strong style="font-style:normal; font-family:'DM Sans',sans-serif; color:var(--gold);">Disciplined, predictable delivery is the outcome.</strong></p>
+    </div>
+  </div>
+
+  <!-- SLIDE 14: THE THREE VOICES -->
+  <div class="slide" id="s14">
+    <div class="slide-header">
+      <div class="slide-eyebrow">A Note to the Skeptics</div>
+      <div class="slide-title">Three Voices That <span>Block Change</span></div>
+      <div class="slide-subtitle">They are real. They are understandable. And they are worth naming out loud.</div>
+    </div>
+    <div class="voices-wrap">
+      <div class="voice-item">
+        <div class="voice-name">Voice of Judgement</div>
+        <div class="voice-desc">Shuts down an open mind. Prevents us from seeing possibilities and learning from others. Shows up as: "We tried this before." "This won't work here." "That's not how we do things."</div>
+      </div>
+      <div class="voice-item">
+        <div class="voice-name">Voice of Cynicism</div>
+        <div class="voice-desc">Blocks empathy and compassion. Makes it difficult to connect with others and their ideas. Shows up as: "Leadership just wants a buzzword." "Nothing ever really changes." "Who came up with this?"</div>
+      </div>
+      <div class="voice-item">
+        <div class="voice-name">Voice of Fear</div>
+        <div class="voice-desc">Inhibits willingness to take risks. Prevents stepping into the unknown to create meaningful change. Shows up as: "What if I fail?" "What does this mean for my role?" "I don't want to be exposed."</div>
+      </div>
+    </div>
+    <div class="voices-footer">The ask is not certainty. The ask is two weeks of honest effort and open eyes.</div>
+  </div>
+
+  <!-- SLIDE 15: WHAT CHANGED ON OUR TEAM -->
+  <div class="slide" id="s15">
+    <div class="slide-header left" style="max-width:1000px;">
+      <div class="slide-eyebrow">Lived Experience · Our Team · Two Years In</div>
+      <div class="slide-title">What Actually <span>Changed</span></div>
+      <div class="slide-subtitle">Not theory. This is what happened when we worked differently.</div>
+    </div>
+    <div class="testimony-grid">
+      <div class="testimony-item">
+        <div class="testimony-label">Capacity</div>
+        <div class="testimony-text">We discovered <strong>52% of our work was reactive and unplanned</strong>. We couldn't commit accurately because we couldn't see what was coming. Making it visible changed everything about how we planned.</div>
+      </div>
+      <div class="testimony-item">
+        <div class="testimony-label">Context Switching</div>
+        <div class="testimony-text">Agile didn't eliminate the chaos — it made the <strong>tradeoffs impossible to ignore</strong>. When an urgent request arrives mid-sprint, the team and leaders now have to say out loud what gets dropped to make room. That uncomfortable conversation used to happen in silence. Now it happens in the open.</div>
+      </div>
+      <div class="testimony-item">
+        <div class="testimony-label">Dependencies</div>
+        <div class="testimony-text"><strong>Cross-team dependencies were our biggest source of delay.</strong> Early dependency mapping during refinement surfaced blockers before they became emergencies. Lead time dropped.</div>
+      </div>
+      <div class="testimony-item">
+        <div class="testimony-label">Team Health</div>
+        <div class="testimony-text">The team is happier. They show up excited. <strong>They deliver consistently</strong> — not because we demanded more, but because we removed the friction that was exhausting them. The system changed. The people responded.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 16: STAY AWAY FROM THE ABYSS -->
+  <div class="slide" id="s16">
+    <div class="slide-header">
+      <div class="slide-eyebrow">Sunshine Laws</div>
+      <div class="slide-title">These Behaviors <span>Hide the Work</span></div>
+      <div class="slide-subtitle">Any of these is a signal the system is breaking down. They are not people failures — they are system gaps.</div>
+    </div>
+    <div class="abyss-list">
+      <div class="abyss-item">Working without a card</div>
+      <div class="abyss-item">Working a card without a definition of done</div>
+      <div class="abyss-item">Working without acceptance criteria</div>
+      <div class="abyss-item">Pulling work into a sprint without SM or PO approval</div>
+      <div class="abyss-item">Not testing throughout the build</div>
+      <div class="abyss-item">Not connecting with the customer during the sprint</div>
+      <div class="abyss-item">Pushing to production without UAT</div>
+      <div class="abyss-item">Talking timelines to customers without the team knowing</div>
+      <div class="abyss-item">Classifying work incorrectly</div>
+    </div>
+    <div class="abyss-footer">Waste is a crime. Look for long lead times — always.</div>
+  </div>
+
+  <!-- SLIDE 17: CLOSING -->
+  <div class="slide" id="s17">
+    <div class="closing-eyebrow">The Why</div>
+    <div class="closing-statement">The System <span>Sets the Conditions.</span> People Do the Rest.</div>
+    <div class="closing-sub">Agile doesn't fix humans. It builds an environment where humans can do their best work — focused, purposeful, and free from the friction that was quietly grinding them down.</div>
+    <div class="closing-rule"></div>
+    <div class="closing-cta">Two weeks. One team. Observe what changes.</div>
+  </div>
+
+</div><!-- /deck -->
+
+<!-- NAVIGATION -->
+<div class="nav">
+  <button class="nav-arrow" onclick="prevSlide()">←</button>
+  <div class="nav-section" onclick="goTo(0)">
+    <button>Intro</button>
+    <div class="nav-dots" id="dots-0"></div>
+  </div>
+  <div class="nav-section" onclick="goTo(2)">
+    <button>Why</button>
+    <div class="nav-dots" id="dots-1"></div>
+  </div>
+  <div class="nav-section" onclick="goTo(7)">
+    <button>Pillars</button>
+    <div class="nav-dots" id="dots-2"></div>
+  </div>
+  <div class="nav-section" onclick="goTo(9)">
+    <button>Cost</button>
+    <div class="nav-dots" id="dots-3"></div>
+  </div>
+  <div class="nav-section" onclick="goTo(12)">
+    <button>Experiment</button>
+    <div class="nav-dots" id="dots-4"></div>
+  </div>
+  <div class="nav-section" onclick="goTo(15)">
+    <button>Evidence</button>
+    <div class="nav-dots" id="dots-5"></div>
+  </div>
+  <div class="nav-section" onclick="goTo(17)">
+    <button>Close</button>
+    <div class="nav-dots" id="dots-6"></div>
+  </div>
+  <span class="slide-counter" id="counter">Intro · 1 of 2</span>
+  <button class="nav-arrow" onclick="nextSlide()">→</button>
+</div>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const counter = document.getElementById('counter');
+  const progress = document.getElementById('progress');
+  let current = 0;
+
+  const sections = [
+    { label: 'Intro',      start: 0,  end: 1  },
+    { label: 'Why',        start: 2,  end: 6  },
+    { label: 'Pillars',    start: 7,  end: 8  },
+    { label: 'Cost',       start: 9,  end: 11 },
+    { label: 'Experiment', start: 12, end: 14 },
+    { label: 'Evidence',   start: 15, end: 16 },
+    { label: 'Close',      start: 17, end: 17 },
+  ];
+
+  // Build dots for each section
+  sections.forEach((sec, si) => {
+    const count = sec.end - sec.start + 1;
+    const container = document.getElementById(`dots-${si}`);
+    for (let i = 0; i < count; i++) {
+      const dot = document.createElement('span');
+      dot.className = 'nav-dot';
+      dot.dataset.slide = sec.start + i;
+      dot.addEventListener('click', (e) => { e.stopPropagation(); showSlide(sec.start + i); });
+      container.appendChild(dot);
+    }
+  });
+
+  function showSlide(n) {
+    slides[current].classList.remove('active');
+    current = (n + slides.length) % slides.length;
+    slides[current].classList.add('active');
+    progress.style.width = `${((current + 1) / slides.length) * 100}%`;
+
+    // Find active section
+    let activeSection = 0;
+    for (let i = 0; i < sections.length; i++) {
+      if (current >= sections[i].start) activeSection = i;
+    }
+
+    // Update section buttons
+    document.querySelectorAll('.nav-section button').forEach((b, i) => {
+      b.classList.toggle('active-nav', i === activeSection);
+    });
+
+    // Update dots
+    document.querySelectorAll('.nav-dot').forEach(dot => {
+      const slideIdx = parseInt(dot.dataset.slide);
+      dot.classList.toggle('nav-dot-active', slideIdx === current);
+      dot.classList.toggle('nav-dot-section', sections[activeSection].start <= slideIdx && slideIdx <= sections[activeSection].end);
+    });
+
+    // Section-aware counter
+    const sec = sections[activeSection];
+    const posInSection = current - sec.start + 1;
+    const totalInSection = sec.end - sec.start + 1;
+    counter.textContent = `${sec.label} · ${posInSection} of ${totalInSection}`;
+  }
+
+  function nextSlide() { showSlide(current + 1); }
+  function prevSlide() { showSlide(current - 1); }
+  function goTo(n) { showSlide(n); }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') nextSlide();
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') prevSlide();
+  });
+
+  // Initialize progress and nav
+  progress.style.width = `${(1 / slides.length) * 100}%`;
+  showSlide(0);
+
+  // Touch / swipe support
+  let touchStartX = 0;
+  let touchStartY = 0;
+
+  document.addEventListener('touchstart', e => {
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
+  }, { passive: true });
+
+  document.addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].clientX - touchStartX;
+    const dy = e.changedTouches[0].clientY - touchStartY;
+    // Only trigger if horizontal swipe dominates (not a scroll)
+    if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 40) {
+      if (dx < 0) nextSlide();
+      else prevSlide();
+    }
+  }, { passive: true });
+</script>
+</body>
+</html>

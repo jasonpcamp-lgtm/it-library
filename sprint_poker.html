@@ -1,0 +1,1994 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Sprint Poker</title>
+
+  <!-- ═══════════════════════════════════════════════════
+       ⚙ ROOM SETTINGS — edit these two values
+       ROOM_CODE: what your team types to join the session
+       ROOM_ID:   unique ID for this room (change if running
+                  multiple separate teams on the same site)
+       ═══════════════════════════════════════════════════ -->
+  <script>
+    const ROOM_ID   = "sprint-poker-room-1";
+    const ROOM_CODE = "agile2024";
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+
+  <style>
+    :root {
+      /* ── Light mode palette ── */
+      --bg0:   #f4f6f9;   /* page background — cool light gray */
+      --bg1:   #eef0f5;   /* slight step down */
+      --bg2:   #ffffff;   /* cards, panels */
+      --bg3:   #f0f2f7;   /* inputs, inset areas */
+      --ink:   #1a1f2e;   /* primary text — near-black charcoal */
+      --muted: #6b7a99;   /* secondary text */
+      --rule:  #dde1ed;   /* borders and dividers */
+
+      /* ── Accent palette ── */
+      --accent: #4f6ef7;  /* indigo — primary action */
+      --acc2:   #3d5ce8;  /* indigo dark */
+      --green:  #16a34a;  /* voted / active / success */
+      --red:    #dc2626;  /* error / danger */
+      --blue:   #0284c7;  /* info / ticket ID */
+      --purple: #7c3aed;  /* SM controls */
+      --orange: #ea580c;  /* timer urgent */
+
+      /* ── Glow / shadow ── */
+      --aglow:  rgba(79,110,247,.18);
+      --gglow:  rgba(22,163,74,.2);
+      --shadow: rgba(30,40,80,.1);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; overflow: hidden; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg0); color: var(--ink);
+    }
+
+    /* ─────────────────────────────────────
+       JOIN SCREEN
+    ───────────────────────────────────── */
+    #join {
+      position: fixed; inset: 0; z-index: 200;
+      display: flex; align-items: center; justify-content: center;
+      background:
+        radial-gradient(700px 500px at 25% 20%, rgba(79,110,247,.06), transparent),
+        radial-gradient(500px 400px at 75% 80%, rgba(124,58,237,.05), transparent),
+        var(--bg0);
+      overflow-y: auto; padding: 20px;
+    }
+
+    .jbox {
+      width: 100%; max-width: 460px;
+      background: var(--bg2); border: 1px solid var(--rule);
+      border-radius: 16px; padding: 42px 40px 38px;
+      box-shadow: 0 8px 40px var(--shadow), 0 1px 0 rgba(255,255,255,.8);
+      position: relative;
+    }
+
+    .j-eye {
+      font-size: 10px; letter-spacing: .2em; text-transform: uppercase;
+      color: var(--accent); margin-bottom: 10px; opacity: .7;
+    }
+
+    .j-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 34px; font-weight: 900; color: var(--ink);
+      margin-bottom: 6px; line-height: 1.05;
+    }
+    .j-title em { color: var(--accent); font-style: normal; }
+
+    .j-sub { font-size: 13px; color: var(--muted); margin-bottom: 30px; line-height: 1.6; }
+
+    .fl { margin-bottom: 16px; display: flex; flex-direction: column; gap: 6px; }
+    .fl label { font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+
+    .fi {
+      background: var(--bg3); border: 1px solid var(--rule); border-radius: 8px;
+      color: var(--ink); font-family: 'DM Sans', sans-serif; font-size: 14px;
+      padding: 11px 14px; outline: none; transition: border-color .2s; width: 100%;
+    }
+    .fi:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--aglow); }
+    .fi::placeholder { color: rgba(107,122,153,.4); }
+
+    .egrid {
+      display: grid; grid-template-columns: repeat(8,1fr); gap: 6px; margin-top: 4px;
+    }
+
+    .eopt {
+      aspect-ratio: 1; font-size: 20px; border-radius: 7px;
+      border: 2px solid transparent; background: var(--bg3);
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: all .15s;
+    }
+    .eopt:hover { border-color: rgba(79,110,247,.3); transform: scale(1.08); }
+    .eopt.on { border-color: var(--accent); background: rgba(79,110,247,.08); }
+
+    /* SM CLAIM */
+    .sm-claim {
+      margin: 20px 0 0;
+      padding: 14px 16px;
+      border: 1px solid var(--rule);
+      border-radius: 10px;
+      background: rgba(124,58,237,.04);
+      display: flex; align-items: flex-start; gap: 12px;
+      cursor: pointer; transition: border-color .2s;
+      user-select: none;
+    }
+    .sm-claim:hover { border-color: rgba(124,58,237,.3); }
+    .sm-claim.disabled { opacity: .4; cursor: not-allowed; pointer-events: none; }
+
+    .sm-claim-check {
+      width: 20px; height: 20px; border-radius: 6px; flex-shrink: 0;
+      border: 2px solid var(--rule); background: var(--bg3);
+      display: flex; align-items: center; justify-content: center;
+      margin-top: 1px; transition: all .15s; pointer-events: none;
+    }
+    .sm-claim.on .sm-claim-check {
+      background: var(--purple); border-color: var(--purple);
+    }
+    .sm-claim-check::after {
+      content: '✓'; font-size: 12px; color: #fff; font-weight: 700;
+      display: none; line-height: 1;
+    }
+    .sm-claim.on .sm-claim-check::after { display: block; }
+
+    .sm-claim-text {}
+    .sm-claim-title { font-size: 13px; font-weight: 600; color: var(--ink); margin-bottom: 2px; }
+    .sm-claim-sub { font-size: 11px; color: var(--muted); line-height: 1.5; }
+    .sm-taken-msg { font-size: 11px; color: var(--red); margin-top: 2px; display: none; }
+
+    .jbtn {
+      width: 100%; margin-top: 18px; padding: 14px;
+      background: var(--accent); border: none; border-radius: 10px;
+      color: #fff; font-family: 'DM Sans', sans-serif;
+      font-size: 14px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+      cursor: pointer; transition: all .2s;
+    }
+    .jbtn:hover { background: var(--acc2); box-shadow: 0 4px 20px var(--aglow); transform: translateY(-1px); }
+
+    /* ─────────────────────────────────────
+       ROOM
+    ───────────────────────────────────── */
+    #room {
+      position: fixed; inset: 0;
+      display: none; flex-direction: column;
+    }
+    #room.on { display: flex; }
+
+    /* TOPBAR */
+    .tb {
+      height: 52px; flex-shrink: 0;
+      display: flex; align-items: center; gap: 12px; padding: 0 18px;
+      background: var(--bg2); border-bottom: 1px solid var(--rule);
+      box-shadow: 0 1px 4px var(--shadow); z-index: 40;
+    }
+
+    .tb-logo {
+      font-family: 'Playfair Display', serif;
+      font-size: 16px; font-weight: 700; color: var(--accent);
+      flex-shrink: 0;
+    }
+
+    .tb-sep { width: 1px; height: 20px; background: var(--rule); flex-shrink: 0; }
+
+    .tb-ticket { flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; }
+
+    .tb-id {
+      font-family: 'DM Mono', monospace; font-size: 11px; color: var(--blue);
+      background: rgba(2,132,199,.08); padding: 3px 8px; border-radius: 4px;
+      white-space: nowrap; flex-shrink: 0; border: 1px solid rgba(2,132,199,.15);
+    }
+
+    .tb-title {
+      font-size: 13px; font-weight: 500; color: var(--ink);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+
+    .tb-empty { font-size: 12px; color: var(--muted); font-style: italic; opacity: .6; }
+
+    .tb-right { display: flex; gap: 8px; align-items: center; flex-shrink: 0; }
+
+    .timer-badge {
+      padding: 4px 12px; border-radius: 999px;
+      border: 1px solid var(--rule); background: var(--bg3);
+      font-family: 'DM Mono', monospace; font-size: 13px;
+      color: var(--ink); min-width: 68px; text-align: center;
+      transition: all .3s;
+    }
+    .timer-badge.red { border-color: var(--orange); color: var(--orange); background: rgba(234,88,12,.08); animation: tblink 1s infinite; }
+    @keyframes tblink { 0%,100%{opacity:1}50%{opacity:.4} }
+
+    /* State badge in topbar */
+    .state-badge {
+      padding: 4px 12px; border-radius: 999px;
+      font-size: 11px; font-weight: 600; letter-spacing: .08em;
+      text-transform: uppercase; white-space: nowrap;
+      border: 1px solid var(--rule); color: var(--muted);
+      background: var(--bg3); transition: all .3s;
+    }
+    .state-badge.idle     { border-color: var(--rule); color: var(--muted); }
+    .state-badge.voting   { border-color: rgba(22,163,74,.4); color: var(--green); background: rgba(22,163,74,.07); }
+    .state-badge.revealed { border-color: rgba(79,110,247,.4); color: var(--accent); background: rgba(79,110,247,.07); }
+
+    /* ─────────────────────────────────────
+       SPLIT LAYOUT
+       Left: poker interaction
+       Right: live feed + session log (always visible)
+    ───────────────────────────────────── */
+    .room-split {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+      min-height: 0;
+    }
+
+    /* LEFT — poker side */
+    .poker-col {
+      flex: 1;
+      min-width: 0;
+      overflow-y: auto;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+      padding: 18px 16px 24px;
+      gap: 16px;
+      border-right: 1px solid var(--rule);
+    }
+
+    /* RIGHT — feed + log side, fixed width, never scrolls as a whole */
+    .info-col {
+      width: 300px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      background: var(--bg1);
+    }
+
+    /* Feed fills the top, log fills the bottom */
+    .feed-section {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      border-bottom: 1px solid var(--rule);
+      min-height: 0;
+    }
+
+    .feed-head {
+      padding: 11px 14px;
+      border-bottom: 1px solid var(--rule);
+      display: flex; align-items: center; justify-content: space-between;
+      flex-shrink: 0;
+      background: var(--bg2);
+    }
+
+    .feed-title {
+      display: flex; align-items: center; gap: 7px;
+      font-size: 11px; font-weight: 600; color: var(--muted);
+      letter-spacing: .08em; text-transform: uppercase;
+    }
+
+    .live-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--green); box-shadow: 0 0 6px var(--green);
+      animation: ldp 2s ease-in-out infinite; flex-shrink: 0;
+    }
+    @keyframes ldp { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+    /* Feed list — fills remaining space, scrolls internally */
+    .feed-list {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      min-height: 0;
+      height: 0;
+    }
+
+    .feed-item {
+      padding: 9px 14px;
+      border-bottom: 1px solid var(--rule);
+      animation: fi .2s ease;
+    }
+    @keyframes fi { from{opacity:0;transform:translateX(6px)} to{opacity:1;transform:translateX(0)} }
+
+    .feed-time {
+      font-family: 'DM Mono', monospace; font-size: 9px;
+      color: var(--muted); opacity: .5; margin-bottom: 2px;
+    }
+
+    .feed-msg { font-size: 12px; color: var(--ink); line-height: 1.45; }
+    .feed-msg .hi { color: var(--accent); font-weight: 600; }
+    .feed-msg .sc { color: var(--green); font-weight: 700; font-family:'DM Mono',monospace; }
+    .feed-msg .id { color: var(--blue); font-family:'DM Mono',monospace; font-size:11px; }
+
+    .feed-empty {
+      padding: 20px 14px; font-size: 12px; color: var(--muted);
+      text-align: center; line-height: 1.6;
+    }
+
+    /* Log section — fixed height at bottom of right column */
+    .log-section {
+      flex-shrink: 0;
+      height: 240px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      background: var(--bg2);
+    }
+
+    .log-head {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--rule);
+      display: flex; align-items: center; justify-content: space-between;
+      flex-shrink: 0;
+    }
+
+    .log-head-lbl {
+      font-size: 11px; font-weight: 600; color: var(--muted);
+      letter-spacing: .08em; text-transform: uppercase;
+    }
+
+    /* Log scrolls internally */
+    .log-list {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      min-height: 0;
+      /* Force scroll to work inside flex parent */
+      height: 0;
+    }
+
+    .log-row {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 10px; padding: 9px 14px;
+      border-bottom: 1px solid var(--rule);
+    }
+
+    .log-row-left { flex: 1; min-width: 0; }
+    .lr-id    { font-family:'DM Mono',monospace; font-size:10px; color:var(--blue); opacity:.8; margin-bottom:1px; }
+    .lr-title { font-size: 12px; color: var(--ink); line-height: 1.3; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .lr-meta  { font-size: 10px; color: var(--muted); margin-top: 1px; }
+    .lr-score { font-family:'Playfair Display',serif; font-size:22px; font-weight:700; color:var(--accent); flex-shrink:0; }
+
+    .log-empty { padding: 20px 14px; font-size: 12px; color: var(--muted); text-align: center; }
+
+    .log-footer {
+      padding: 8px 10px; border-top: 1px solid var(--rule); flex-shrink: 0;
+    }
+
+    /* ─── TICKET CARD — tall portrait playing card ─── */
+    .ticket-stage {
+      display: flex; justify-content: center;
+    }
+
+    /* Empty state */
+    .ticket-empty {
+      width: 220px;
+      aspect-ratio: 5/7;
+      border: 2px dashed rgba(142,162,184,.15);
+      border-radius: 16px;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 10px;
+      color: var(--muted); font-size: 13px; text-align: center;
+      line-height: 1.5; padding: 20px;
+    }
+    .ticket-empty-icon { font-size: 36px; opacity: .3; }
+
+    /* The actual playing card */
+    .playing-card {
+      width: 220px;
+      aspect-ratio: 5/7;
+      background: var(--bg2);
+      border: 1.5px solid var(--rule);
+      border-radius: 16px;
+      padding: 14px;
+      box-shadow: 0 4px 24px var(--shadow), 0 1px 0 rgba(255,255,255,.9);
+      display: flex; flex-direction: column;
+      position: relative; overflow: hidden;
+    }
+
+    /* fib watermark inside card */
+    .playing-card::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 280'%3E%3Cpath d='M100,140 Q100,68 168,68 Q236,68 236,140 Q236,224 100,224 Q-36,224 -36,112 Q-36,0 118,0' fill='none' stroke='rgba(79,110,247,0.07)' stroke-width='2'/%3E%3Cpath d='M100,140 Q100,104 136,104 Q172,104 172,140 Q172,182 100,182 Q28,182 28,126 Q28,70 112,70' fill='none' stroke='rgba(79,110,247,0.05)' stroke-width='1.5'/%3E%3Cpath d='M100,140 Q100,122 118,122 Q136,122 136,140 Q136,160 100,160 Q64,160 64,133 Q64,106 106,106' fill='none' stroke='rgba(79,110,247,0.04)' stroke-width='1'/%3E%3C/svg%3E") no-repeat center/cover;
+      pointer-events: none; z-index: 0;
+    }
+
+    .pc-inner { position: relative; z-index: 1; display: flex; flex-direction: column; height: 100%; }
+
+    /* Corner marks — top left and bottom right (rotated) */
+    .pc-corner {
+      font-family: 'DM Mono', monospace;
+      font-size: 11px; line-height: 1.3;
+      color: rgba(79,110,247,.35);
+      flex-shrink: 0;
+    }
+    .pc-corner.tl { align-self: flex-start; }
+    .pc-corner.br { align-self: flex-end; transform: rotate(180deg); margin-top: auto; }
+
+    .pc-body {
+      flex: 1; display: flex; flex-direction: column;
+      justify-content: center; gap: 10px;
+      padding: 8px 2px;
+    }
+
+    .pc-type {
+      font-size: 9px; letter-spacing: .18em; text-transform: uppercase;
+      color: var(--blue); opacity: .8; font-family: 'DM Mono', monospace;
+    }
+
+    .pc-id {
+      font-family: 'DM Mono', monospace; font-size: 12px; color: var(--blue);
+    }
+
+    .pc-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 17px; font-weight: 700; color: var(--ink);
+      line-height: 1.35;
+      word-break: break-word; overflow-wrap: break-word;
+    }
+
+    .pc-divider { height: 1px; background: var(--rule); }
+
+    .pc-state {
+      font-size: 11px; font-weight: 600;
+      display: flex; align-items: center; gap: 5px;
+    }
+    .pc-state-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+
+    /* ─── VOTE TRACKER ─── */
+    .tracker {
+      background: var(--bg2); border: 1px solid var(--rule);
+      border-radius: 12px; padding: 16px 18px;
+    }
+
+    .tr-header {
+      display: flex; align-items: baseline; justify-content: space-between;
+      margin-bottom: 10px;
+    }
+
+    .tr-label { font-size: 13px; font-weight: 600; color: var(--ink); }
+
+    .tr-count {
+      font-family: 'DM Mono', monospace; font-size: 12px; color: var(--muted);
+    }
+
+    .tr-bar-wrap {
+      height: 5px; background: var(--rule); border-radius: 999px;
+      overflow: hidden; margin-bottom: 14px;
+    }
+
+    .tr-bar {
+      height: 100%; width: 0%;
+      background: linear-gradient(90deg, var(--green), #6dd498);
+      border-radius: 999px; transition: width .4s ease;
+    }
+
+    .tr-avatars {
+      display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+    }
+
+    .tr-av {
+      width: 38px; height: 38px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px; border: 2px solid var(--rule);
+      background: var(--bg3); transition: all .3s; position: relative;
+    }
+    .tr-av.voted {
+      border-color: var(--green); box-shadow: 0 0 10px var(--gglow);
+    }
+    .tr-av.voted::after {
+      content: '✓';
+      position: absolute; bottom: -2px; right: -2px;
+      width: 14px; height: 14px; border-radius: 50%;
+      background: var(--green); color: #fff; font-size: 8px;
+      font-weight: 700; display: flex; align-items: center; justify-content: center;
+      line-height: 14px; text-align: center;
+    }
+    .tr-av.waiting { font-size: 14px; color: rgba(142,162,184,.3); }
+
+    .tr-waiting-text {
+      font-size: 11px; color: var(--muted); margin-left: 2px;
+    }
+
+    /* ─── HAND ─── */
+    .hand-wrap {
+      display: flex; flex-direction: column; gap: 10px;
+    }
+
+    .hand-hint {
+      font-size: 10px; letter-spacing: .14em; text-transform: uppercase;
+      color: var(--muted); text-align: center; opacity: .6;
+    }
+
+    .hand-cards {
+      display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;
+    }
+
+    .hc {
+      width: 72px; height: 104px; border-radius: 10px;
+      background: #ffffff; border: 1.5px solid #dde1ed;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      cursor: pointer; position: relative; flex-shrink: 0;
+      box-shadow: 0 2px 8px var(--shadow);
+      transition: transform .2s cubic-bezier(.34,1.56,.64,1), box-shadow .2s, border-color .2s;
+    }
+    .hc:hover {
+      transform: translateY(-18px) scale(1.06);
+      border-color: var(--accent);
+      box-shadow: 0 16px 28px var(--shadow), 0 0 0 3px var(--aglow);
+    }
+    .hc.on {
+      transform: translateY(-22px) scale(1.08);
+      border-color: var(--accent); background: rgba(79,110,247,.04);
+      box-shadow: 0 20px 32px var(--shadow), 0 0 0 3px var(--aglow);
+    }
+    .hc.off { opacity: .28; pointer-events: none; }
+
+    .hc-val {
+      font-family: 'Playfair Display', serif;
+      font-size: 32px; font-weight: 700; color: var(--ink); line-height: 1;
+    }
+    .hc-val.sm-val { font-size: 22px; }
+
+    .hc-corner {
+      position: absolute; font-family: 'DM Mono', monospace;
+      font-size: 11px; color: rgba(107,122,153,.35); line-height: 1;
+    }
+    .hc-corner.tl { top: 6px; left: 8px; }
+    .hc-corner.br { bottom: 6px; right: 8px; transform: rotate(180deg); }
+
+    /* MY STATUS */
+    .my-status {
+      display: flex; justify-content: center;
+    }
+
+    .my-pill {
+      display: flex; align-items: center; gap: 9px;
+      padding: 8px 18px; background: var(--bg2);
+      border: 1px solid var(--rule); border-radius: 999px;
+    }
+    .my-pill-emoji { font-size: 18px; }
+    .my-pill-name  { font-size: 12px; color: var(--muted); }
+    .my-pill-vote  { font-family: 'DM Mono', monospace; font-size: 13px; color: var(--accent); font-weight: 500; }
+
+    /* ─── SM CONTROLS ─── */
+    .sm-panel {
+      background: rgba(124,58,237,.04);
+      border: 1px solid rgba(124,58,237,.15);
+      border-radius: 12px; padding: 16px;
+      display: none; flex-direction: column; gap: 14px;
+    }
+    .sm-panel.on { display: flex; }
+
+    .sm-panel-title {
+      font-size: 10px; letter-spacing: .14em; text-transform: uppercase;
+      color: var(--purple); margin-bottom: 2px;
+    }
+
+    .sm-ticket-row { display: flex; flex-direction: column; gap: 8px; }
+    .sm-inputs { display: flex; gap: 8px; }
+
+    .si {
+      background: var(--bg2); border: 1px solid var(--rule); border-radius: 8px;
+      color: var(--ink); font-family: 'DM Sans', sans-serif; font-size: 13px;
+      padding: 9px 12px; outline: none; transition: border-color .2s;
+    }
+    .si:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--aglow); }
+    .si::placeholder { color: rgba(107,122,153,.4); font-size: 12px; }
+    .si.id-field { width: 140px; flex-shrink: 0; }
+    .si.desc-field { flex: 1; }
+    .si.full { width: 100%; }
+
+    .sm-controls { display: flex; gap: 7px; flex-wrap: wrap; }
+
+    .sm-queue-toggle {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 11px; color: var(--muted); cursor: pointer;
+      user-select: none; transition: color .15s;
+    }
+    .sm-queue-toggle:hover { color: var(--ink); }
+    .sm-queue-toggle-icon { font-size: 12px; transition: transform .2s; }
+    .sm-queue-toggle.open .sm-queue-toggle-icon { transform: rotate(90deg); }
+
+    .sm-queue-body { display: none; margin-top: 8px; }
+    .sm-queue-body.on { display: flex; flex-direction: column; gap: 8px; }
+
+    .sq-textarea {
+      background: var(--bg2); border: 1px solid var(--rule); border-radius: 8px;
+      color: var(--ink); font-family: 'DM Mono', monospace; font-size: 11px;
+      padding: 10px 12px; outline: none; width: 100%; resize: vertical;
+      min-height: 80px; transition: border-color .2s; line-height: 1.6;
+    }
+    .sq-textarea:focus { border-color: var(--accent); }
+    .sq-textarea::placeholder { color: rgba(107,122,153,.35); }
+
+    .sq-hint { font-size: 10px; color: var(--muted); line-height: 1.5; opacity: .6; }
+    .sq-list { display: flex; flex-direction: column; gap: 4px; }
+
+    .sq-item {
+      display: flex; align-items: center; gap: 8px;
+      padding: 7px 10px; background: var(--bg3); border: 1px solid var(--rule);
+      border-radius: 7px; cursor: pointer; transition: all .15s;
+    }
+    .sq-item:hover { border-color: var(--accent); background: rgba(79,110,247,.04); }
+    .sq-item.done { opacity: .35; }
+
+    .sq-item-id    { font-family:'DM Mono',monospace; font-size:11px; color:var(--blue); flex-shrink:0; }
+    .sq-item-title { font-size:12px; color:var(--ink); flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .sq-item-load  { font-size:10px; color:var(--muted); flex-shrink:0; }
+
+    /* ─── Player roster ─── */
+    .player-roster { display: flex; flex-direction: column; gap: 4px; }
+
+    .roster-row {
+      display: flex; align-items: center; gap: 8px;
+      padding: 6px 8px; border-radius: 7px; background: var(--bg3);
+      border: 1px solid var(--rule);
+    }
+    .roster-emoji { font-size: 18px; flex-shrink: 0; }
+    .roster-name  { flex: 1; font-size: 12px; color: var(--ink); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .roster-real  { font-size: 10px; color: var(--muted); }
+    .roster-you   { font-size: 9px; color: var(--accent); font-weight: 600; letter-spacing: .08em; text-transform: uppercase; border: 1px solid rgba(79,110,247,.3); border-radius: 999px; padding: 1px 6px; flex-shrink: 0; }
+    .roster-dot   { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .roster-kick  { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 14px; padding: 0 2px; line-height: 1; transition: color .15s; flex-shrink: 0; }
+    .roster-kick:hover { color: var(--red); }
+
+    /* Broadcast */
+    .broadcast-row { display: flex; gap: 6px; }
+    .broadcast-input {
+      flex: 1; background: var(--bg2); border: 1px solid var(--rule);
+      border-radius: 8px; color: var(--ink); font-family: 'DM Sans', sans-serif;
+      font-size: 12px; padding: 7px 10px; outline: none; transition: border-color .2s;
+    }
+    .broadcast-input:focus { border-color: var(--accent); }
+    .broadcast-input::placeholder { color: rgba(107,122,153,.4); font-size: 11px; }
+
+    /* Feed event icons by type */
+    .feed-item.ev-join   .feed-time::before { content: '→ '; color: var(--blue); }
+    .feed-item.ev-leave  .feed-time::before { content: '← '; color: var(--muted); }
+    .feed-item.ev-vote   .feed-time::before { content: '🃏 '; }
+    .feed-item.ev-reveal .feed-time::before { content: '👁 '; }
+    .feed-item.ev-score  .feed-time::before { content: '✓ '; color: var(--green); }
+    .feed-item.ev-ticket .feed-time::before { content: '📋 '; }
+    .feed-item.ev-system .feed-time::before { content: '⚙ '; }
+    .feed-item.ev-bc     .feed-time::before { content: '📣 '; }
+    .feed-item.ev-kick   .feed-time::before { content: '🚪 '; }
+
+    .feed-item.ev-score  { border-left: 2px solid var(--green);  background: rgba(22,163,74,.03); }
+    .feed-item.ev-reveal { border-left: 2px solid var(--accent); background: rgba(79,110,247,.03); }
+    .feed-item.ev-bc     { border-left: 2px solid var(--orange); background: rgba(234,88,12,.03); }
+    .feed-item.ev-join   { border-left: 2px solid var(--blue);   background: rgba(2,132,199,.03); }
+
+    /* Vote distribution chips in feed */
+    .vote-dist { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 5px; }
+    .vd-chip {
+      display: flex; align-items: center; gap: 3px;
+      background: var(--bg3); border: 1px solid var(--rule);
+      border-radius: 5px; padding: 2px 6px;
+      font-family: 'DM Mono', monospace; font-size: 10px; color: var(--ink);
+    }
+    .vd-chip.top { background: rgba(79,110,247,.08); border-color: rgba(79,110,247,.35); color: var(--accent); font-weight: 700; }
+    .vd-count { color: var(--muted); font-size: 9px; margin-left: 1px; }
+
+    /* ─────────────────────────────────────
+       REVEAL OVERLAY — no auto close
+    ───────────────────────────────────── */
+    #reveal {
+      position: fixed; inset: 0; z-index: 100;
+      background: rgba(244,246,249,.96); backdrop-filter: blur(20px);
+      display: none; flex-direction: column; overflow-y: auto;
+      align-items: center; justify-content: center; gap: 24px; padding: 24px;
+    }
+    #reveal.on { display: flex; }
+
+    .rv-hed {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(20px,3.5vw,34px); font-weight: 900;
+      color: var(--accent); text-align: center;
+    }
+
+    .rv-cards {
+      display: flex; flex-wrap: wrap; gap: 14px;
+      justify-content: center; max-width: 820px;
+    }
+
+    .rv-card { display: flex; flex-direction: column; align-items: center; gap: 7px; }
+
+    .rv-face {
+      width: 80px; height: 116px; border-radius: 12px;
+      background: #fff; border: 1.5px solid var(--rule);
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; gap: 6px;
+      box-shadow: 0 4px 16px var(--shadow);
+      opacity: 0; animation: cpop .4s cubic-bezier(.34,1.56,.64,1) forwards;
+    }
+    .rv-face.hi {
+      border-color: var(--accent);
+      box-shadow: 0 4px 16px var(--shadow), 0 0 0 3px var(--aglow);
+      background: rgba(79,110,247,.04);
+    }
+    .rv-face.nv { border-color: var(--rule); background: var(--bg3); }
+    @keyframes cpop { 0%{opacity:0;transform:scale(.5) translateY(22px)} 100%{opacity:1;transform:scale(1) translateY(0)} }
+
+    .rv-emoji { font-size: 26px; }
+    .rv-val {
+      font-family: 'Playfair Display', serif;
+      font-size: 24px; font-weight: 700; color: var(--ink);
+    }
+    .rv-val.nv { font-size: 14px; color: var(--muted); }
+
+    .rv-name { font-size: 11px; color: var(--muted); max-width: 88px; text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    .rv-stats {
+      display: flex; gap: 28px; flex-wrap: wrap;
+      justify-content: center; align-items: center;
+    }
+
+    .rv-stat { text-align: center; }
+    .rv-stat-v { font-family:'Playfair Display',serif; font-size:48px; font-weight:900; color:var(--accent); line-height:1; }
+    .rv-stat-v.sm { font-size:26px; color:var(--muted); }
+    .rv-stat-v.ag { font-size:18px; }
+    .rv-stat-l { font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); margin-top:4px; }
+
+    .rv-actions { display:flex; gap:12px; flex-wrap:wrap; justify-content:center; }
+
+    /* Score method picker */
+    .score-methods {
+      display: flex; gap: 12px; flex-wrap: wrap; justify-content: center;
+      max-width: 600px;
+    }
+    .score-method {
+      flex: 1; min-width: 140px; max-width: 180px;
+      background: var(--bg2); border: 2px solid var(--rule);
+      border-radius: 12px; padding: 16px 14px; cursor: pointer;
+      text-align: center; transition: all .2s;
+      box-shadow: 0 2px 8px var(--shadow);
+    }
+    .score-method:hover { border-color: var(--accent); box-shadow: 0 4px 16px var(--shadow); }
+    .score-method.chosen { border-color: var(--accent); background: rgba(79,110,247,.05); box-shadow: 0 0 0 3px var(--aglow); }
+    .score-method-val { font-family:'Playfair Display',serif; font-size:36px; font-weight:900; color:var(--accent); line-height:1; margin-bottom:6px; }
+    .score-method-lbl { font-size:11px; font-weight:600; color:var(--ink); letter-spacing:.06em; text-transform:uppercase; margin-bottom:4px; }
+    .score-method-sub { font-size:10px; color:var(--muted); line-height:1.4; }
+
+    /* ─── SCORE MODAL ─── */
+    #smodal {
+      position: fixed; inset: 0; z-index: 110;
+      background: rgba(30,40,80,.15); backdrop-filter: blur(8px);
+      display: none; align-items: center; justify-content: center; padding: 20px;
+    }
+    #smodal.on { display: flex; }
+
+    .sm-box {
+      background: var(--bg2); border: 1px solid var(--rule); border-radius: 14px;
+      padding: 28px; width: 100%; max-width: 340px;
+      box-shadow: 0 8px 40px var(--shadow);
+    }
+    .smb-title { font-family:'Playfair Display',serif; font-size:20px; color:var(--accent); margin-bottom:6px; }
+    .smb-sub   { font-size:12px; color:var(--muted); margin-bottom:16px; }
+
+    .fib-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:7px; margin-bottom:16px; }
+
+    .fb {
+      aspect-ratio:1; border-radius:8px; background:var(--bg3);
+      border:1.5px solid var(--rule); color:var(--ink);
+      font-family:'Playfair Display',serif; font-size:20px; font-weight:700;
+      cursor:pointer; transition:all .15s;
+      display:flex; align-items:center; justify-content:center;
+    }
+    .fb:hover { border-color:var(--accent); background:rgba(79,110,247,.06); transform:scale(1.05); }
+    .fb.on { border-color:var(--accent); background:rgba(79,110,247,.1); box-shadow:0 0 0 3px var(--aglow); }
+
+    .sma { display:flex; gap:8px; justify-content:flex-end; }
+
+    /* ─── BUTTONS ─── */
+    .btn {
+      padding: 7px 16px; border-radius: 999px;
+      border: 1.5px solid rgba(79,110,247,.3); background: transparent;
+      color: var(--accent); font-family: 'DM Sans', sans-serif;
+      font-size: 11px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase;
+      cursor: pointer; transition: all .18s; white-space: nowrap;
+    }
+    .btn:hover { background: rgba(79,110,247,.08); border-color: var(--accent); }
+    .btn.p { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .btn.p:hover { background: var(--acc2); box-shadow: 0 4px 14px var(--aglow); }
+    .btn.g { border-color: rgba(22,163,74,.4); color: var(--green); }
+    .btn.g:hover { background: rgba(22,163,74,.08); }
+    .btn.r { border-color: rgba(220,38,38,.3); color: var(--red); }
+    .btn.r:hover { background: rgba(220,38,38,.07); }
+    .btn.full { width: 100%; justify-content: center; display: flex; }
+    .btn.locked { opacity: .3; cursor: not-allowed; pointer-events: none; }
+
+    /* TOASTS */
+    #toasts {
+      position: fixed; top: 64px; right: 16px; z-index: 300;
+      display: flex; flex-direction: column; gap: 6px; pointer-events: none;
+    }
+    .toast {
+      background: var(--bg2); border: 1px solid var(--rule);
+      border-left: 3px solid var(--accent); border-radius: 8px;
+      padding: 9px 14px; font-size: 12.5px; color: var(--ink);
+      box-shadow: 0 4px 16px var(--shadow); max-width: 260px;
+      animation: tin .22s ease;
+    }
+    .toast.err { border-left-color: var(--red); }
+    .toast.out { animation: tout .22s ease forwards; }
+    @keyframes tin  { from{opacity:0;transform:translateX(12px)} to{opacity:1;transform:translateX(0)} }
+    @keyframes tout { to{opacity:0;transform:translateX(12px)} }
+
+    .setup-bar {
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 50;
+      background: rgba(220,38,38,.07); border-top: 1px solid rgba(220,38,38,.2);
+      padding: 6px 16px; font-size: 11px; color: var(--red);
+      text-align: center; display: none;
+    }
+
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(107,122,153,.2); border-radius:999px; }
+  </style>
+</head>
+<body>
+
+<!-- ══ JOIN ══════════════════════════════════════════ -->
+<div id="join">
+  <div class="jbox">
+    <div class="j-eye">Story Point Planning</div>
+    <div class="j-title">Sprint <em>Poker</em></div>
+    <div class="j-sub">Fibonacci-based estimation · Real-time collaboration</div>
+
+    <div class="fl">
+      <label>Room Code</label>
+      <input class="fi" id="icode" type="password" placeholder="Enter the session code" maxlength="32"/>
+    </div>
+    <div class="fl">
+      <label>Your real name (saved in the log)</label>
+      <input class="fi" id="iname" type="text" placeholder="e.g. Sarah Chen" maxlength="28"/>
+    </div>
+    <div class="fl">
+      <label>Display name at the table (optional — leave blank to use real name)</label>
+      <input class="fi" id="idisp" type="text" placeholder="e.g. Chaos Gremlin 🔥" maxlength="22"/>
+    </div>
+    <div class="fl">
+      <label>Pick your avatar</label>
+      <div class="egrid" id="egrid"></div>
+    </div>
+
+    <!-- SM CLAIM -->
+    <div class="sm-claim" id="sm-claim" onclick="toggleSMClaim()">
+      <div class="sm-claim-check"></div>
+      <div class="sm-claim-text">
+        <div class="sm-claim-title">👑 I am the Scrum Master</div>
+        <div class="sm-claim-sub">Claim this role to control voting, load tickets, and manage the session.</div>
+        <div class="sm-taken-msg" id="sm-taken">A Scrum Master is already active in this session.</div>
+      </div>
+    </div>
+
+    <button class="jbtn" id="join-btn" onclick="joinRoom()">Take a Seat →</button>
+  </div>
+</div>
+
+<!-- ══ ROOM ═══════════════════════════════════════════ -->
+<div id="room">
+
+  <!-- TOPBAR -->
+  <div class="tb">
+    <div class="tb-logo">Sprint Poker</div>
+    <div class="tb-sep"></div>
+    <div class="tb-ticket" id="tb-ticket">
+      <div class="tb-empty">No ticket loaded</div>
+    </div>
+    <div class="tb-right">
+      <div class="state-badge" id="state-badge">Waiting</div>
+    </div>
+  </div>
+
+  <!-- SPLIT BODY -->
+  <div class="room-split">
+
+    <!-- LEFT — POKER -->
+    <div class="poker-col" id="poker-col">
+
+      <!-- TICKET CARD -->
+      <div class="ticket-stage" id="ticket-stage">
+        <div class="ticket-empty">
+          <div class="ticket-empty-icon">🃏</div>
+          Waiting for the Scrum Master<br>to load a ticket
+        </div>
+      </div>
+
+      <!-- VOTE TRACKER -->
+      <div class="tracker" id="tracker">
+        <div class="tr-header">
+          <div class="tr-label" id="tr-label">Waiting…</div>
+          <div class="tr-count" id="tr-count"></div>
+        </div>
+        <div class="tr-bar-wrap"><div class="tr-bar" id="tr-bar"></div></div>
+        <div class="tr-avatars" id="tr-avs"></div>
+      </div>
+
+      <!-- HAND -->
+      <div class="hand-wrap">
+        <div class="hand-hint">Your hand — pick a card to vote</div>
+        <div class="hand-cards" id="hand-cards"></div>
+      </div>
+
+      <!-- MY STATUS -->
+      <div class="my-status">
+        <div class="my-pill">
+          <span class="my-pill-emoji" id="my-emoji">🃏</span>
+          <span class="my-pill-name"  id="my-dname">—</span>
+          <span style="color:var(--rule)">·</span>
+          <span class="my-pill-vote"  id="my-vote">Not voted</span>
+        </div>
+      </div>
+
+      <!-- SM CONTROLS — only visible to SM -->
+      <div class="sm-panel" id="sm-panel">
+
+        <div>
+          <div class="sm-panel-title">Quick Entry — Ticket for Voting</div>
+          <div class="sm-ticket-row">
+            <div class="sm-inputs">
+              <input class="si id-field" id="si-id" placeholder="Ticket #"/>
+              <input class="si desc-field" id="si-desc" placeholder="Enter ticket details / short description"/>
+              <button class="btn p" onclick="smLoad()">Put on Table</button>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="sm-queue-toggle" id="queue-toggle" onclick="toggleQueue()">
+            <span class="sm-queue-toggle-icon">▶</span>
+            <span>Ticket Queue — paste a list to vote through</span>
+          </div>
+          <div class="sm-queue-body" id="queue-body">
+            <textarea class="sq-textarea" id="sq-input"
+              placeholder="Paste one ticket per line:&#10;INC0012345 | Login page 500 error on submit&#10;TASK0098765 | Refactor auth middleware"></textarea>
+            <div class="sq-hint">Format: TICKET# | Description · One per line · Click any row to load</div>
+            <button class="btn" onclick="parseQueue()" style="align-self:flex-start">Load Queue</button>
+            <div class="sq-list" id="sq-list"></div>
+          </div>
+        </div>
+
+        <div>
+          <div class="sm-panel-title">Voting Controls</div>
+          <div class="sm-controls">
+            <button class="btn g" id="btn-start"  onclick="smStart()">▶ Start Vote</button>
+            <button class="btn"   id="btn-reveal" onclick="smReveal()">👁 Reveal Now</button>
+            <button class="btn r" id="btn-revote" onclick="smRevote()">↺ Re-vote</button>
+            <button class="btn"   id="btn-pause"  onclick="smPause()" style="display:none">⏸ Pause</button>
+            <button class="btn"   id="btn-skip"   onclick="smSkip()">⏭ Skip Ticket</button>
+          </div>
+        </div>
+
+        <div>
+          <div class="sm-panel-title" style="display:flex;align-items:center;justify-content:space-between">
+            <span>Timer</span>
+            <span class="timer-badge" id="timer">——</span>
+          </div>
+          <div class="sm-controls">
+            <button class="btn" id="btn-t60"  onclick="smTimer(60)">60s</button>
+            <button class="btn" id="btn-t90"  onclick="smTimer(90)">90s</button>
+            <button class="btn" id="btn-t120" onclick="smTimer(120)">2 min</button>
+            <button class="btn r" onclick="smStopTimer()">⏹ Stop</button>
+          </div>
+        </div>
+
+        <div>
+          <div class="sm-panel-title">📣 Broadcast to Table</div>
+          <div class="broadcast-row">
+            <input class="broadcast-input" id="bc-input" placeholder="Send a message to all players…" maxlength="80"/>
+            <button class="btn" onclick="smBroadcast()">Send</button>
+          </div>
+        </div>
+
+        <div>
+          <div class="sm-panel-title">👥 Players in Room</div>
+          <div class="player-roster" id="player-roster">
+            <div style="font-size:11px;color:var(--muted)">Waiting for players…</div>
+          </div>
+        </div>
+
+        <div>
+          <div class="sm-panel-title">Session</div>
+          <div class="sm-controls">
+            <button class="btn r" onclick="smClear()">Clear Session</button>
+          </div>
+        </div>
+
+      </div><!-- /sm-panel -->
+
+    </div><!-- /poker-col -->
+
+    <!-- RIGHT — FEED + LOG -->
+    <div class="info-col">
+
+      <!-- LIVE FEED — fills all space above log -->
+      <div class="feed-section">
+        <div class="feed-head">
+          <div class="feed-title">
+            <div class="live-dot"></div>
+            Live Feed
+          </div>
+          <div style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;opacity:.6" id="tk-count">0 scored</div>
+        </div>
+        <div class="feed-list" id="ticker-body">
+          <div class="feed-empty">Activity appears here<br>as players join and vote.</div>
+        </div>
+      </div>
+
+      <!-- SESSION LOG — fixed 240px at bottom -->
+      <div class="log-section">
+        <div class="log-head">
+          <div class="log-head-lbl">Session Log</div>
+          <div class="log-pts" id="log-pts"></div>
+        </div>
+        <div class="log-list" id="log-body">
+          <div class="log-empty">No tickets scored yet.</div>
+        </div>
+        <div class="log-footer">
+          <button class="btn full" onclick="exportLog()">⬇ Export CSV</button>
+        </div>
+      </div>
+
+    </div><!-- /info-col -->
+
+  </div><!-- /room-split -->
+</div><!-- /room -->
+
+<!-- REVEAL — stays open until SM acts -->
+<div id="reveal">
+  <div class="rv-hed" id="rv-hed">Votes Revealed!</div>
+  <div class="rv-cards" id="rv-cards"></div>
+  <div class="rv-stats" id="rv-stats"></div>
+  <div class="rv-actions" id="rv-actions"></div>
+</div>
+
+<!-- SCORE MODAL -->
+<div id="smodal">
+  <div class="sm-box">
+    <div class="smb-title">Set Final Score</div>
+    <div class="smb-sub">Confirm the story points for this ticket.</div>
+    <div class="fib-grid" id="fib-grid"></div>
+    <div class="sma">
+      <button class="btn r" onclick="closeModal()">Cancel</button>
+      <button class="btn p" onclick="confirmScore()">Confirm Score</button>
+    </div>
+  </div>
+</div>
+
+<div id="toasts"></div>
+<div class="setup-bar" id="setup-bar">⚠ Running in demo mode — deploy to Netlify with the functions folder to enable multiplayer.</div>
+
+<!-- ══ SCRIPT ══════════════════════════════════════════ -->
+<script>
+// ── CONSTANTS ──────────────────────────────────────────
+const FIBS   = [1,2,3,5,8,13,21,34,'?'];
+const EMOJIS = ['🦊','🐺','🦁','🐻','🐼','🐸','🦄','🐲',
+                '🤖','👾','🧙','🧜','🧛','👻','🦸','🕵️',
+                '🤯','😈','🔥','⚡','🌊','🌙','⭐','🎯'];
+
+// ── API ────────────────────────────────────────────────
+// Points to the Netlify Function. Works automatically on Netlify.
+// Falls back to demo mode if the function isn't available.
+const API = '/api/poker';
+
+async function apiGet(roomId, playerId) {
+  const params = new URLSearchParams({ room: roomId });
+  if (playerId) params.set('hb', playerId);
+  const r = await fetch(`${API}?${params}`);
+  if (!r.ok) throw new Error(`GET ${r.status}`);
+  return r.json();
+}
+
+async function apiPost(roomId, action, payload = {}) {
+  const r = await fetch(API, {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body:    JSON.stringify({ room: roomId, action, payload }),
+  });
+  if (!r.ok) throw new Error(`POST ${r.status}`);
+  return r.json();
+}
+
+// ── STATE ──────────────────────────────────────────────
+let myId=null, myName='', myDisplay='', myEmoji='🦊';
+let isSM=false, claimingSM=false, votingOpen=false;
+let currentVote=null, pendingScore=null;
+let timerIv=null, pollIv=null;
+let selEmoji=EMOJIS[0];
+let sessionLog=[], feedCleared=false;
+// Start as true — flip to false only if Netlify Function responds successfully
+let demoMode=true;
+let lastUpdatedAt=0;
+let lastBroadcastId = null;
+// reveal snapshot
+let _revealTicket=null, _revealVotes={}, _revealPlayers={};
+// demo state
+let dP={}, dV={}, dS='idle', dT=null;
+
+// ── BOOT ───────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', () => {
+  buildEmojiGrid();
+  buildHand();
+  buildFibGrid();
+
+  // Pre-check if SM is already taken so the join screen shows correct state.
+  // Silent fail on file:// or if function not deployed yet.
+  try {
+    fetch(`${API}?room=${encodeURIComponent(ROOM_ID)}`)
+      .then(r => r.ok ? r.json() : null)
+      .then(room => {
+        if (room && room.sm) {
+          const claim = document.getElementById('sm-claim');
+          const msg   = document.getElementById('sm-taken');
+          if (claim) claim.classList.add('disabled');
+          if (msg)   msg.style.display = 'block';
+        }
+      })
+      .catch(() => {}); // silent — stays unchecked if no network
+  } catch(e) {}
+});
+
+// ── EMOJI ──────────────────────────────────────────────
+function buildEmojiGrid() {
+  const g = document.getElementById('egrid');
+  EMOJIS.forEach(e => {
+    const d = document.createElement('div');
+    d.className = 'eopt'+(e===selEmoji?' on':'');
+    d.textContent = e;
+    d.onclick = () => { selEmoji=e; document.querySelectorAll('.eopt').forEach(x=>x.classList.remove('on')); d.classList.add('on'); };
+    g.appendChild(d);
+  });
+}
+
+// ── HAND ───────────────────────────────────────────────
+function buildHand() {
+  const row = document.getElementById('hand-cards');
+  FIBS.forEach(v => {
+    const c = document.createElement('div');
+    c.className = 'hc off'; c.dataset.val = v;
+    c.innerHTML = `<span class="hc-corner tl">${v}</span><span class="hc-val${v==='?'?' sm-val':''}">${v}</span><span class="hc-corner br">${v}</span>`;
+    c.onclick = () => castVote(v);
+    row.appendChild(c);
+  });
+}
+
+function buildFibGrid() {
+  const g = document.getElementById('fib-grid');
+  FIBS.forEach(v => {
+    const b = document.createElement('button');
+    b.className='fb'; b.textContent=v; b.dataset.val=v;
+    b.onclick=()=>{ document.querySelectorAll('.fb').forEach(x=>x.classList.remove('on')); b.classList.add('on'); pendingScore=v; };
+    g.appendChild(b);
+  });
+}
+
+// ── SM CLAIM ───────────────────────────────────────────
+function toggleSMClaim() {
+  const el = document.getElementById('sm-claim');
+  if (!el || el.classList.contains('disabled')) return;
+  claimingSM = !claimingSM;
+  el.classList.toggle('on', claimingSM);
+}
+
+// ── JOIN ───────────────────────────────────────────────
+function joinRoom() {
+  const code = document.getElementById('icode').value.trim();
+  const name = document.getElementById('iname').value.trim();
+  const disp = document.getElementById('idisp').value.trim();
+  if (!code) { toast('Enter the room code to join.', true); return; }
+  if (code !== ROOM_CODE) { toast('Incorrect room code — check with your Scrum Master.', true); return; }
+  if (!name) { toast('Enter your real name to continue.', true); return; }
+
+  myName    = name;
+  myDisplay = disp || name;
+  myEmoji   = selEmoji;
+  myId      = 'u' + Date.now().toString(36) + Math.random().toString(36).slice(2,6);
+
+  document.getElementById('my-emoji').textContent = myEmoji;
+  document.getElementById('my-dname').textContent = myDisplay;
+  document.getElementById('join').style.display   = 'none';
+  document.getElementById('room').classList.add('on');
+
+  // Always try live API first. Only fall back to demo if the API call fails.
+  registerAndPoll();
+}
+
+async function registerAndPoll() {
+  try {
+    const res = await apiPost(ROOM_ID, 'join', {
+      id: myId, name: myName, display: myDisplay,
+      emoji: myEmoji, claimSM: claimingSM,
+    });
+    // Live mode confirmed
+    demoMode = false;
+    document.getElementById('setup-bar').style.display = 'none';
+    if (res.room.sm === myId) becomeSM();
+    applyState(res.room);
+    tick('join', `<span class="hi">${myDisplay}</span> ${myEmoji} joined the table`);
+  } catch(e) {
+    // API not reachable — fall back to demo mode
+    demoMode = true;
+    document.getElementById('setup-bar').style.display = 'block';
+    initDemo();
+    return;
+  }
+
+  // ── SMART POLLING ──────────────────────────────────────
+  // Fast (3s) when vote active or state just changed.
+  // Slow (15s) only when genuinely idle for 5+ consecutive unchanged polls.
+  let consecutiveIdle = 0;
+  let currentState = 'idle';
+
+  async function smartPoll() {
+    try {
+      const room = await apiGet(ROOM_ID, myId);
+      if (room.updatedAt !== lastUpdatedAt) {
+        lastUpdatedAt = room.updatedAt;
+        consecutiveIdle = 0;
+        currentState = room.state;
+        applyState(room);
+      } else {
+        consecutiveIdle++;
+      }
+      // Fast poll during active voting or recent change; slow when truly idle
+      const isActive = currentState !== 'idle';
+      const nextDelay = (isActive || consecutiveIdle < 5) ? 3000 : 15000;
+      pollIv = setTimeout(smartPoll, nextDelay);
+    } catch(e) {
+      pollIv = setTimeout(smartPoll, 8000);
+    }
+  }
+
+  // Expose reset so any SM action can snap back to fast polling
+  window._resetPoll = function() {
+    consecutiveIdle = 0;
+    clearTimeout(pollIv);
+    pollIv = setTimeout(smartPoll, 1000);
+  };
+
+  pollIv = setTimeout(smartPoll, 2000);
+
+  // Clean up on tab close
+  window.addEventListener('beforeunload', () => {
+    apiPost(ROOM_ID, 'leave', { id: myId }).catch(()=>{});
+  });
+}
+
+function becomeSM() {
+  isSM = true;
+  document.getElementById('sm-panel').classList.add('on');
+  toast('👑 You are the Scrum Master');
+}
+
+// ── APPLY STATE ────────────────────────────────────────
+function applyState(data) {
+  const players = data.players || {};
+  const votes   = data.votes   || {};
+  const state   = data.state   || 'idle';
+  const ticket  = data.ticket  || null;
+  const sm      = data.sm      || null;
+  const tmr     = data.timer   || null;
+  const log     = data.log     || {};
+  const bc      = data.broadcast || null;
+
+  if (sm === myId && !isSM) becomeSM();
+  votingOpen = state === 'voting';
+
+  // Show broadcast from SM in feed (only once per unique broadcast)
+  if (bc && bc.id !== lastBroadcastId) {
+    lastBroadcastId = bc.id;
+    tick('bc', `<strong>📣 ${bc.display||'SM'}:</strong> ${bc.message}`);
+  }
+
+  // SM role availability on join screen
+  if (!sm && !isSM) {
+    const claim = document.getElementById('sm-claim');
+    const msg   = document.getElementById('sm-taken');
+    if (claim) claim.classList.remove('disabled');
+    if (msg)   msg.style.display = 'none';
+  } else if (sm && sm !== myId) {
+    const claim = document.getElementById('sm-claim');
+    const msg   = document.getElementById('sm-taken');
+    if (claim) claim.classList.add('disabled');
+    if (msg)   msg.style.display = 'block';
+  }
+
+  renderTopbar(ticket);
+  renderTicketCard(ticket, state);
+  renderTracker(players, votes, state);
+  renderHandState(state, votes);
+  renderRoster(players, votes, state);
+  handleTimer(tmr);
+  if (isSM) updateSMControls(state, ticket);
+  updateStateBadge(state);
+
+  sessionLog = Object.values(log).sort((a,b) => a.scoredAt - b.scoredAt);
+  renderLog();
+
+  if (state === 'revealed') openReveal(players, votes, ticket);
+}
+
+// ── TOPBAR ─────────────────────────────────────────────
+function renderTopbar(ticket) {
+  const el = document.getElementById('tb-ticket');
+  if (!ticket) { el.innerHTML='<div class="tb-empty">No ticket loaded</div>'; return; }
+  el.innerHTML = `${ticket.id?`<div class="tb-id">${ticket.id}</div>`:''}
+    <div class="tb-title">${ticket.title||'Untitled'}</div>`;
+}
+
+// ── TICKET CARD ────────────────────────────────────────
+function renderTicketCard(ticket, state) {
+  const stage = document.getElementById('ticket-stage');
+  if (!ticket) {
+    stage.innerHTML=`<div class="ticket-empty"><div class="ticket-empty-icon">🃏</div>Waiting for the Scrum Master<br>to load a ticket</div>`;
+    return;
+  }
+  const typeMap = { INC:'INCIDENT', CHG:'CHANGE', PRB:'PROBLEM', TASK:'TASK', REQ:'REQUEST', STY:'STORY' };
+  const prefix  = (ticket.id||'').match(/^([A-Z]+)/i);
+  const typeLabel = prefix ? (typeMap[prefix[1].toUpperCase()]||'TICKET') : 'STORY';
+
+  const stateConfigs = {
+    idle:     { color:'var(--muted)',  dot:'var(--muted)',  label:'Awaiting Vote' },
+    voting:   { color:'var(--green)',  dot:'var(--green)',  label:'🟢 Voting Open' },
+    revealed: { color:'var(--accent)', dot:'var(--accent)', label:'✓ Revealed' },
+  };
+  const sc = stateConfigs[state] || stateConfigs.idle;
+
+  stage.innerHTML = `
+    <div class="playing-card">
+      <div class="pc-inner">
+        <div class="pc-corner tl">SP<br>♠</div>
+        <div class="pc-body">
+          <div class="pc-type">${typeLabel}</div>
+          ${ticket.id?`<div class="pc-id">${ticket.id}</div>`:''}
+          <div class="pc-title">${ticket.title||'Untitled Ticket'}</div>
+          <div class="pc-divider"></div>
+          <div class="pc-state" style="color:${sc.color}">
+            <div class="pc-state-dot" style="background:${sc.dot}"></div>
+            ${sc.label}
+          </div>
+        </div>
+        <div class="pc-corner br">SP<br>♠</div>
+      </div>
+    </div>`;
+}
+
+// ── VOTE TRACKER ───────────────────────────────────────
+function renderTracker(players, votes, state) {
+  const pList   = Object.values(players);
+  const pCount  = pList.length;
+  const vCount  = pList.filter(p => votes[p.id] != null).length;
+  const waiting = pCount - vCount;
+  const pct     = pCount > 0 ? Math.round(vCount / pCount * 100) : 0;
+
+  document.getElementById('tr-bar').style.width = pct + '%';
+  document.getElementById('tr-count').textContent =
+    state === 'idle' ? `${pCount} in room` : `${vCount} / ${pCount} voted`;
+
+  const lbl = document.getElementById('tr-label');
+  if (state === 'idle')       lbl.textContent = 'No vote in progress';
+  else if (state === 'voting') lbl.textContent = vCount === pCount ? '✓ All votes in!' : `Waiting on ${waiting} more…`;
+  else                         lbl.textContent = 'Voting complete';
+
+  const avs = document.getElementById('tr-avs');
+  avs.innerHTML = '';
+  pList.forEach(p => {
+    const voted = votes[p.id] != null;
+    const av = document.createElement('div');
+    av.className = 'tr-av ' + (voted ? 'voted' : 'waiting');
+    av.textContent = voted ? p.emoji : '?';
+    av.title = voted ? `${p.display} has voted` : 'Waiting…';
+    avs.appendChild(av);
+  });
+  if (state === 'voting' && waiting > 0) {
+    const badge = document.createElement('span');
+    badge.className = 'tr-waiting-text';
+    badge.textContent = `${waiting} still deciding`;
+    avs.appendChild(badge);
+  }
+}
+
+// ── SM BUTTON STATE GATES ──────────────────────────────
+function updateSMControls(state, ticket) {
+  const hasTicket  = !!ticket;
+  const isIdle     = state === 'idle';
+  const isVoting   = state === 'voting';
+  const isRevealed = state === 'revealed';
+
+  function lock(id, locked, reason) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.classList.toggle('locked', locked);
+    el.title = locked ? reason : '';
+  }
+
+  // Put on Table — only when idle
+  const loadBtn = document.querySelector('#sm-panel .btn.p');
+  if (loadBtn) {
+    const loadLocked = isVoting || isRevealed;
+    loadBtn.classList.toggle('locked', loadLocked);
+    loadBtn.title = loadLocked ? 'Cannot load a new ticket during an active vote' : '';
+  }
+
+  lock('btn-start',  !hasTicket || !isIdle,
+    !hasTicket ? 'Load a ticket first' : 'Vote already in progress');
+
+  lock('btn-reveal', !isVoting,
+    isIdle ? 'Start a vote before revealing' : isRevealed ? 'Already revealed' : '');
+
+  lock('btn-revote', !isRevealed, 'Can only re-vote after revealing');
+
+  lock('btn-skip', !hasTicket || isRevealed,
+    !hasTicket ? 'No ticket to skip' : 'Accept or re-vote before skipping');
+
+  ['btn-t60','btn-t90','btn-t120'].forEach(id =>
+    lock(id, !isVoting, 'Start a vote before setting a timer')
+  );
+}
+
+// ── STATE BADGE ────────────────────────────────────────
+function updateStateBadge(state) {
+  const el = document.getElementById('state-badge');
+  if (!el) return;
+  el.className = 'state-badge ' + state;
+  el.textContent =
+    state === 'idle'     ? 'Waiting' :
+    state === 'voting'   ? '🟢 Voting' :
+    state === 'revealed' ? '✓ Revealed' : 'Waiting';
+}
+
+// ── HAND STATE ─────────────────────────────────────────
+function renderHandState(state, votes) {
+  const myVote    = votes?.[myId];
+  currentVote     = myVote ?? null;
+  const isVoting  = state === 'voting';
+
+  // SM can always change their vote during voting
+  // Non-SM: locked once voted (until next round)
+  const hasVoted  = myVote != null;
+  const locked    = !isVoting || (hasVoted && !isSM);
+
+  document.querySelectorAll('.hc').forEach(c => {
+    c.classList.toggle('off', locked);
+    c.classList.toggle('on',  c.dataset.val == myVote);
+  });
+
+  // Show hint to non-SM who already voted
+  const hint = document.querySelector('.hand-hint');
+  if (hint) {
+    if (!isVoting)          hint.textContent = 'Voting is not open';
+    else if (hasVoted && !isSM) hint.textContent = `✓ Voted — waiting for reveal`;
+    else if (hasVoted && isSM)  hint.textContent = 'Your vote — click to change';
+    else                    hint.textContent = 'Your hand — pick a card to vote';
+  }
+
+  document.getElementById('my-vote').textContent =
+    myVote != null     ? `Voted: ${myVote}` :
+    isVoting           ? 'Pick a card!' : 'Not voted';
+}
+
+// ── CAST VOTE ──────────────────────────────────────────
+window.castVote = function(val) {
+  if (!votingOpen) {
+    toast('Voting is not open yet — wait for the Scrum Master.', true);
+    return;
+  }
+  currentVote = val;
+  document.querySelectorAll('.hc').forEach(c => c.classList.toggle('on', c.dataset.val == val));
+  document.getElementById('my-vote').textContent = `Voted: ${val}`;
+  tick('vote', `<span class="hi">${myDisplay}</span> ${myEmoji} voted`);
+
+  if (demoMode) {
+    dV[myId] = String(val);
+    applyDemo();
+    toast(`Voted: ${val} ✓`);
+    return;
+  }
+  apiPost(ROOM_ID, 'cast_vote', { id: myId, value: val })
+    .catch(() => toast('Vote failed — try again.', true));
+  toast(`Voted: ${val} ✓`);
+};
+
+// ── REVEAL ─────────────────────────────────────────────
+function openReveal(players, votes, ticket) {
+  _revealTicket  = ticket;
+  _revealVotes   = votes  || {};
+  _revealPlayers = players || {};
+
+  const ov = document.getElementById('reveal');
+  ov.classList.add('on');
+
+  document.getElementById('rv-hed').textContent =
+    ticket?.id ? `${ticket.id} — Votes Revealed!` : 'Votes Revealed!';
+
+  const cardsEl = document.getElementById('rv-cards');
+  cardsEl.innerHTML = '';
+  const nums = [];
+
+  Object.values(players).forEach((p, i) => {
+    const v    = votes?.[p.id];
+    const card = document.createElement('div'); card.className = 'rv-card';
+    const face = document.createElement('div');
+    face.className = 'rv-face' + (v == null ? ' nv' : '');
+    face.style.animationDelay = `${i * 65}ms`;
+    face.innerHTML = `<div class="rv-emoji">${p.emoji}</div><div class="rv-val${v==null?' nv':''}">${v??'—'}</div>`;
+    if (!isNaN(Number(v)) && v != null) nums.push(Number(v));
+    const nm = document.createElement('div'); nm.className = 'rv-name'; nm.textContent = p.display;
+    card.append(face, nm); cardsEl.appendChild(card);
+  });
+
+  if (nums.length) {
+    const mode = findMode(nums);
+    cardsEl.querySelectorAll('.rv-face:not(.nv)').forEach(f => {
+      if (Number(f.querySelector('.rv-val')?.textContent) === mode) f.classList.add('hi');
+    });
+  }
+
+  const statsEl = document.getElementById('rv-stats');
+  statsEl.innerHTML = '';
+
+  if (nums.length) {
+    const rawAvg = nums.reduce((a,b) => a+b, 0) / nums.length;
+    const avg    = rawAvg.toFixed(1);
+    const mode   = findMode(nums);
+    const fibAvg = nearestFib(rawAvg);
+    const una    = nums.every(v => v === nums[0]);
+
+    // Build vote distribution for feed
+    const dist = {};
+    Object.values(players).forEach(p => {
+      const v = votes?.[p.id];
+      if (v != null) dist[v] = (dist[v]||0) + 1;
+    });
+    const una_text = una ? ' · <span style="color:var(--green)">Unanimous!</span>' : ' · <span style="color:var(--red)">Split</span>';
+    tick('reveal',
+      `Votes revealed · avg <strong>${avg}</strong>${una_text}`,
+      { dist }
+    );
+    statsEl.innerHTML = `
+      <div class="rv-stat"><div class="rv-stat-v sm">${avg}</div><div class="rv-stat-l">Average</div></div>
+      <div class="rv-stat"><div class="rv-stat-v ag" style="color:${una?'var(--green)':'var(--red)'}">${una?'✓ Unanimous':'⚡ Split'}</div><div class="rv-stat-l">Agreement</div></div>`;
+
+    if (isSM) {
+      document.getElementById('rv-actions').innerHTML = `
+        <div style="text-align:center;width:100%">
+          <div style="font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-bottom:14px">
+            SM — Choose how to score this ticket
+          </div>
+          <div class="score-methods" id="score-methods">
+            <div class="score-method" data-score="${mode}" onclick="pickScoreMethod(this)">
+              <div class="score-method-val">${mode}</div>
+              <div class="score-method-lbl">Consensus</div>
+              <div class="score-method-sub">Most common vote</div>
+            </div>
+            <div class="score-method" data-score="${fibAvg}" onclick="pickScoreMethod(this)">
+              <div class="score-method-val">${fibAvg}</div>
+              <div class="score-method-lbl">Avg → Fibonacci</div>
+              <div class="score-method-sub">Average (${avg}) rounded to nearest Fib</div>
+            </div>
+            <div class="score-method" data-score="pick" onclick="pickScoreMethod(this)">
+              <div class="score-method-val">—</div>
+              <div class="score-method-lbl">SM Picks</div>
+              <div class="score-method-sub">Override — choose any value</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:10px;justify-content:center;margin-top:16px;flex-wrap:wrap">
+            <button class="btn g" id="btn-accept-score" onclick="acceptChosenScore()" style="display:none">✓ Confirm Score</button>
+            <button class="btn r" onclick="smRevote()">↺ Re-vote</button>
+            <button class="btn"   onclick="document.getElementById('reveal').classList.remove('on')">Close</button>
+          </div>
+        </div>`;
+    } else {
+      document.getElementById('rv-actions').innerHTML =
+        `<button class="btn" onclick="document.getElementById('reveal').classList.remove('on')">Close</button>`;
+    }
+  } else {
+    statsEl.innerHTML = '<div style="color:var(--muted);font-size:14px">No numeric votes cast</div>';
+    document.getElementById('rv-actions').innerHTML = `
+      <button class="btn r" onclick="smRevote()">↺ Re-vote</button>
+      <button class="btn"   onclick="document.getElementById('reveal').classList.remove('on')">Close</button>`;
+  }
+}
+
+function nearestFib(n) {
+  const fibs = [1,2,3,5,8,13,21,34];
+  return fibs.reduce((a,b) => Math.abs(b-n) < Math.abs(a-n) ? b : a);
+}
+
+window.pickScoreMethod = function(el) {
+  document.querySelectorAll('.score-method').forEach(m => m.classList.remove('chosen'));
+  el.classList.add('chosen');
+  const val = el.dataset.score;
+  if (val === 'pick') {
+    pendingScore = null;
+    document.querySelectorAll('.fb').forEach(b => b.classList.remove('on'));
+    document.getElementById('smodal').classList.add('on');
+  } else {
+    pendingScore = String(val);
+    const btn = document.getElementById('btn-accept-score');
+    if (btn) btn.style.display = 'inline-flex';
+  }
+};
+
+window.acceptChosenScore = function() {
+  if (!pendingScore) { toast('Select a scoring method first.', true); return; }
+  doConfirmScore(pendingScore);
+};
+
+function findMode(arr) {
+  const f = {}; arr.forEach(v => f[v] = (f[v]||0) + 1);
+  return Number(Object.entries(f).sort((a,b) => b[1]-a[1])[0][0]);
+}
+
+// ── SCORE MODAL ────────────────────────────────────────
+window.closeModal = function() {
+  document.getElementById('smodal').classList.remove('on');
+};
+
+window.confirmScore = function() {
+  if (!pendingScore) { toast('Select a score first.', true); return; }
+  window.closeModal();
+  doConfirmScore(pendingScore);
+};
+
+function doConfirmScore(score) {
+  const ticket     = _revealTicket;
+  const voterCount = Object.values(_revealVotes).filter(v => v != null).length;
+
+  const entry = {
+    id:       ticket?.id    || '',
+    title:    ticket?.title || 'Untitled',
+    score,
+    scoredAt: Date.now(),
+    voters:   voterCount,
+  };
+
+  document.getElementById('reveal').classList.remove('on');
+  tick('score', `<strong>${score} pts</strong> · <span class="id">${entry.id||entry.title}</span> · ${voterCount} voter${voterCount!==1?'s':''}`);
+
+  if (demoMode) {
+    sessionLog.push(entry); renderLog();
+    toast(`✓ ${entry.title} → ${score} pts`);
+    dV={}; dS='idle'; dT=null; _revealTicket=null; applyDemo(); return;
+  }
+
+  apiPost(ROOM_ID, 'confirm_score', {
+    smId:        myId,
+    score,
+    ticketId:    entry.id,
+    ticketTitle: entry.title,
+    voters:      voterCount,
+  })
+  .then(res => { applyState(res.room); toast(`✓ ${entry.title} → ${score} pts`); })
+  .catch(() => toast('Score save failed — try again.', true));
+}
+
+// ── SM ACTIONS ─────────────────────────────────────────
+window.smLoad = function() {
+  const id   = document.getElementById('si-id').value.trim();
+  const desc = document.getElementById('si-desc').value.trim();
+  if (!id && !desc) { toast('Enter a ticket number or description.'); return; }
+  const currentState = dS;
+  if (!demoMode && (currentState === 'voting')) { toast('Cannot load a new ticket during an active vote.', true); return; }
+  const ticket = { id: id||null, title: desc||id };
+  tick('ticket', `New ticket: ${id ? `<span class="id">${id}</span> ` : ''}<span class="hi">${desc||id}</span>`);
+  if (demoMode) {
+    dT=ticket; dV={}; dS='idle'; applyDemo();
+    document.getElementById('si-id').value='';
+    document.getElementById('si-desc').value='';
+    return;
+  }
+  apiPost(ROOM_ID, 'load_ticket', { smId: myId, id: ticket.id, title: ticket.title })
+    .then(res => { applyState(res.room); if (window._resetPoll) window._resetPoll(); })
+    .catch(() => toast('Failed to load ticket.', true));
+  document.getElementById('si-id').value='';
+  document.getElementById('si-desc').value='';
+};
+
+window.smStart = function() {
+  // Guard: need a ticket
+  if (demoMode && !dT) { toast('Load a ticket before starting a vote.', true); return; }
+
+  tick('system', 'Voting started — pick your cards');
+  if (demoMode) { dS='voting'; dV={}; applyDemo(); toast('Vote open!'); return; }
+  apiPost(ROOM_ID, 'start_vote', { smId: myId })
+    .then(res => { applyState(res.room); if(window._resetPoll)window._resetPoll(); })
+    .catch(() => toast('Failed to start vote.', true));
+};
+
+window.smReveal = function() {
+  // Guard: must be in voting state
+  if (demoMode && dS !== 'voting') { toast('Start a vote before revealing.', true); return; }
+
+  if (demoMode) { dS='revealed'; applyDemo(); return; }
+  apiPost(ROOM_ID, 'reveal', { smId: myId })
+    .then(res => { applyState(res.room); if(window._resetPoll)window._resetPoll(); })
+    .catch(() => toast('Failed to reveal.', true));
+};
+
+window.smRevote = function() {
+  // Guard: must be in revealed state
+  if (demoMode && dS !== 'revealed') { toast('Nothing to re-vote — votes have not been revealed yet.', true); return; }
+
+  document.getElementById('reveal').classList.remove('on');
+  tick('system', 'Re-vote started');
+  if (demoMode) { dS='voting'; dV={}; currentVote=null; applyDemo(); toast('Re-vote!'); return; }
+  apiPost(ROOM_ID, 'revote', { smId: myId })
+    .then(res => { applyState(res.room); if(window._resetPoll)window._resetPoll(); })
+    .catch(() => toast('Failed to restart vote.', true));
+};
+
+window.smTimer = function(s) {
+  // Guard: must be voting
+  if (demoMode && dS !== 'voting') { toast('Start a vote before setting a timer.', true); return; }
+
+  tick('system', `Timer: ${s}s`);
+  if (demoMode) { startTimer(Date.now() + s*1000); return; }
+  apiPost(ROOM_ID, 'set_timer', { smId: myId, seconds: s })
+    .then(res => { applyState(res.room); if(window._resetPoll)window._resetPoll(); })
+    .catch(() => toast('Failed to set timer.', true));
+};
+
+window.smStopTimer = function() {
+  clearTimer();
+  if (demoMode) { toast('Timer stopped.'); return; }
+  apiPost(ROOM_ID, 'stop_timer', { smId: myId })
+    .then(res => { applyState(res.room); toast('Timer stopped.'); if(window._resetPoll)window._resetPoll(); })
+    .catch(() => toast('Failed to stop timer.', true));
+};
+
+window.smClear = function() {
+  if (!confirm('Clear all session data?')) return;
+  if (demoMode) {
+    sessionLog=[]; renderLog();
+    document.getElementById('ticker-body').innerHTML='<div class="feed-empty">Session cleared.</div>';
+    feedCleared=false; dV={}; dS='idle'; dT=null; applyDemo(); return;
+  }
+  apiPost(ROOM_ID, 'clear_session', { smId: myId })
+    .then(res => {
+      sessionLog=[]; renderLog();
+      document.getElementById('ticker-body').innerHTML='<div class="feed-empty">Session cleared.</div>';
+      feedCleared=false;
+      applyState(res.room);
+      toast('Session cleared.');
+    })
+    .catch(() => toast('Failed to clear session.', true));
+};
+
+// ── SM PLAYER ROSTER ───────────────────────────────────
+function renderRoster(players, votes, state) {
+  if (!isSM) return;
+  const el = document.getElementById('player-roster');
+  if (!el) return;
+  const pList = Object.values(players);
+  if (!pList.length) { el.innerHTML='<div style="font-size:11px;color:var(--muted)">No players yet…</div>'; return; }
+
+  el.innerHTML = pList.map(p => {
+    const isMe    = p.id === myId;
+    const hasVoted = votes?.[p.id] != null;
+    const dotColor = state === 'voting' ? (hasVoted ? 'var(--green)' : 'var(--rule)') : 'var(--rule)';
+    return `
+      <div class="roster-row">
+        <span class="roster-emoji">${p.emoji}</span>
+        <span class="roster-name">
+          ${p.display}
+          ${p.name !== p.display ? `<span class="roster-real"> · ${p.name}</span>` : ''}
+        </span>
+        ${isMe ? '<span class="roster-you">You</span>' : ''}
+        <div class="roster-dot" style="background:${dotColor}" title="${hasVoted?'Voted':'Waiting'}"></div>
+        ${!isMe ? `<button class="roster-kick" onclick="smKick('${p.id}','${p.display.replace(/'/g,"\\'")}')">✕</button>` : ''}
+      </div>`;
+  }).join('');
+}
+
+// ── KICK PLAYER ────────────────────────────────────────
+window.smKick = function(playerId, displayName) {
+  if (!confirm(`Remove ${displayName} from the session?`)) return;
+  tick('kick', `<span class="hi">${displayName}</span> was removed by SM`);
+  if (demoMode) {
+    delete dP[playerId]; delete dV[playerId]; applyDemo(); return;
+  }
+  apiPost(ROOM_ID, 'leave', { id: playerId })
+    .then(res => { applyState(res.room); toast(`${displayName} removed.`); })
+    .catch(() => toast('Could not remove player.', true));
+};
+
+// ── SKIP TICKET ────────────────────────────────────────
+window.smSkip = function() {
+  if (!confirm('Skip this ticket? It will not be scored.')) return;
+  const idEl    = document.getElementById('tb-ticket').querySelector('.tb-id');
+  const titleEl = document.getElementById('tb-ticket').querySelector('.tb-title');
+  const label   = idEl?.textContent || titleEl?.textContent || 'ticket';
+  tick('system', `Ticket skipped: <span class="hi">${label}</span>`);
+  if (demoMode) { dT=null; dV={}; dS='idle'; applyDemo(); toast('Ticket skipped.'); return; }
+  apiPost(ROOM_ID, 'skip_ticket', { smId: myId })
+    .then(res => { applyState(res.room); toast('Ticket skipped.'); })
+    .catch(() => toast('Failed to skip ticket.', true));
+};
+
+// ── BROADCAST ──────────────────────────────────────────
+window.smBroadcast = function() {
+  const inp = document.getElementById('bc-input');
+  const msg = inp?.value.trim();
+  if (!msg) { toast('Type a message first.'); return; }
+  inp.value = '';
+  if (demoMode) {
+    tick('bc', `<strong>📣 SM:</strong> ${msg}`);
+    toast('📣 Broadcast sent');
+    return;
+  }
+  apiPost(ROOM_ID, 'broadcast', { smId: myId, message: msg, display: myDisplay })
+    .then(res => { applyState(res.room); toast('📣 Broadcast sent'); if(window._resetPoll)window._resetPoll(); })
+    .catch(() => toast('Failed to send broadcast.', true));
+};
+window.toggleQueue = function() {
+  document.getElementById('queue-toggle').classList.toggle('open');
+  document.getElementById('queue-body').classList.toggle('on');
+};
+
+window.parseQueue = function() {
+  const raw  = document.getElementById('sq-input').value.trim();
+  const list = document.getElementById('sq-list');
+  if (!raw) { toast('Paste some tickets first.'); return; }
+  list.innerHTML = '';
+  raw.split('\n').forEach(line => {
+    line = line.trim(); if (!line) return;
+    const parts = line.split(/\s*[|\-]\s*/);
+    const id    = parts.length > 1 ? parts[0].trim() : '';
+    const title = parts.length > 1 ? parts.slice(1).join(' ').trim() : parts[0].trim();
+    const item  = document.createElement('div');
+    item.className = 'sq-item';
+    item.innerHTML = `
+      ${id ? `<span class="sq-item-id">${id}</span>` : ''}
+      <span class="sq-item-title">${title}</span>
+      <span class="sq-item-load">Load →</span>`;
+    item.onclick = () => {
+      document.getElementById('si-id').value   = id;
+      document.getElementById('si-desc').value = title;
+      item.classList.add('done');
+      window.smLoad();
+    };
+    list.appendChild(item);
+  });
+  toast(`${list.children.length} tickets ready.`);
+};
+
+// ── TIMER ──────────────────────────────────────────────
+function handleTimer(t) { t?.end ? startTimer(t.end) : clearTimer(); }
+
+function startTimer(endTs) {
+  clearTimer();
+  const el = document.getElementById('timer');
+  timerIv = setInterval(() => {
+    const rem = Math.max(0, Math.ceil((endTs - Date.now()) / 1000));
+    el.textContent = `${Math.floor(rem/60)}:${String(rem%60).padStart(2,'0')}`;
+    el.classList.toggle('red', rem <= 10 && rem > 0);
+    if (rem === 0) {
+      clearTimer(); el.textContent='——';
+      toast('⏰ Time is up!');
+      if (isSM) window.smReveal();
+    }
+  }, 250);
+}
+
+function clearTimer() {
+  clearInterval(timerIv); timerIv = null;
+  const el = document.getElementById('timer');
+  el.textContent = '——'; el.classList.remove('red');
+}
+
+// ── LOG ────────────────────────────────────────────────
+function renderLog() {
+  const el  = document.getElementById('log-body');
+  const cnt = document.getElementById('tk-count');
+  const pts = document.getElementById('log-pts');
+
+  cnt.textContent = `${sessionLog.length} scored`;
+  const nums = sessionLog.map(e => Number(e.score)).filter(n => !isNaN(n));
+  pts.textContent = nums.length ? `${nums.reduce((a,b)=>a+b,0)} pts` : '';
+
+  if (!sessionLog.length) {
+    el.innerHTML = '<div class="log-empty">No tickets scored yet.</div>';
+    return;
+  }
+
+  // Newest first for easy scanning
+  const sorted = [...sessionLog].reverse();
+  el.innerHTML = sorted.map(e => `
+    <div class="log-row">
+      <div class="log-row-left">
+        ${e.id ? `<div class="lr-id">${e.id}</div>` : ''}
+        <div class="lr-title" title="${e.title}">${e.title}</div>
+        <div class="lr-meta">${e.voters||'?'} voters · ${new Date(e.scoredAt).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}</div>
+      </div>
+      <div class="lr-score">${e.score}</div>
+    </div>`).join('');
+}
+
+// ── TICKER ─────────────────────────────────────────────
+// type: join | leave | vote | reveal | score | ticket | system | bc | kick
+function tick(type, html, extra) {
+  const feed = document.getElementById('ticker-body');
+  if (!feedCleared) {
+    feed.innerHTML = '';
+    feedCleared = true;
+  }
+  const now = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit', second:'2-digit'});
+  const item = document.createElement('div');
+  item.className = `feed-item ev-${type}`;
+
+  let extraHtml = '';
+  if (extra?.dist) {
+    // Vote distribution chips
+    const chips = Object.entries(extra.dist)
+      .sort((a,b) => b[1]-a[1])
+      .map(([ val, count ], i) =>
+        `<span class="vd-chip${i===0?' top':''}">${val}<span class="vd-count">×${count}</span></span>`
+      ).join('');
+    extraHtml = `<div class="vote-dist">${chips}</div>`;
+  }
+
+  item.innerHTML = `<div class="feed-time">${now}</div><div class="feed-msg">${html}${extraHtml}</div>`;
+  feed.insertBefore(item, feed.firstChild);
+}
+
+// ── EXPORT ─────────────────────────────────────────────
+window.exportLog = function() {
+  if (!sessionLog.length) { toast('No entries to export yet.'); return; }
+  const rows = ['Ticket ID,Title,Score,Voters,Time'];
+  sessionLog.forEach(e => rows.push(`"${e.id||''}","${e.title}","${e.score}",${e.voters||0},"${new Date(e.scoredAt).toLocaleTimeString()}"`));
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([rows.join('\n')], {type:'text/csv'}));
+  a.download = `sprint-poker-${new Date().toISOString().split('T')[0]}.csv`;
+  a.click();
+};
+
+// ── DEMO MODE ──────────────────────────────────────────
+function initDemo() {
+  isSM = true;
+  document.getElementById('sm-panel').classList.add('on');
+  dP = { [myId]: { id:myId, name:myName, display:myDisplay, emoji:myEmoji, joinedAt:Date.now() } };
+  dV={}; dS='idle'; dT=null;
+  applyDemo();
+  tick('join',   `<span class="hi">${myDisplay}</span> ${myEmoji} joined the table`);
+  tick('system', 'Demo mode — deploy to Netlify with the functions folder for multiplayer');
+  if (claimingSM) toast('👑 You are the Scrum Master');
+}
+
+function applyDemo() {
+  applyState({
+    players: dP, votes: dV, state: dS, ticket: dT,
+    sm: myId, timer: null,
+    log: Object.fromEntries(sessionLog.map((e,i) => [i,e])),
+    updatedAt: Date.now(),
+  });
+}
+
+// ── TOAST ──────────────────────────────────────────────
+window.toast = function(msg, err=false) {
+  const rack = document.getElementById('toasts');
+  const t    = document.createElement('div');
+  t.className = 'toast' + (err ? ' err' : '');
+  t.textContent = msg;
+  rack.appendChild(t);
+  setTimeout(() => { t.classList.add('out'); setTimeout(() => t.remove(), 250); }, 3200);
+};
+</script>
+
+
+</body>
+</html>

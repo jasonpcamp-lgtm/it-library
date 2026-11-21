@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PRJ Task Intake Gate</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f4f5f7;
+    --surface: #ffffff;
+    --surface2: #f8f9fa;
+    --border: #dde1e7;
+    --border-light: #c2c8d0;
+    --text: #1a1d23;
+    --text-muted: #4a5568;
+    --text-dim: #8a95a3;
+    --accent: #1a56db;
+    --accent-dim: #ebf0ff;
+    --green: #057a55;
+    --green-dim: #f0fdf4;
+    --green-border: #a7f3d0;
+    --amber: #92400e;
+    --amber-dim: #fffbeb;
+    --amber-border: #fcd34d;
+    --red: #9b1c1c;
+    --red-dim: #fef2f2;
+    --red-border: #fca5a5;
+    --mono: 'IBM Plex Mono', monospace;
+    --sans: 'IBM Plex Sans', sans-serif;
+    --radius: 8px;
+    --radius-lg: 12px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 2rem 1rem 4rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .shell { width: 100%; max-width: 680px; }
+
+  .header { margin-bottom: 2rem; border-bottom: 1px solid var(--border); padding-bottom: 1.25rem; }
+  .header h1 { font-size: 20px; font-weight: 600; color: var(--text); letter-spacing: -.01em; margin-bottom: .3rem; }
+  .header p { font-size: 13px; color: var(--text-muted); line-height: 1.5; }
+
+  /* Principle strip */
+  .principle-strip {
+    background: #ebf0ff;
+    border: 1px solid #c7d7fd;
+    border-radius: var(--radius);
+    padding: .75rem 1rem;
+    margin-bottom: 1.75rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .principle-strip .ps-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: #1a56db;
+    flex-shrink: 0;
+    padding-top: 1px;
+  }
+  .principle-strip .ps-text {
+    font-size: 12px;
+    color: #1e3a8a;
+    line-height: 1.5;
+    font-style: italic;
+  }
+  .principle-strip .ps-text strong {
+    color: #1e3a8a;
+    font-style: normal;
+    font-weight: 600;
+  }
+
+  .progress-row { display: flex; align-items: center; margin-bottom: 1.75rem; }
+  .step-wrap { display: flex; align-items: center; flex: 1; }
+  .step-wrap:last-child { flex: 0; }
+  .step-dot {
+    width: 28px; height: 28px; border-radius: 50%;
+    border: 1px solid var(--border-light); background: var(--surface);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--mono); font-size: 11px; font-weight: 600;
+    color: var(--text-dim); flex-shrink: 0; transition: all .25s;
+  }
+  .step-dot.active { border-color: var(--accent); background: var(--accent-dim); color: var(--accent); box-shadow: 0 0 0 3px rgba(79,142,247,.15); }
+  .step-dot.done   { border-color: var(--green); background: var(--green-dim); color: var(--green); }
+  .step-dot.r-good { border-color: var(--green); background: #057a55; color: #ffffff; }
+  .step-dot.r-warn { border-color: #d97706; background: #d97706; color: #ffffff; }
+  .step-dot.r-stop { border-color: #dc2626; background: #dc2626; color: #ffffff; }
+  .step-line { flex: 1; height: 1px; background: var(--border); transition: background .25s; margin: 0 4px; }
+  .step-line.done   { background: var(--green); }
+  .step-line.active { background: var(--accent); }
+
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1.75rem; margin-bottom: 1rem; animation: fadeIn .2s ease; }
+  @keyframes fadeIn { from { opacity:0; transform:translateY(4px); } to { opacity:1; transform:none; } }
+
+  .q-label { font-family: var(--mono); font-size: 10px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); margin-bottom: .4rem; }
+  .q-principle { font-size: 11px; color: var(--text-dim); font-style: italic; margin-bottom: .75rem; font-family: var(--mono); }
+  .q-principle span { color: var(--text-muted); }
+  .q-text { font-size: 18px; font-weight: 600; color: var(--text); line-height: 1.4; margin-bottom: 1.25rem; }
+
+  .crit-table { width: 100%; border-collapse: collapse; margin-bottom: 1.25rem; font-size: 13px; }
+  .crit-table th { font-family: var(--mono); font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; color: var(--text-dim); text-align: left; padding: 6px 10px; border-bottom: 1px solid var(--border); }
+  .crit-table td { padding: 9px 10px; border-bottom: 1px solid var(--border); color: var(--text-muted); line-height: 1.45; vertical-align: top; }
+  .crit-table td:first-child { color: var(--text); font-weight: 500; width: 30%; }
+  .crit-table tr:last-child td { border-bottom: none; }
+  .g { color: var(--green); }
+  .r { color: var(--red); }
+
+  .hint-box { background: var(--surface2); border: 1px solid var(--border); border-left: 3px solid var(--border-light); border-radius: 0 var(--radius) var(--radius) 0; padding: .85rem 1rem; margin-bottom: 1.5rem; font-size: 13px; color: var(--text-muted); line-height: 1.55; }
+
+  .btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .btn { background: var(--surface2); border: 1px solid var(--border-light); border-radius: var(--radius); padding: 14px 20px; font-family: var(--sans); font-size: 15px; font-weight: 500; color: var(--text); cursor: pointer; transition: all .15s; text-align: center; }
+  .btn.yes:hover { border-color: #057a55; color: #057a55; background: #f0fdf4; }
+  .btn.no:hover  { border-color: #dc2626; color: #9b1c1c; background: #fef2f2; }
+
+  .result-card { border-radius: var(--radius-lg); padding: 1.75rem; margin-bottom: 1rem; animation: fadeIn .2s ease; }
+  .result-card.good { background: var(--green-dim); border: 1px solid var(--green-border); }
+  .result-card.warn { background: var(--amber-dim); border: 1px solid var(--amber-border); }
+  .result-card.stop { background: var(--red-dim);   border: 1px solid var(--red-border); }
+  .result-label { font-family: var(--mono); font-size: 10px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; margin-bottom: .5rem; }
+  .good .result-label { color: #057a55; }
+  .warn .result-label { color: #92400e; }
+  .stop .result-label { color: #9b1c1c; }
+  .result-title { font-size: 18px; font-weight: 600; color: var(--text); margin-bottom: .75rem; line-height: 1.3; }
+  .result-body  { font-size: 14px; color: var(--text-muted); line-height: 1.6; margin-bottom: 1.25rem; }
+
+  /* WBS principle callout on results */
+  .wbs-callout {
+    border-radius: var(--radius);
+    padding: .75rem 1rem;
+    margin-bottom: 1.25rem;
+    font-size: 12px;
+    font-style: italic;
+    line-height: 1.55;
+  }
+  .good .wbs-callout { background: #ecfdf5; border: 1px solid var(--green-border); color: #057a55; }
+  .warn .wbs-callout { background: #fffbeb; border: 1px solid var(--amber-border); color: #92400e; }
+  .stop .wbs-callout { background: #fef2f2; border: 1px solid var(--red-border);   color: #9b1c1c; }
+  .wbs-callout strong { font-style: normal; font-weight: 600; display: block; margin-bottom: 2px; font-family: var(--mono); font-size: 10px; letter-spacing: .06em; text-transform: uppercase; }
+
+  .miss-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 1.25rem; background: #f8f9fa; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+  .miss-table th { font-family: var(--mono); font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; padding: 7px 10px; text-align: left; border-bottom: 1px solid var(--border); }
+  .warn .miss-table th { color: #92400e; }
+  .stop .miss-table th { color: #9b1c1c; }
+  .miss-table td { padding: 8px 10px; border-bottom: 1px solid var(--border); color: var(--text-muted); vertical-align: top; line-height: 1.45; }
+  .miss-table td:first-child { color: var(--text); font-weight: 500; width: 38%; }
+  .miss-table tr:last-child td { border-bottom: none; }
+
+  .doc-checklist { background: #f8f9fa; border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem; margin-bottom: 1.25rem; }
+  .doc-label { font-family: var(--mono); font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .08em; margin-bottom: .65rem; }
+  .warn .doc-label { color: #92400e; }
+  .stop .doc-label { color: #9b1c1c; }
+  .doc-checklist ol { padding-left: 1.1rem; }
+  .doc-checklist li { color: var(--text-muted); margin-bottom: .45rem; line-height: 1.5; font-size: 13px; }
+  .doc-checklist li strong { color: var(--text); font-weight: 500; }
+
+  .action-box { border-radius: var(--radius); padding: .85rem 1rem; font-size: 13px; line-height: 1.55; }
+  .good .action-box { background: #ecfdf5; border: 1px solid var(--green-border); color: #057a55; }
+  .warn .action-box { background: #fffbeb; border: 1px solid var(--amber-border); color: #92400e; }
+  .stop .action-box { background: #fef2f2; border: 1px solid var(--red-border);   color: #9b1c1c; }
+  .action-box strong { display: block; font-weight: 600; margin-bottom: 4px; font-family: var(--mono); font-size: 10px; letter-spacing: .08em; text-transform: uppercase; }
+
+  .breadcrumb { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: 12px; color: var(--text-dim); margin-bottom: 1.25rem; min-height: 18px; font-family: var(--mono); }
+  .breadcrumb .sep { color: var(--border-light); }
+
+  .reset-btn { background: none; border: 1px solid var(--border); border-radius: var(--radius); padding: 9px 16px; font-family: var(--sans); font-size: 13px; color: var(--text-muted); cursor: pointer; transition: all .15s; }
+  .reset-btn:hover { border-color: var(--border-light); color: var(--text); }
+
+  .footer { font-family: var(--mono); font-size: 11px; color: var(--text-dim); margin-top: 2rem; text-align: center; line-height: 1.8; }
+  .footer a { color: var(--text-dim); text-decoration: none; border-bottom: 1px solid var(--border); }
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <div class="header">
+    <h1>PRJ Task Intake Gate</h1>
+    <p>Run every PRJ task from the PMO through these three questions before accepting it. If it fails at any point — document it, then bring it to your team lead.</p>
+  </div>
+
+  <div class="principle-strip">
+    <span class="ps-label">p. 87</span>
+    <span class="ps-text"><strong>"If an item is not in the WBS, it does not get delivered."</strong> A PRJ task with no defined output, no owner, and no scope has no place in the WBS — and therefore no place in your team's work queue.</span>
+  </div>
+
+  <div class="progress-row" id="progress"></div>
+  <div class="breadcrumb" id="breadcrumb"></div>
+  <div id="main"></div>
+
+  <div class="footer">
+    PMI PMBOK Guide Ch. 5 — Create WBS &nbsp;·&nbsp; Key facts: pp. 85, 86, 87, 88 &nbsp;·&nbsp; IT Platform Team
+  </div>
+</div>
+
+<script>
+const STEPS = 3;
+
+const tree = {
+  d: 1,
+  qLabel: "Question 1 of 3 — Output",
+  qPrinciple: "p. 87 — &ldquo;It must be detailed down to a low level. The lowest level consists of work packages.&rdquo;",
+  q: "Does this PRJ task describe something that will be produced — a named, handoff-able output?",
+  hint: "Read the Short Description and Description fields in the task. A work package names what will exist when the work is done. If it only tells someone what to go do, the PMO has not defined the deliverable yet.",
+  table: {
+    headers: ["", "Ready", "Not ready"],
+    rows: [
+      ["Short Description", "Names an output — a noun", "Names an action only — a verb"],
+      ["Description field",  "Describes what finished looks like", "Blank, vague, or repeats the title"],
+      ["Example — ready",    "\"Approval workflow configured and live\"", ""],
+      ["Example — not ready","", "\"Work on the approval workflow\""],
+    ],
+    cols: ["", "g", "r"]
+  },
+  yes: {
+    d: 2,
+    qLabel: "Question 2 of 3 — Ownership",
+    qPrinciple: "p. 87 — &ldquo;It helps define responsibilities for the team.&rdquo;",
+    q: "Does the PRJ task assign responsibility to one person or one group — with no ambiguity?",
+    hint: "Check Assigned To and Assignment Group. Shared ownership with no named lead means no one is accountable. If your team is listed alongside another team as co-owners, that is a dependency problem — not a work package.",
+    table: {
+      headers: ["", "Ready", "Not ready"],
+      rows: [
+        ["Assigned To",    "One person named",                      "Blank, TBD, or multiple individuals"],
+        ["Assignment Group","One group responsible",                 "Multiple groups, or no group listed"],
+        ["Accountability", "Someone can present it at completion",   "No one can say who owns sign-off"],
+      ],
+      cols: ["", "g", "r"]
+    },
+    yes: {
+      d: 3,
+      qLabel: "Question 3 of 3 — Scope & Estimability",
+      qPrinciple: "p. 87 — &ldquo;It should provide sufficient detail to drive the subsequent phases of planning.&rdquo; / p. 85 — Work packages must be small enough to estimate for time and cost.",
+      q: "Is there enough detail in this PRJ task to estimate the work and state when it is done?",
+      hint: "If your team cannot size this task and write a clear finish line without a clarification meeting first — it is not ready. The PMO owes your team this detail before engagement, not after.",
+      table: {
+        headers: ["", "Ready", "Not ready"],
+        rows: [
+          ["Scope",              "What is in and out of scope is stated",        "\"Build X\" with no context"],
+          ["Definition of done", "Specific, verifiable finish line",             "Missing or just says \"complete\""],
+          ["Estimable",          "Can be sized without a clarification meeting",  "Too vague to discuss"],
+          ["Due date",           "Date present, or noted as flexible",            "No date, no urgency context"],
+          ["Dependencies",       "Other teams or systems listed if relevant",     "Implied but not stated"],
+        ],
+        cols: ["", "g", "r"]
+      },
+      yes: {
+        type: "good",
+        label: "Ready to accept",
+        title: "This PRJ task is well-formed.",
+        body: "It names a deliverable, assigns responsibility, and provides enough detail to plan the work. This is what every PRJ task should look like before it reaches your team.",
+        wbsCallout: { head: "p. 87 — WBS principle met", text: "It is an integration tool, allowing you to see where the individual pieces of work fit into the project as a whole. This task has that structure." },
+        missing: null,
+        docSteps: null,
+        action: { head: "Your action", body: "Accept the task. Confirm capacity with your team lead before committing to the due date." }
+      },
+      no: {
+        type: "warn",
+        label: "Not ready — scope is missing",
+        title: "Output and owner are present but the work is not scoped.",
+        body: "Your team cannot safely size or commit to this task. The PMO has not provided the detail required to drive planning — which page 87 identifies as a core element of a well-formed work package.",
+        wbsCallout: { head: "p. 87 — principle not met", text: "It should provide sufficient detail to drive the subsequent phases of planning. This task does not meet that bar. Do not accept it." },
+        missing: {
+          headers: ["What is missing", "What the PMO needs to provide"],
+          rows: [
+            ["Scope description",  "What is included and what is explicitly out of scope"],
+            ["Definition of done", "What does finished look like and who verifies it"],
+            ["Due date / urgency", "Is there a hard date? Is this blocking something?"],
+            ["Dependencies",       "Which other teams or systems must complete work first"],
+          ]
+        },
+        docSteps: [
+          "<strong>Copy the PRJ task number and short description.</strong>",
+          "<strong>Note which scope fields are missing or insufficient</strong> using the table above.",
+          "<strong>Do not change the task state</strong> or assign it to anyone yet.",
+          "<strong>Bring your notes to your team lead</strong> before responding to the PMO."
+        ],
+        action: { head: "Document then escalate — do not respond to PMO first", body: "Your team lead will decide whether to send it back or request a clarification session." }
+      }
+    },
+    no: {
+      type: "warn",
+      label: "Not ready — no clear owner",
+      title: "Responsibility is undefined or shared with no accountable lead.",
+      body: "Page 87 is explicit: a good WBS defines responsibilities. A PRJ task that does not name an owner has not met this standard. If your team pulls this in, no one will know who is accountable when it stalls.",
+      wbsCallout: { head: "p. 87 — principle not met", text: "It helps define responsibilities for the team. Assigned To is blank, ambiguous, or split across multiple teams. This task is not ready." },
+      missing: {
+        headers: ["What is missing", "What the PMO needs to provide"],
+        rows: [
+          ["Assigned To",    "One individual accountable end-to-end"],
+          ["Assignment Group","One group — not a shared or multi-team list"],
+          ["Sign-off owner", "Who accepts or presents this at completion"],
+        ]
+      },
+      docSteps: [
+        "<strong>Copy the PRJ task number and short description.</strong>",
+        "<strong>Note that Assigned To or Assignment Group is blank, shared, or ambiguous.</strong>",
+        "<strong>Do not change the task state</strong> or assign it to anyone on your team.",
+        "<strong>Bring your notes to your team lead</strong> before responding to the PMO."
+      ],
+      action: { head: "Document then escalate — do not respond to PMO first", body: "Your team lead will determine whether to request clarification from the PMO or escalate to project leadership." }
+    }
+  },
+  no: {
+    d: 2,
+    qLabel: "Question 2 of 3 — Task type",
+    qPrinciple: "p. 87 — &ldquo;If an item is not in the WBS, it does not get delivered.&rdquo;",
+    q: "Is this task phrased as an activity with no output stated anywhere — even in the description?",
+    hint: "Read the full Description field before answering. Sometimes the title is a verb but the description has real output detail — check everything. If there is still no stated output anywhere, the PMO has sent a shell task. They skipped the WBS planning step that must happen before your team is engaged.",
+    table: {
+      headers: ["Type", "What it looks like", "What to do"],
+      rows: [
+        ["Well-formed",    "Names a deliverable",                    "Go back — answer Yes to Q1"],
+        ["Poorly worded",  "Verb title, description has output",      "Clarify wording, re-run from Q1"],
+        ["Shell task",     "Verb with no output anywhere in record",  "Do not accept — return to PMO"],
+        ["Sub-task / fragment", "A step with no parent task defined", "Do not accept — parent missing"],
+      ],
+      cols: ["", "g", "r"]
+    },
+    yes: {
+      type: "stop",
+      label: "Do not accept — shell task",
+      title: "This PRJ task has no stated output. It does not belong in the WBS.",
+      body: "Page 87 states plainly: if an item is not in the WBS, it does not get delivered. The inverse is also true — if an item has no defined deliverable, it has no legitimate place in the WBS or in your team's queue. The PMO has engaged your team before completing their planning.",
+      wbsCallout: { head: "p. 87 — core principle violated", text: "The project team, and not just the project manager, creates the WBS. The PMO cannot skip WBS-level planning and hand the gap to your team to absorb. This is a planning failure, not a work request." },
+      missing: {
+        headers: ["What is absent", "What the PMO must define first"],
+        rows: [
+          ["Output / deliverable", "What will exist when this task is done?"],
+          ["Parent context",       "Where does this fit in the larger project WBS?"],
+          ["Owner",                "Who is accountable end-to-end?"],
+          ["Done criteria",        "How will anyone know it is finished?"],
+        ]
+      },
+      docSteps: [
+        "<strong>Copy the PRJ task number and short description exactly as written.</strong>",
+        "<strong>Note: \"No output or deliverable is defined anywhere in this task record.\"</strong>",
+        "<strong>Do not change the task state</strong> or assign it to anyone on your team.",
+        "<strong>Bring your notes to your team lead immediately.</strong> Do not contact the PMO first."
+      ],
+      action: { head: "Document then escalate — do not respond to PMO first", body: "Your team lead will decide how to engage the PMO and whether this needs to go higher." }
+    },
+    no: {
+      type: "stop",
+      label: "Do not accept — undefined",
+      title: "This PRJ task is not a recognizable deliverable or activity.",
+      body: "The record is incomplete at the most basic level. Page 87 describes the WBS as a communication tool — this task communicates nothing. The PMO has not done the planning work required before your team is engaged.",
+      wbsCallout: { head: "p. 87 — principle violated", text: "It is a communication tool. A task with no description, no owner, and no output communicates nothing. It is not a work package. It is not ready." },
+      missing: {
+        headers: ["What is missing", "What the PMO needs to provide"],
+        rows: [
+          ["Short Description", "A clear name for what the task produces"],
+          ["Description",       "Scope, context, and what finished looks like"],
+          ["Assigned To",       "One accountable owner"],
+          ["Done criteria",     "A verifiable finish line"],
+        ]
+      },
+      docSteps: [
+        "<strong>Copy the PRJ task number.</strong>",
+        "<strong>Note: \"Task record is incomplete — no output, description, or owner present.\"</strong>",
+        "<strong>Do not change the task state</strong> or assign it to anyone.",
+        "<strong>Bring the task number to your team lead immediately.</strong> Do not contact the PMO first."
+      ],
+      action: { head: "Document then escalate — do not respond to PMO first", body: "Your team lead will determine next steps. This may require escalation beyond the PMO." }
+    }
+  }
+};
+
+let node = tree, crumbs = [];
+
+function renderProgress() {
+  const el = document.getElementById('progress');
+  el.innerHTML = '';
+  const cur = node.d || STEPS + 1;
+  const done = !!node.type;
+  for (let i = 1; i <= STEPS; i++) {
+    const wrap = document.createElement('div');
+    wrap.className = 'step-wrap';
+    const dot = document.createElement('div');
+    dot.className = 'step-dot';
+    if (done) {
+      if (i < cur) { dot.classList.add('done'); dot.textContent = '✓'; }
+      else {
+        dot.classList.add(node.type === 'good' ? 'r-good' : node.type === 'warn' ? 'r-warn' : 'r-stop');
+        dot.textContent = node.type === 'good' ? '✓' : node.type === 'warn' ? '!' : '✕';
+      }
+    } else {
+      if (i < cur) { dot.classList.add('done'); dot.textContent = '✓'; }
+      else if (i === cur) { dot.classList.add('active'); dot.textContent = i; }
+      else { dot.textContent = i; }
+    }
+    wrap.appendChild(dot);
+    if (i < STEPS) {
+      const line = document.createElement('div');
+      line.className = 'step-line' + (i < cur ? ' done' : i === cur && !done ? ' active' : '');
+      wrap.appendChild(line);
+    }
+    el.appendChild(wrap);
+  }
+}
+
+function renderBreadcrumb() {
+  const el = document.getElementById('breadcrumb');
+  if (!crumbs.length) { el.innerHTML = ''; return; }
+  el.innerHTML = crumbs.map((b, i) =>
+    `<span>${b}</span>${i < crumbs.length - 1 ? '<span class="sep"> › </span>' : ''}`
+  ).join('');
+}
+
+function buildCritTable(t) {
+  if (!t) return '';
+  const hdr = t.headers.map(h => `<th>${h}</th>`).join('');
+  const rows = t.rows.map(r =>
+    '<tr>' + r.map((c, ci) => {
+      const cls = t.cols && t.cols[ci] ? ` class="${t.cols[ci]}"` : '';
+      return `<td${cls}>${c}</td>`;
+    }).join('') + '</tr>'
+  ).join('');
+  return `<table class="crit-table"><thead><tr>${hdr}</tr></thead><tbody>${rows}</tbody></table>`;
+}
+
+function buildMissTable(m) {
+  if (!m) return '';
+  const hdr = m.headers.map(h => `<th>${h}</th>`).join('');
+  const rows = m.rows.map(r => '<tr>' + r.map(c => `<td>${c}</td>`).join('') + '</tr>').join('');
+  return `<table class="miss-table"><thead><tr>${hdr}</tr></thead><tbody>${rows}</tbody></table>`;
+}
+
+function buildDocSteps(steps) {
+  if (!steps) return '';
+  return `<div class="doc-checklist">
+    <div class="doc-label">How to document before escalating</div>
+    <ol>${steps.map(s => `<li>${s}</li>`).join('')}</ol>
+  </div>`;
+}
+
+function buildWbsCallout(c) {
+  if (!c) return '';
+  return `<div class="wbs-callout"><strong>${c.head}</strong>${c.text}</div>`;
+}
+
+function render() {
+  renderProgress();
+  renderBreadcrumb();
+  const el = document.getElementById('main');
+
+  if (node.type) {
+    el.innerHTML = `
+      <div class="result-card ${node.type}">
+        <div class="result-label">${node.label}</div>
+        <div class="result-title">${node.title}</div>
+        <div class="result-body">${node.body}</div>
+        ${buildWbsCallout(node.wbsCallout)}
+        ${buildMissTable(node.missing)}
+        ${buildDocSteps(node.docSteps)}
+        <div class="action-box"><strong>${node.action.head}</strong>${node.action.body}</div>
+      </div>
+      <button class="reset-btn" onclick="reset()">← Start over</button>`;
+  } else {
+    el.innerHTML = `
+      <div class="card">
+        <div class="q-label">${node.qLabel}</div>
+        <div class="q-principle"><span>${node.qPrinciple}</span></div>
+        <div class="q-text">${node.q}</div>
+        ${buildCritTable(node.table)}
+        <div class="hint-box">${node.hint}</div>
+        <div class="btn-row">
+          <button class="btn yes" onclick="go('yes')">Yes</button>
+          <button class="btn no" onclick="go('no')">No</button>
+        </div>
+      </div>`;
+  }
+}
+
+function go(a) { crumbs.push(a === 'yes' ? 'Yes' : 'No'); node = node[a]; render(); }
+function reset() { node = tree; crumbs = []; render(); }
+render();
+</script>
+</body>
+</html>

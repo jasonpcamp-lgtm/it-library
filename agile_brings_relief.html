@@ -1,0 +1,1738 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>A Better Two Weeks — Agile for Healthcare IT</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700;1,300&family=DM+Serif+Display:ital@0;1&display=swap');
+
+  :root {
+    --black: #0a0a0a;
+    --dark: #111318;
+    --surface: #181c24;
+    --surface2: #1e2330;
+    --border: #2a3040;
+    --gold: #f0b429;
+    --teal: #2dd4bf;
+    --red: #f56565;
+    --white: #f4f1eb;
+    --muted: #8892a4;
+    --warm: #fde68a;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    height: 100%;
+    background: var(--black);
+    color: var(--white);
+    font-family: 'DM Sans', sans-serif;
+    overflow: hidden;
+  }
+
+  .deck { width: 100vw; height: 100vh; position: relative; }
+
+  .slide {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.6s ease;
+    padding: 60px;
+    overflow: hidden;
+  }
+
+  .slide.active { opacity: 1; pointer-events: all; }
+
+  /* PROGRESS */
+  .progress {
+    position: fixed;
+    top: 0; left: 0;
+    height: 3px;
+    background: var(--gold);
+    transition: width 0.4s ease;
+    z-index: 200;
+  }
+
+  .hint {
+    position: fixed;
+    top: 20px;
+    right: 24px;
+    color: var(--muted);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    opacity: 0.5;
+  }
+
+  /* NAV */
+  .nav {
+    position: fixed;
+    bottom: 32px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    z-index: 100;
+    background: rgba(10,10,10,0.85);
+    border: 1px solid var(--border);
+    padding: 10px 20px;
+    border-radius: 50px;
+    backdrop-filter: blur(10px);
+  }
+
+  .nav button {
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    padding: 6px 12px;
+    border-radius: 30px;
+    transition: all 0.2s;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .nav button:hover { color: var(--white); background: var(--surface); }
+
+  .nav-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+  }
+
+  .nav-section button { pointer-events: none; }
+
+  .nav-dots { display: flex; gap: 4px; height: 6px; align-items: center; }
+
+  .nav-dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: var(--border);
+    cursor: pointer;
+    pointer-events: all;
+    transition: all 0.2s;
+    flex-shrink: 0;
+  }
+
+  .nav-dot.nav-dot-section { background: rgba(240,180,41,0.3); }
+  .nav-dot.nav-dot-active { background: var(--gold); width: 7px; height: 7px; }
+
+  .nav button.active-nav {
+    color: var(--gold);
+    background: rgba(240,180,41,0.12);
+    border: 1px solid rgba(240,180,41,0.3);
+  }
+
+  .slide-counter {
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 300;
+    letter-spacing: 0.1em;
+    min-width: 100px;
+    text-align: center;
+  }
+
+  .nav-arrow {
+    background: none !important;
+    border: 1px solid var(--border) !important;
+    color: var(--white) !important;
+    width: 32px; height: 32px;
+    padding: 0 !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px !important;
+    border-radius: 50% !important;
+  }
+  .nav-arrow:hover { border-color: var(--gold) !important; color: var(--gold) !important; }
+
+  /* SHARED COMPONENTS */
+  .eyebrow {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 16px;
+  }
+
+  .slide-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(36px, 4.5vw, 64px);
+    line-height: 1;
+    color: var(--white);
+    margin-bottom: 8px;
+  }
+
+  .slide-title span { color: var(--gold); }
+
+  .slide-subtitle {
+    font-size: 15px;
+    color: var(--muted);
+    font-weight: 300;
+    line-height: 1.6;
+    max-width: 700px;
+  }
+
+  .pull-quote {
+    font-family: 'DM Serif Display', serif;
+    font-style: italic;
+    font-size: clamp(18px, 2.2vw, 26px);
+    color: var(--white);
+    line-height: 1.6;
+  }
+
+  .pull-quote span { color: var(--gold); font-style: normal; font-family: 'DM Sans', sans-serif; }
+
+  /* ANIMATIONS */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  .slide:not(.active) * { opacity: 0; }
+
+  .slide.active .anim-1 { animation: fadeUp 0.7s ease 0.1s forwards; opacity: 0; }
+  .slide.active .anim-2 { animation: fadeUp 0.7s ease 0.25s forwards; opacity: 0; }
+  .slide.active .anim-3 { animation: fadeUp 0.7s ease 0.4s forwards; opacity: 0; }
+  .slide.active .anim-4 { animation: fadeUp 0.7s ease 0.55s forwards; opacity: 0; }
+  .slide.active .anim-5 { animation: fadeUp 0.7s ease 0.7s forwards; opacity: 0; }
+
+  /* =============================================
+     SLIDE 1 — TITLE
+  ============================================= */
+  #s1 {
+    background: var(--black);
+    justify-content: center;
+    align-items: flex-start;
+    padding: 80px 100px;
+  }
+
+  .s1-bg {
+    position: absolute;
+    right: -40px; top: 50%;
+    transform: translateY(-50%);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 420px;
+    color: rgba(240,180,41,0.03);
+    line-height: 1;
+    pointer-events: none;
+    white-space: nowrap;
+  }
+
+  .s1-eyebrow {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 28px;
+  }
+
+  .s1-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(72px, 10vw, 140px);
+    line-height: 0.92;
+    margin-bottom: 36px;
+  }
+
+  .s1-title span { color: var(--gold); }
+
+  .s1-sub {
+    font-family: 'DM Serif Display', serif;
+    font-style: italic;
+    font-size: clamp(18px, 2vw, 24px);
+    color: var(--muted);
+    max-width: 520px;
+    line-height: 1.6;
+    margin-bottom: 40px;
+  }
+
+  .s1-rule { width: 60px; height: 2px; background: var(--gold); margin-bottom: 28px; }
+
+  .s1-meta { font-size: 13px; color: var(--muted); font-weight: 300; letter-spacing: 0.05em; }
+
+  /* =============================================
+     SLIDE 2 — THE HONEST QUESTION
+  ============================================= */
+  #s2 { background: var(--dark); text-align: center; }
+
+  .honest-q {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(48px, 7vw, 96px);
+    line-height: 1;
+    max-width: 900px;
+    margin-bottom: 28px;
+  }
+
+  .honest-q span { color: var(--gold); }
+
+  /* =============================================
+     SLIDE 3 — THE NOTEBOOK
+  ============================================= */
+  #s3 {
+    background: var(--surface);
+    align-items: flex-start;
+    padding: 80px 100px;
+  }
+
+  .notebook-wrap {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+    max-width: 1000px;
+    width: 100%;
+    margin-top: 36px;
+  }
+
+  .notebook-visual {
+    background: #f5f0e8;
+    border-radius: 4px;
+    padding: 32px 28px;
+    position: relative;
+    box-shadow: 4px 4px 24px rgba(0,0,0,0.4);
+  }
+
+  .notebook-lines {
+    position: absolute;
+    inset: 0;
+    padding: 32px 28px;
+    pointer-events: none;
+  }
+
+  .notebook-line {
+    border-bottom: 1px solid rgba(180,160,120,0.3);
+    height: 32px;
+  }
+
+  .notebook-title {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #8b7355;
+    margin-bottom: 20px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .notebook-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 14px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .notebook-check {
+    width: 14px;
+    height: 14px;
+    border: 1.5px solid #8b7355;
+    border-radius: 2px;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .notebook-text {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    color: #3d2e1e;
+    line-height: 1.5;
+    font-weight: 400;
+  }
+
+  .notebook-text.old { text-decoration: line-through; opacity: 0.4; }
+
+  .notebook-age {
+    font-size: 10px;
+    color: #a07850;
+    margin-left: 24px;
+    margin-top: -8px;
+    margin-bottom: 10px;
+    font-style: italic;
+  }
+
+  .notebook-right {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 24px;
+  }
+
+  .notebook-quote {
+    padding: 28px 32px;
+    background: var(--dark);
+    border-left: 3px solid var(--gold);
+  }
+
+  .notebook-quote p {
+    font-family: 'DM Serif Display', serif;
+    font-style: italic;
+    font-size: clamp(17px, 1.8vw, 22px);
+    color: var(--white);
+    line-height: 1.7;
+  }
+
+  .notebook-quote strong {
+    color: var(--gold);
+    font-style: normal;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .notebook-outcome {
+    padding: 20px 24px;
+    background: rgba(45,212,191,0.06);
+    border: 1px solid rgba(45,212,191,0.2);
+  }
+
+  .notebook-outcome-label {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--teal);
+    margin-bottom: 8px;
+  }
+
+  .notebook-outcome p {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.7;
+    font-weight: 300;
+  }
+
+  .notebook-outcome strong { color: var(--white); font-weight: 500; }
+
+  /* =============================================
+     SLIDE 4 — TWO WEEKS AT A TIME
+  ============================================= */
+  #s4 { background: var(--black); text-align: center; }
+
+  .two-weeks-visual {
+    max-width: 800px;
+    width: 100%;
+    margin-top: 36px;
+    position: relative;
+  }
+
+  .org-chaos {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 28px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .org-chaos-label {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 16px;
+    opacity: 0.6;
+  }
+
+  .chaos-items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    opacity: 0.35;
+    filter: blur(1px);
+  }
+
+  .chaos-item {
+    padding: 6px 14px;
+    background: var(--dark);
+    border: 1px solid var(--border);
+    font-size: 11px;
+    color: var(--muted);
+    border-radius: 2px;
+  }
+
+  .sprint-boundary {
+    margin: 0 auto;
+    width: 85%;
+    background: rgba(240,180,41,0.06);
+    border: 2px solid var(--gold);
+    padding: 32px 28px;
+    position: relative;
+    margin-top: -80px;
+    z-index: 10;
+  }
+
+  .sprint-boundary-label {
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--gold);
+    color: var(--black);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 14px;
+    letter-spacing: 0.15em;
+    padding: 2px 16px;
+    white-space: nowrap;
+  }
+
+  .sprint-items {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .sprint-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    background: var(--dark);
+    border-left: 3px solid var(--teal);
+  }
+
+  .sprint-item-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--teal);
+    flex-shrink: 0;
+  }
+
+  .sprint-item-text {
+    font-size: 13px;
+    color: var(--white);
+    font-weight: 400;
+  }
+
+  .two-weeks-caption {
+    margin-top: 20px;
+    font-family: 'DM Serif Display', serif;
+    font-style: italic;
+    font-size: clamp(16px, 1.8vw, 20px);
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  .two-weeks-caption span { color: var(--gold); font-style: normal; font-family: 'DM Sans', sans-serif; font-weight: 500; }
+
+  /* =============================================
+     SLIDE 5 — WHERE THE WORK WAS COMING FROM
+  ============================================= */
+  #s5 {
+    background: var(--surface);
+    align-items: flex-start;
+    padding: 40px 80px 90px;
+    overflow-y: auto;
+    justify-content: flex-start;
+  }
+
+  .work-source-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    max-width: 1000px;
+    width: 100%;
+    margin-top: 36px;
+    align-items: start;
+  }
+
+  .work-donut-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .donut-svg { width: 200px; height: 200px; }
+
+  .donut-legend {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  .legend-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .work-insights {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .insight-card {
+    padding: 20px 24px;
+    background: var(--dark);
+    border-left: 3px solid var(--gold);
+  }
+
+  .insight-number {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 48px;
+    color: var(--gold);
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .insight-label {
+    font-size: 13px;
+    color: var(--muted);
+    font-weight: 300;
+    line-height: 1.6;
+  }
+
+  .insight-label strong { color: var(--white); font-weight: 500; }
+
+  /* =============================================
+     SLIDE 6 — HIDDEN TAX / CONTEXT SWITCHING
+  ============================================= */
+  #s6 { background: var(--black); }
+
+  .data-table {
+    width: 100%;
+    max-width: 780px;
+    border-collapse: collapse;
+    margin-top: 32px;
+  }
+
+  .data-table th {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold);
+    padding: 14px 24px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .data-table td {
+    padding: 16px 24px;
+    font-size: 15px;
+    border-bottom: 1px solid rgba(42,48,64,0.5);
+    transition: background 0.2s;
+  }
+
+  .data-table tr:hover td { background: var(--surface); }
+
+  .data-table td:first-child {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    color: var(--white);
+    width: 70px;
+  }
+
+  .data-table td:nth-child(2) { color: var(--teal); font-weight: 500; }
+  .data-table td:last-child { color: var(--red); font-weight: 500; }
+
+  .source-note {
+    margin-top: 20px;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+    opacity: 0.5;
+  }
+
+  /* =============================================
+     SLIDE 7 — SHORT LOOPS, FAST TRUTH
+  ============================================= */
+  #s7 { background: var(--surface); text-align: center; }
+
+  .humphrey-wrap {
+    max-width: 860px;
+    width: 100%;
+    margin-top: 36px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3px;
+  }
+
+  .hump-card {
+    padding: 36px 32px;
+    text-align: left;
+  }
+
+  .hump-card.before { background: rgba(245,101,101,0.06); border: 1px solid rgba(245,101,101,0.15); }
+  .hump-card.after { background: rgba(45,212,191,0.06); border: 1px solid rgba(45,212,191,0.2); }
+
+  .hump-label {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: 0.08em;
+    margin-bottom: 12px;
+  }
+
+  .hump-card.before .hump-label { color: var(--red); }
+  .hump-card.after .hump-label { color: var(--teal); }
+
+  .hump-body {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.8;
+    font-weight: 300;
+  }
+
+  .hump-body strong { color: var(--white); font-weight: 500; }
+
+  .humphrey-law {
+    margin-top: 24px;
+    padding: 24px 32px;
+    background: var(--dark);
+    border-left: 3px solid var(--gold);
+    max-width: 860px;
+    width: 100%;
+    text-align: left;
+  }
+
+  .humphrey-law-label {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 10px;
+  }
+
+  .humphrey-law p {
+    font-family: 'DM Serif Display', serif;
+    font-style: italic;
+    font-size: clamp(16px, 1.8vw, 21px);
+    color: var(--white);
+    line-height: 1.6;
+  }
+
+  /* =============================================
+     SLIDE 8 — BRENT GETS A VACATION
+  ============================================= */
+  #s8 { background: var(--black); }
+
+  .brent-wrap {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 32px;
+    max-width: 960px;
+    width: 100%;
+    margin-top: 36px;
+    align-items: start;
+  }
+
+  .brent-col { display: flex; flex-direction: column; gap: 16px; }
+
+  .brent-col-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    letter-spacing: 0.05em;
+    margin-bottom: 4px;
+  }
+
+  .brent-col.before .brent-col-title { color: var(--red); }
+  .brent-col.after .brent-col-title { color: var(--teal); }
+
+  .brent-reality {
+    padding: 16px 20px;
+    background: var(--surface);
+    border-left: 3px solid var(--red);
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.7;
+    font-weight: 300;
+  }
+
+  .brent-relief {
+    padding: 16px 20px;
+    background: var(--surface);
+    border-left: 3px solid var(--teal);
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.7;
+    font-weight: 300;
+  }
+
+  .brent-reality strong, .brent-relief strong { color: var(--white); font-weight: 500; }
+
+  .brent-vs {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 48px;
+    color: var(--border);
+    align-self: center;
+    padding-top: 40px;
+  }
+
+  .swarm-note {
+    margin-top: 24px;
+    padding: 20px 28px;
+    background: rgba(240,180,41,0.06);
+    border: 1px solid rgba(240,180,41,0.2);
+    max-width: 960px;
+    width: 100%;
+  }
+
+  .swarm-note p {
+    font-family: 'DM Serif Display', serif;
+    font-style: italic;
+    font-size: clamp(15px, 1.6vw, 19px);
+    color: var(--white);
+    line-height: 1.6;
+  }
+
+  .swarm-note strong { color: var(--gold); font-style: normal; font-family: 'DM Sans', sans-serif; }
+
+  /* =============================================
+     SLIDE 9 — MASTERY PURPOSE AUTONOMY
+  ============================================= */
+  #s9 { background: var(--surface); text-align: center; }
+
+  .mpa-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 3px;
+    max-width: 960px;
+    width: 100%;
+    margin-top: 40px;
+  }
+
+  .mpa-card {
+    background: var(--dark);
+    padding: 44px 32px;
+    position: relative;
+    overflow: hidden;
+    text-align: left;
+  }
+
+  .mpa-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--gold);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.4s ease;
+  }
+
+  .mpa-card:hover::before { transform: scaleX(1); }
+
+  .mpa-number {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 72px;
+    color: rgba(240,180,41,0.1);
+    line-height: 1;
+    margin-bottom: 12px;
+  }
+
+  .mpa-heading {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 34px;
+    color: var(--gold);
+    letter-spacing: 0.02em;
+    margin-bottom: 12px;
+  }
+
+  .mpa-body {
+    font-size: 14px;
+    line-height: 1.8;
+    color: var(--muted);
+    font-weight: 300;
+  }
+
+  .mpa-body strong { color: var(--white); font-weight: 500; }
+
+  /* =============================================
+     SLIDE 10 — THE ASK
+  ============================================= */
+  #s10 {
+    background: var(--black);
+    text-align: center;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .ask-eyebrow {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 32px;
+  }
+
+  .ask-statement {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(52px, 7.5vw, 108px);
+    line-height: 0.95;
+    max-width: 900px;
+    margin-bottom: 40px;
+  }
+
+  .ask-statement span { color: var(--gold); }
+
+  .ask-sub {
+    font-family: 'DM Serif Display', serif;
+    font-style: italic;
+    font-size: clamp(16px, 2vw, 22px);
+    color: var(--muted);
+    max-width: 600px;
+    line-height: 1.7;
+    margin-bottom: 48px;
+  }
+
+  .ask-rule { width: 60px; height: 2px; background: var(--gold); margin: 0 auto 32px; }
+
+  .ask-cta {
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold);
+  }
+
+  .ask-bg {
+    position: absolute;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 380px;
+    color: rgba(240,180,41,0.025);
+    line-height: 1;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  /* SLIDE NUMBER */
+  .slide-number {
+    position: absolute;
+    bottom: 90px;
+    right: 28px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 13px;
+    color: var(--border);
+    letter-spacing: 0.15em;
+    z-index: 50;
+    pointer-events: none;
+  }
+
+  /* BURNOUT */
+  .burnout-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    max-width: 1000px;
+    width: 100%;
+    margin-top: 32px;
+  }
+
+  .burnout-grid .burnout-item:last-child { grid-column: 2; }
+
+  .burnout-item {
+    padding: 20px;
+    background: var(--dark);
+    border-top: 2px solid var(--red);
+  }
+
+  .burnout-title { font-size: 14px; font-weight: 500; color: var(--white); margin-bottom: 8px; }
+  .burnout-desc { font-size: 13px; color: var(--muted); line-height: 1.6; font-weight: 300; }
+
+  .burnout-callout {
+    margin-top: 24px;
+    padding: 20px 28px;
+    background: rgba(245,101,101,0.08);
+    border: 1px solid rgba(245,101,101,0.2);
+    max-width: 1000px;
+    width: 100%;
+  }
+
+  .burnout-callout p {
+    font-family: 'DM Serif Display', serif;
+    font-style: italic;
+    font-size: 20px;
+    color: var(--white);
+    line-height: 1.6;
+  }
+
+  .burnout-callout strong { color: var(--red); font-style: normal; font-family: 'DM Sans', sans-serif; }
+
+  /* PRINCIPLE LIST */
+  .principle-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    max-width: 800px;
+    width: 100%;
+    margin-top: 32px;
+    text-align: left;
+  }
+
+  .principle-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+    padding: 20px 24px;
+    background: var(--dark);
+    border-left: 3px solid transparent;
+    transition: border-color 0.3s;
+  }
+
+  .principle-item:hover { border-left-color: var(--gold); }
+  .principle-icon { font-size: 22px; flex-shrink: 0; margin-top: 2px; }
+  .principle-text strong { display: block; font-size: 15px; font-weight: 500; color: var(--white); margin-bottom: 6px; }
+  .principle-text span { font-size: 13px; color: var(--muted); font-weight: 300; line-height: 1.6; }
+
+  /* INDIVIDUAL VS TEAM */
+  .individual-visual {
+    display: flex;
+    gap: 40px;
+    margin-top: 36px;
+    align-items: flex-start;
+    max-width: 900px;
+    width: 100%;
+  }
+
+  .ind-col { flex: 1; text-align: center; }
+  .ind-icon { font-size: 88px; margin-bottom: 16px; line-height: 1; }
+  .ind-col-title { font-family: 'Bebas Neue', sans-serif; font-size: 28px; margin-bottom: 12px; letter-spacing: 0.05em; }
+  .ind-col.danger .ind-col-title { color: var(--red); }
+  .ind-col.safe .ind-col-title { color: var(--teal); }
+  .ind-col-body { font-size: 14px; line-height: 1.7; color: var(--muted); font-weight: 300; text-align: left; }
+  .ind-vs { font-family: 'Bebas Neue', sans-serif; font-size: 48px; color: var(--border); align-self: center; padding-top: 40px; }
+
+  /* VOICES */
+  .voices-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    max-width: 700px;
+    width: 100%;
+    margin-top: 32px;
+    text-align: left;
+  }
+
+  .voice-item {
+    display: flex;
+    gap: 24px;
+    align-items: flex-start;
+    padding: 20px 24px;
+    background: var(--surface);
+    border-left: 3px solid var(--red);
+  }
+
+  .voice-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    color: var(--red);
+    min-width: 180px;
+    max-width: 220px;
+    letter-spacing: 0.05em;
+    flex-shrink: 0;
+  }
+
+  .voice-desc { font-size: 14px; color: var(--muted); line-height: 1.6; font-weight: 300; padding-top: 4px; }
+
+  .voices-footer {
+    margin-top: 20px;
+    font-family: 'DM Serif Display', serif;
+    font-style: italic;
+    font-size: 18px;
+    color: var(--gold);
+    max-width: 700px;
+    text-align: center;
+    line-height: 1.5;
+  }
+  #s3new {
+    background: var(--surface);
+    align-items: flex-start;
+    padding: 60px 300px 100px 80px;
+    justify-content: center;
+    overflow: visible;
+  }
+
+  @media (max-width: 768px) {
+    .slide { padding: 20px 20px 90px; overflow-y: auto; justify-content: flex-start; }
+    #s1, #s3, #s5 { padding: 32px 20px 90px; }
+    .s1-title { font-size: 56px; }
+    .notebook-wrap, .work-source-grid, .humphrey-wrap, .brent-wrap { grid-template-columns: 1fr; }
+    .mpa-grid { grid-template-columns: 1fr; }
+    .brent-vs { display: none; }
+    .nav { padding: 8px 12px; gap: 6px; bottom: 16px; max-width: calc(100vw - 32px); flex-wrap: wrap; justify-content: center; }
+    .nav button { font-size: 10px; padding: 4px 8px; }
+    .hint { display: none; }
+    .s1-bg { display: none; }
+    .ask-bg { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="progress" id="progress"></div>
+<div class="hint">← → arrow keys to navigate</div>
+
+<div class="deck" id="deck">
+
+  <!-- SLIDE 1: TITLE -->
+  <div class="slide active" id="s1">
+    <div class="slide-number">01</div>
+    <div class="s1-bg">RELIEF</div>
+    <div class="s1-eyebrow anim-1">Healthcare IT · Working Out Loud</div>
+    <div class="s1-title anim-2">A Better<br>Two <span>Weeks.</span></div>
+    <div class="s1-rule anim-3"></div>
+    <div class="s1-sub anim-4">This isn't a methodology pitch. It's a conversation about what it feels like when work finally works — for you.</div>
+    <div class="s1-meta anim-5">Use arrow keys or the navigation below to advance</div>
+  </div>
+
+  <!-- SLIDE 2: THE HONEST QUESTION -->
+  <div class="slide" id="s2">
+    <div class="slide-number">02</div>
+    <div class="honest-q anim-1">Are you <span>busy</span> — or are you getting things <span>done?</span></div>
+    <div class="pull-quote anim-2" style="max-width:700px; text-align:center; color:var(--muted);">Most of us are working as hard as we ever have. The work just isn't moving. That's not a people problem. <span>That's a system problem.</span></div>
+  </div>
+
+  <!-- SLIDE 3: WHY GOOD PEOPLE LEAVE -->
+  <div class="slide" id="s3new">
+    <div class="slide-number">03</div>
+
+    <!-- Right flyout quote — fixed to slide, clears nav -->
+    <div class="anim-3" style="
+      position: absolute;
+      right: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 260px;
+      background: rgba(245,101,101,0.08);
+      border-left: 3px solid var(--red);
+      border-top: 1px solid rgba(245,101,101,0.2);
+      border-bottom: 1px solid rgba(245,101,101,0.2);
+      padding: 28px 24px;
+      z-index: 10;
+    ">
+      <div style="font-size:10px; font-weight:500; letter-spacing:0.2em; text-transform:uppercase; color:var(--red); margin-bottom:14px;">The Root Cause</div>
+      <p style="font-family:'DM Serif Display',serif; font-style:italic; font-size:16px; color:var(--white); line-height:1.7;">Organizations fix the person. <strong style="color:var(--red); font-style:normal; font-family:'DM Sans',sans-serif;">The system is the problem.</strong> Human error is never the root cause — it is always a symptom of a system that set the conditions for failure.</p>
+    </div>
+
+    <div class="anim-1" style="width:100%; max-width:760px; text-align:left;">
+      <div class="eyebrow">Accelerate · Nicole Forsgren, Jez Humble, Gene Kim</div>
+      <div class="slide-title">This Is Why <span>Good People Leave</span></div>
+    </div>
+    <div class="anim-2" style="
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      max-width: 760px;
+      width: 100%;
+      margin-top: 24px;
+    ">
+      <div class="burnout-item"><div class="burnout-title">Work Overload</div><div class="burnout-desc">Too much in flight, no way to finish anything. The more we start without finishing, the worse it gets.</div></div>
+      <div class="burnout-item"><div class="burnout-title">Lack of Control</div><div class="burnout-desc">Work arrives from every direction. Priorities shift without warning. The team reacts constantly.</div></div>
+      <div class="burnout-item"><div class="burnout-title">No Sense of Progress</div><div class="burnout-desc">You finish things — but the pile never gets smaller. Effort pours in and nothing feels like it moves forward.</div></div>
+      <div class="burnout-item"><div class="burnout-title">Permanent Firefighting</div><div class="burnout-desc">Every day a different crisis. The work never stops being urgent. Good people can only run that hard for so long.</div></div>
+      <div class="burnout-item"><div class="burnout-title">No Way to Say No</div><div class="burnout-desc">Every request is urgent. Every stakeholder matters. But when everything is the top priority, nothing is.</div></div>
+      <div class="burnout-item"><div class="burnout-title">The Weight Never Lifts</div><div class="burnout-desc">The processes, the meetings, the approvals — baked in long before anyone arrived. Removing them feels impossible.</div></div>
+      <div class="burnout-item" style="border-top-color:var(--gold); grid-column: 2;"><div class="burnout-title" style="color:var(--gold);">Leadership Gaps</div><div class="burnout-desc">People don't leave organizations. They leave leaders. When direction is unclear and credit flows up, good people find the exit.</div></div>
+    </div>
+  </div>
+
+  <!-- SLIDE 4: THE NOTEBOOK -->
+  <div class="slide" id="s3">
+    <div class="slide-number">04</div>
+    <div class="anim-1" style="width:100%; max-width:1000px;">
+      <div class="eyebrow">Lived Experience · Our Team</div>
+      <div class="slide-title">The List She'd Been <span>Carrying for Years</span></div>
+      <div class="slide-subtitle">A team member had a notebook. Full of things she knew needed to get done. Things that never made it anywhere official.</div>
+    </div>
+    <div class="notebook-wrap anim-2">
+      <div class="notebook-visual">
+        <div class="notebook-lines">
+          <div class="notebook-line"></div><div class="notebook-line"></div>
+          <div class="notebook-line"></div><div class="notebook-line"></div>
+          <div class="notebook-line"></div><div class="notebook-line"></div>
+          <div class="notebook-line"></div><div class="notebook-line"></div>
+          <div class="notebook-line"></div><div class="notebook-line"></div>
+        </div>
+        <div class="notebook-title">To Do — someday</div>
+        <div class="notebook-item">
+          <div class="notebook-check"></div>
+          <div class="notebook-text old">Fix the onboarding process for new staff</div>
+        </div>
+        <div class="notebook-age">sitting here 14 months</div>
+        <div class="notebook-item">
+          <div class="notebook-check"></div>
+          <div class="notebook-text old">Document the workaround for the lab interface</div>
+        </div>
+        <div class="notebook-age">sitting here 8 months</div>
+        <div class="notebook-item">
+          <div class="notebook-check"></div>
+          <div class="notebook-text">Consolidate the shared drive folders</div>
+        </div>
+        <div class="notebook-age">sitting here 2 years</div>
+        <div class="notebook-item">
+          <div class="notebook-check"></div>
+          <div class="notebook-text">Update the ticket routing rules</div>
+        </div>
+        <div class="notebook-age">sitting here 6 months</div>
+        <div class="notebook-item">
+          <div class="notebook-check"></div>
+          <div class="notebook-text">Talk to someone about the printer queue issue</div>
+        </div>
+        <div class="notebook-age">sitting here 11 months</div>
+      </div>
+      <div class="notebook-right">
+        <div class="notebook-quote">
+          <p>"It was overwhelming to put it all on the board. But it also took the weight off me personally. <strong>The ideas weren't mine to carry alone anymore. They belonged to the team.</strong>"</p>
+        </div>
+        <div class="notebook-outcome">
+          <div class="notebook-outcome-label">What Changed</div>
+          <p>The list went from a private burden to a <strong>shared team backlog</strong>. Visible. Prioritized. Worked on together. Some items shipped within two weeks. Some were let go entirely — which turned out to be its own relief.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 5: TWO WEEKS AT A TIME -->
+  <div class="slide" id="s4">
+    <div class="slide-number">05</div>
+    <div class="anim-1" style="text-align:center; width:100%; max-width:800px;">
+      <div class="eyebrow">The Sprint Boundary</div>
+      <div class="slide-title">You Only Have to Think About <span>Two Weeks</span></div>
+      <div class="slide-subtitle">The rest of the organization — the politics, the backlog, the chaos — it all waits outside. For two weeks, this is all that exists.</div>
+    </div>
+    <div class="two-weeks-visual anim-2">
+      <div class="org-chaos">
+        <div class="org-chaos-label">The rest of the organization</div>
+        <div class="chaos-items">
+          <div class="chaos-item">Q3 roadmap</div>
+          <div class="chaos-item">Director request from Monday</div>
+          <div class="chaos-item">Unplanned CMDB work</div>
+          <div class="chaos-item">Enhancement backlog (147 items)</div>
+          <div class="chaos-item">Audit prep</div>
+          <div class="chaos-item">PMO project intake</div>
+          <div class="chaos-item">Year-end planning</div>
+          <div class="chaos-item">Legacy system migration</div>
+          <div class="chaos-item">That email from last Thursday</div>
+        </div>
+      </div>
+      <div class="sprint-boundary">
+        <div class="sprint-boundary-label">This Sprint — Next 2 Weeks</div>
+        <div class="sprint-items">
+          <div class="sprint-item"><div class="sprint-item-dot"></div><div class="sprint-item-text">Fix the onboarding ticket routing</div></div>
+          <div class="sprint-item"><div class="sprint-item-dot"></div><div class="sprint-item-text">Lab interface documentation</div></div>
+          <div class="sprint-item"><div class="sprint-item-dot"></div><div class="sprint-item-text">UAT on the shared drive cleanup</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="two-weeks-caption anim-3">Focus is not a personal discipline. <span>It's a system design.</span></div>
+  </div>
+
+  <!-- SLIDE 6: WHERE THE WORK WAS COMING FROM -->
+  <div class="slide" id="s5">
+    <div class="slide-number">06</div>
+    <div class="anim-1" style="width:100%; max-width:1000px;">
+      <div class="eyebrow">Lived Experience · Our Team · What the Data Showed</div>
+      <div class="slide-title">We Couldn't Plan Because We <span>Couldn't See</span></div>
+      <div class="slide-subtitle">We didn't know where our work was coming from. Until we made it visible — and the numbers surprised everyone.</div>
+    </div>
+
+    <div class="anim-2" style="max-width:1000px; width:100%; margin-top:28px;">
+
+      <!-- Header row: Reactive / Proactive -->
+      <div style="display:grid; grid-template-columns:2fr 1fr; gap:3px; margin-bottom:3px;">
+        <div style="background:#0284c7; padding:10px 20px; text-align:center; font-size:12px; font-weight:500; letter-spacing:0.15em; text-transform:uppercase; color:white;">Reactive</div>
+        <div style="background:#0891b2; padding:10px 20px; text-align:center; font-size:12px; font-weight:500; letter-spacing:0.15em; text-transform:uppercase; color:white;">Proactive</div>
+      </div>
+
+      <!-- Category labels row -->
+      <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:3px; margin-bottom:3px;">
+        <div style="background:var(--black); padding:10px 16px; text-align:center; font-size:12px; font-weight:600; color:var(--white); letter-spacing:0.05em;">Keeping the Lights On</div>
+        <div style="background:var(--black); padding:10px 16px; text-align:center; font-size:12px; font-weight:600; color:var(--white); letter-spacing:0.05em;">Project Work We Couldn't Fully See</div>
+        <div style="background:var(--black); padding:10px 16px; text-align:center; font-size:12px; font-weight:600; color:var(--white); letter-spacing:0.05em;">Planned Work We Actually Controlled</div>
+      </div>
+
+      <!-- Data blocks row -->
+      <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:3px; margin-bottom:20px;">
+        <!-- 52% - Unknown Knowns -->
+        <div style="background:#c2410c; padding:28px 20px; text-align:center; position:relative;">
+          <div style="font-family:'Bebas Neue',sans-serif; font-size:56px; color:white; line-height:1;">52%</div>
+          <div style="font-size:13px; font-weight:600; color:rgba(255,255,255,0.9); margin-top:4px;">Unknown Knowns</div>
+          <div style="font-size:11px; color:rgba(255,255,255,0.6); margin-top:6px; line-height:1.5;">The team knew this work existed. Leadership couldn't see it.</div>
+        </div>
+        <!-- 20% - Known Unknowns -->
+        <div style="background:#7e22ce; padding:28px 20px; text-align:center;">
+          <div style="font-family:'Bebas Neue',sans-serif; font-size:56px; color:white; line-height:1;">20%<span style="font-size:32px;">?</span></div>
+          <div style="font-size:13px; font-weight:600; color:rgba(255,255,255,0.9); margin-top:4px;">Known Unknowns</div>
+          <div style="font-size:11px; color:rgba(255,255,255,0.6); margin-top:6px; line-height:1.5;">Project tasks handed down without enough detail to size or plan.</div>
+        </div>
+        <!-- 28% - Known -->
+        <div style="background:#15803d; padding:28px 20px; text-align:center;">
+          <div style="font-family:'Bebas Neue',sans-serif; font-size:56px; color:white; line-height:1;">28%</div>
+          <div style="font-size:13px; font-weight:600; color:rgba(255,255,255,0.9); margin-top:4px;">Known</div>
+          <div style="font-size:11px; color:rgba(255,255,255,0.6); margin-top:6px; line-height:1.5;">The only work the team could confidently commit to.</div>
+        </div>
+      </div>
+
+      <!-- Callout -->
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+        <div style="padding:16px 20px; background:rgba(194,65,12,0.1); border-left:3px solid #c2410c;">
+          <div style="font-size:11px; font-weight:500; letter-spacing:0.2em; text-transform:uppercase; color:#f97316; margin-bottom:6px;">The 20% Question Mark</div>
+          <div style="font-size:13px; color:var(--muted); line-height:1.7; font-weight:300;">That question mark isn't a measurement gap — it's what happens when work is scoped using waterfall methods and handed downstream with incomplete details. <strong style="color:var(--white);">The team couldn't size it because nobody actually knew what was in it.</strong></div>
+        </div>
+        <div style="padding:16px 20px; background:rgba(21,128,61,0.08); border-left:3px solid #15803d;">
+          <div style="font-size:11px; font-weight:500; letter-spacing:0.2em; text-transform:uppercase; color:#4ade80; margin-bottom:6px;">What Changed</div>
+          <div style="font-size:13px; color:var(--muted); line-height:1.7; font-weight:300;">Once the data was visible, the team could protect capacity. We couldn't eliminate reactive work — but we could <strong style="color:var(--white);">stop pretending it didn't exist.</strong></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 7: PROCRASTINATION SPIKE -->
+  <div class="slide" id="s5b">
+    <div class="slide-number">07</div>
+    <div class="anim-1" style="text-align:center; width:100%; max-width:960px;">
+      <div class="eyebrow">Human Behavior · Procrastination Spikes</div>
+      <div class="slide-title">Agile Doesn't Stop the Spike. <span>It Shrinks It.</span></div>
+      <div class="slide-subtitle">Humans naturally defer. The question is how much damage occurs when they do.</div>
+    </div>
+    <div class="anim-2" style="width:100%; max-width:960px; margin-top:28px; display:grid; grid-template-columns:1fr 1fr; gap:24px;">
+      <div style="background:var(--surface); border:1px solid var(--border); padding:28px 28px 20px;">
+        <div style="font-size:10px; font-weight:500; letter-spacing:0.25em; text-transform:uppercase; color:var(--red); margin-bottom:16px;">Waterfall / Long Timebox</div>
+        <svg viewBox="0 0 340 120" width="100%" style="display:block;">
+          <line x1="20" y1="105" x2="330" y2="105" stroke="#2a3040" stroke-width="1"/>
+          <text x="175" y="118" text-anchor="middle" fill="#8892a4" font-size="9" font-family="DM Sans">Time</text>
+          <polyline points="20,95 130,92 145,88 160,70 175,30 190,8 195,105" fill="rgba(245,101,101,0.18)" stroke="none"/>
+          <polyline points="20,95 130,92 145,88 160,70 175,30 190,8" fill="none" stroke="#f56565" stroke-width="2.5" stroke-linejoin="round"/>
+          <line x1="195" y1="20" x2="195" y2="105" stroke="#f56565" stroke-width="1" stroke-dasharray="3,3"/>
+          <text x="197" y="30" fill="#f56565" font-size="8" font-family="DM Sans">Deadline</text>
+          <polyline points="200,95 290,93 300,87 313,70 322,30 330,8" fill="none" stroke="#f56565" stroke-width="2.5" stroke-linejoin="round"/>
+          <polyline points="200,95 290,93 300,87 313,70 322,30 330,8 330,105 200,105" fill="rgba(245,101,101,0.12)" stroke="none"/>
+          <text x="155" y="25" text-anchor="middle" fill="#f56565" font-size="9" font-family="DM Sans" font-weight="500">One big spike</text>
+          <text x="155" y="35" text-anchor="middle" fill="#8892a4" font-size="8" font-family="DM Sans">High risk · Late feedback</text>
+        </svg>
+        <div style="font-size:12px; color:var(--muted); line-height:1.5; margin-top:8px;">Work drifts flat. Then panic. One catastrophic crunch at the end — too late to recover or incorporate feedback.</div>
+      </div>
+      <div style="background:var(--surface); border:1px solid rgba(240,180,41,0.3); padding:28px 28px 20px;">
+        <div style="font-size:10px; font-weight:500; letter-spacing:0.25em; text-transform:uppercase; color:var(--gold); margin-bottom:16px;">Agile / 2-Week Sprints</div>
+        <svg viewBox="0 0 340 120" width="100%" style="display:block;">
+          <line x1="20" y1="105" x2="330" y2="105" stroke="#2a3040" stroke-width="1"/>
+          <text x="175" y="118" text-anchor="middle" fill="#8892a4" font-size="9" font-family="DM Sans">Time</text>
+          <line x1="90" y1="15" x2="90" y2="105" stroke="#2a3040" stroke-width="1" stroke-dasharray="3,3"/>
+          <line x1="160" y1="15" x2="160" y2="105" stroke="#2a3040" stroke-width="1" stroke-dasharray="3,3"/>
+          <line x1="230" y1="15" x2="230" y2="105" stroke="#2a3040" stroke-width="1" stroke-dasharray="3,3"/>
+          <line x1="300" y1="15" x2="300" y2="105" stroke="#2a3040" stroke-width="1" stroke-dasharray="3,3"/>
+          <text x="55" y="14" text-anchor="middle" fill="#8892a4" font-size="7.5" font-family="DM Sans">Sprint 1</text>
+          <text x="125" y="14" text-anchor="middle" fill="#8892a4" font-size="7.5" font-family="DM Sans">Sprint 2</text>
+          <text x="195" y="14" text-anchor="middle" fill="#8892a4" font-size="7.5" font-family="DM Sans">Sprint 3</text>
+          <text x="265" y="14" text-anchor="middle" fill="#8892a4" font-size="7.5" font-family="DM Sans">Sprint 4</text>
+          <polyline points="20,98 55,96 70,88 78,72 85,48 90,28" fill="none" stroke="#f0b429" stroke-width="2.2" stroke-linejoin="round"/>
+          <polyline points="20,98 55,96 70,88 78,72 85,48 90,28 90,105 20,105" fill="rgba(240,180,41,0.12)" stroke="none"/>
+          <polyline points="92,98 125,96 138,88 147,72 154,50 160,30" fill="none" stroke="#f0b429" stroke-width="2.2" stroke-linejoin="round"/>
+          <polyline points="92,98 125,96 138,88 147,72 154,50 160,30 160,105 92,105" fill="rgba(240,180,41,0.10)" stroke="none"/>
+          <polyline points="162,98 195,96 208,88 217,72 224,50 230,30" fill="none" stroke="#f0b429" stroke-width="2.2" stroke-linejoin="round"/>
+          <polyline points="162,98 195,96 208,88 217,72 224,50 230,30 230,105 162,105" fill="rgba(240,180,41,0.10)" stroke="none"/>
+          <polyline points="232,98 265,96 278,88 287,72 294,50 300,30" fill="none" stroke="#f0b429" stroke-width="2.2" stroke-linejoin="round"/>
+          <polyline points="232,98 265,96 278,88 287,72 294,50 300,30 300,105 232,105" fill="rgba(240,180,41,0.10)" stroke="none"/>
+          <circle cx="90" cy="28" r="4" fill="#2dd4bf"/>
+          <circle cx="160" cy="30" r="4" fill="#2dd4bf"/>
+          <circle cx="230" cy="30" r="4" fill="#2dd4bf"/>
+          <circle cx="300" cy="30" r="4" fill="#2dd4bf"/>
+          <text x="175" y="58" text-anchor="middle" fill="#f0b429" font-size="9" font-family="DM Sans" font-weight="500">4 small controlled spikes</text>
+          <text x="175" y="68" text-anchor="middle" fill="#8892a4" font-size="8" font-family="DM Sans">● = demo + feedback</text>
+        </svg>
+        <div style="font-size:12px; color:var(--muted); line-height:1.5; margin-top:8px;">Same human behavior. Compressed into two weeks. Damage is contained. Learning happens at every spike — not just the last one.</div>
+      </div>
+    </div>
+    <div class="anim-3" style="margin-top:20px; max-width:960px; width:100%; padding:16px 24px; background:rgba(240,180,41,0.06); border-left:3px solid var(--gold);">
+      <div style="font-size:10px; font-weight:500; letter-spacing:0.2em; text-transform:uppercase; color:var(--gold); margin-bottom:6px;">The Point</div>
+      <div style="font-size:13px; color:var(--muted); line-height:1.6;">Agile doesn't make us stop procrastinating. <strong style="color:var(--white);">It makes sure that when we do, the damage is small and the learning is immediate.</strong></div>
+    </div>
+  </div>
+
+  <!-- SLIDE 8: THE HIDDEN TAX -->
+  <div class="slide" id="s6">
+    <div class="slide-number">08</div>
+    <div class="anim-1" style="text-align:center; width:100%; max-width:780px;">
+      <div class="eyebrow">Jeff Sutherland · The Scrum Fieldbook</div>
+      <div class="slide-title">Every Project You Add <span>Costs More Than You Think</span></div>
+      <div class="slide-subtitle">Every time we switch tasks, we pay a cognitive toll. These aren't calendar percentages — they're how much of your mental capacity actually reaches each project after the switching cost is paid.</div>
+    </div>
+    <table class="data-table anim-2">
+      <thead>
+        <tr>
+          <th>Projects</th>
+          <th>Effective Focus per Project</th>
+          <th>Lost to Switching</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>1</td><td>100% focused</td><td>0% lost</td></tr>
+        <tr><td>2</td><td>40% per project</td><td>20% gone</td></tr>
+        <tr><td>3</td><td>20% per project</td><td>40% gone</td></tr>
+        <tr><td>4</td><td>10% per project</td><td>60% gone</td></tr>
+        <tr><td>5</td><td>5% per project</td><td>75% gone</td></tr>
+      </tbody>
+    </table>
+    <div class="source-note anim-3">Source: The Scrum Fieldbook, Jeff Sutherland — co-creator of Scrum</div>
+  </div>
+
+  <!-- SLIDE 9: SHORT LOOPS FAST TRUTH -->
+  <div class="slide" id="s7">
+    <div class="slide-number">09</div>
+    <div class="anim-1" style="text-align:center; width:100%; max-width:860px;">
+      <div class="eyebrow">Humphrey's Law</div>
+      <div class="slide-title">You Only Know What You Want <span>When You See What You Don't</span></div>
+      <div class="slide-subtitle">Requirements written in a conference room are hypotheses. Showing real work turns hypotheses into real feedback — fast.</div>
+    </div>
+    <div class="humphrey-wrap anim-2">
+      <div class="hump-card before">
+        <div class="hump-label">The Long Way</div>
+        <div class="hump-body">A stakeholder describes what they need. The team builds for months. <strong>At the end, it's wrong.</strong> Not because anyone was careless — because nobody actually knew what "right" looked like until they saw something real. The cost of being wrong at month six is catastrophic.</div>
+      </div>
+      <div class="hump-card after">
+        <div class="hump-label">The Short Loop</div>
+        <div class="hump-body">Build something small. Show it in two weeks. <strong>The stakeholder sees what they don't want — which tells you exactly what they do.</strong> Wrong at week two costs almost nothing. The feedback makes the next two weeks better. And the ones after that.</div>
+      </div>
+    </div>
+    <div class="humphrey-law anim-3">
+      <div class="humphrey-law-label">Humphrey's Law</div>
+      <p>People don't know what they want until they see what they don't. <strong style="color:var(--gold); font-style:normal; font-family:'DM Sans',sans-serif;">Short loops are the fastest path to right.</strong></p>
+    </div>
+  </div>
+
+  <!-- SLIDE 10: WHAT AGILE ACTUALLY IS -->
+  <div class="slide" id="s7b">
+    <div class="slide-number">10</div>
+    <div class="anim-1" style="text-align:center; width:100%; max-width:800px;">
+      <div class="eyebrow">The 4 Pillars</div>
+      <div class="slide-title">What Agile <span>Actually Is</span></div>
+      <div class="slide-subtitle">Not a tool. Not a ceremony. A shift in what we value.</div>
+    </div>
+    <div class="principle-list anim-2">
+      <div class="principle-item">
+        <div class="principle-icon">👥</div>
+        <div class="principle-text">
+          <strong>Individuals and interactions over processes and tools</strong>
+          <span>Better processes and tools don't fix a broken system. The people closest to the work — talking to each other, solving problems together — do. Agile puts them first.</span>
+        </div>
+      </div>
+      <div class="principle-item">
+        <div class="principle-icon">🚢</div>
+        <div class="principle-text">
+          <strong>Working deliverables over comprehensive documentation</strong>
+          <span>People only know what they want when they see what they don't. The only way to find that out is to put something real in front of them. A working deliverable creates that conversation. A document never will.</span>
+        </div>
+      </div>
+      <div class="principle-item">
+        <div class="principle-icon">🤝</div>
+        <div class="principle-text">
+          <strong>Customer collaboration over contract negotiation</strong>
+          <span>Someone hands us a requirement and disappears. Six months later it's wrong. Agile replaces that handoff with a continuous conversation — so we build what's actually needed, not what was assumed.</span>
+        </div>
+      </div>
+      <div class="principle-item">
+        <div class="principle-icon">🔄</div>
+        <div class="principle-text">
+          <strong>Responding to change over following a plan</strong>
+          <span>The plan you make on day one will be wrong. That's not a failure — it's reality. What matters is building a team that can adapt, not one that's locked into defending a document.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 11: BRENT — THE PROBLEM -->
+  <div class="slide" id="s8old">
+    <div class="slide-number">11</div>
+    <div class="anim-1" style="text-align:center; width:100%; max-width:900px;">
+      <div class="eyebrow">Business Continuity · The Phoenix Project</div>
+      <div class="slide-title">There Is No Continuity <span>in a Brent</span></div>
+      <div class="slide-subtitle">Every team has one. Life happens. The question is whether the work stops when it does.</div>
+    </div>
+    <div class="individual-visual anim-2">
+      <div class="ind-col danger">
+        <div style="display:flex; justify-content:center; margin-bottom:8px;">
+          <svg viewBox="0 0 120 150" width="130" style="display:block;">
+            <rect x="35" y="72" width="50" height="45" rx="6" fill="#374151"/>
+            <polygon points="55,72 60,82 65,72" fill="#1f2937"/>
+            <rect x="38" y="78" width="14" height="16" rx="1" fill="#1e2330" stroke="#4b5563" stroke-width="0.8"/>
+            <line x1="42" y1="80" x2="42" y2="92" stroke="#f0b429" stroke-width="1"/>
+            <line x1="45" y1="80" x2="45" y2="92" stroke="#2dd4bf" stroke-width="1"/>
+            <line x1="48" y1="80" x2="48" y2="92" stroke="#f56565" stroke-width="1"/>
+            <path d="M35,82 Q22,90 18,100" fill="none" stroke="#374151" stroke-width="10" stroke-linecap="round"/>
+            <path d="M85,82 Q98,90 102,100" fill="none" stroke="#374151" stroke-width="10" stroke-linecap="round"/>
+            <circle cx="17" cy="102" r="6" fill="#fbbf24"/>
+            <circle cx="103" cy="102" r="6" fill="#fbbf24"/>
+            <rect x="44" y="115" width="14" height="24" rx="4" fill="#1f2937"/>
+            <rect x="62" y="115" width="14" height="24" rx="4" fill="#1f2937"/>
+            <rect x="40" y="134" width="20" height="8" rx="3" fill="#111318"/>
+            <rect x="60" y="134" width="20" height="8" rx="3" fill="#111318"/>
+            <rect x="52" y="60" width="16" height="14" rx="3" fill="#fbbf24"/>
+            <ellipse cx="60" cy="44" rx="26" ry="24" fill="#fbbf24"/>
+            <path d="M34,38 Q36,18 60,16 Q84,18 86,38" fill="#292524"/>
+            <path d="M38,28 Q44,22 52,20" fill="none" stroke="#292524" stroke-width="2"/>
+            <path d="M82,28 Q76,22 68,20" fill="none" stroke="#292524" stroke-width="2"/>
+            <rect x="38" y="40" width="18" height="12" rx="4" fill="none" stroke="#9ca3af" stroke-width="1.5"/>
+            <rect x="64" y="40" width="18" height="12" rx="4" fill="none" stroke="#9ca3af" stroke-width="1.5"/>
+            <line x1="56" y1="46" x2="64" y2="46" stroke="#9ca3af" stroke-width="1.5"/>
+            <line x1="34" y1="46" x2="38" y2="46" stroke="#9ca3af" stroke-width="1.2"/>
+            <line x1="82" y1="46" x2="86" y2="46" stroke="#9ca3af" stroke-width="1.2"/>
+            <circle cx="47" cy="46" r="4" fill="white"/>
+            <circle cx="73" cy="46" r="4" fill="white"/>
+            <circle cx="47.5" cy="46.5" r="1.8" fill="#1f2937"/>
+            <circle cx="73.5" cy="46.5" r="1.8" fill="#1f2937"/>
+            <path d="M50,57 Q60,64 70,57" fill="none" stroke="#92400e" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div style="font-family:'Bebas Neue',sans-serif; font-size:22px; color:var(--red); letter-spacing:0.05em; margin-bottom:4px;">Brent</div>
+        <div style="font-size:10px; color:var(--muted); letter-spacing:0.2em; text-transform:uppercase; margin-bottom:12px;">The Phoenix Project</div>
+        <div class="ind-col-body">Gets sick. Goes on vacation. Changes roles. Leaves the org. Takes institutional knowledge with him. The work stops. The team scrambles. The business pretends this isn't a risk.</div>
+        <div style="margin-top:16px; padding:20px 18px; background:rgba(245,101,101,0.06); border-left:3px solid var(--red); position:relative;">
+          <div style="font-family:'Bebas Neue',sans-serif; font-size:56px; color:rgba(245,101,101,0.15); line-height:0.8; position:absolute; top:8px; left:10px;">"</div>
+          <div style="font-size:12px; color:var(--muted); font-style:italic; padding-left:22px; margin-bottom:10px; line-height:1.6;">Brent is a character from <em>The Phoenix Project</em> — the most talented person on the IT team, and the one everything depends on. Sound familiar?</div>
+          <div style="font-family:'DM Serif Display',serif; font-style:italic; font-size:17px; color:var(--white); line-height:1.75; padding-left:22px;">Every time that we let Brent fix something that none of us can replicate, Brent gets a little smarter, and <strong style="color:var(--red); font-style:normal; font-family:'DM Sans',sans-serif;">the entire system gets dumber.</strong> We've got to put an end to that.</div>
+          <div style="font-size:9px; color:var(--muted); margin-top:10px; padding-left:22px; letter-spacing:0.1em; text-transform:uppercase;">Gene Kim · The Phoenix Project</div>
+        </div>
+      </div>
+      <div class="ind-vs">VS</div>
+      <div class="ind-col safe">
+        <div class="ind-icon">
+          <svg width="88" height="88" viewBox="0 0 88 88" fill="none">
+            <ellipse cx="44" cy="44" rx="36" ry="22" fill="#2dd4bf" opacity="0.15" stroke="#2dd4bf" stroke-width="2"/>
+            <line x1="8" y1="44" x2="80" y2="44" stroke="#2dd4bf" stroke-width="1.5"/>
+            <ellipse cx="44" cy="44" rx="12" ry="22" fill="none" stroke="#2dd4bf" stroke-width="1.5" opacity="0.5"/>
+            <line x1="41" y1="37" x2="47" y2="37" stroke="#2dd4bf" stroke-width="2" stroke-linecap="round"/>
+            <line x1="41" y1="41" x2="47" y2="41" stroke="#2dd4bf" stroke-width="2" stroke-linecap="round"/>
+            <line x1="41" y1="45" x2="47" y2="45" stroke="#2dd4bf" stroke-width="2" stroke-linecap="round"/>
+            <line x1="41" y1="49" x2="47" y2="49" stroke="#2dd4bf" stroke-width="2" stroke-linecap="round"/>
+            <line x1="41" y1="53" x2="47" y2="53" stroke="#2dd4bf" stroke-width="2" stroke-linecap="round"/>
+            <line x1="44" y1="36" x2="44" y2="54" stroke="#2dd4bf" stroke-width="1" opacity="0.6"/>
+          </svg>
+        </div>
+        <div class="ind-col-title">The Team</div>
+        <div class="ind-col-body">Owns the work collectively. Builds members who each have a specialty but can cover for each other when needed. Has stable, predictable velocity. Absorbs disruption. No single point of failure. Swarming isn't a metaphor — it's a survival mechanism.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 12: BRENT GETS A VACATION -->
+  <div class="slide" id="s8">
+    <div class="slide-number">12</div>
+    <div class="anim-1" style="text-align:center; width:100%; max-width:960px;">
+      <div class="eyebrow">Business Continuity · The Phoenix Project</div>
+      <div class="slide-title">When Was the Last Time You <span>Truly Disconnected?</span></div>
+      <div class="slide-subtitle">Agile didn't just make the team more resilient. It gave individuals their lives back.</div>
+    </div>
+    <div class="brent-wrap anim-2">
+      <div class="brent-col before">
+        <div class="brent-col-title">Before</div>
+        <div class="brent-reality"><strong>You're the only one who knows.</strong> Your phone doesn't stop on vacation. You come back to a disaster. Getting sick feels like a professional risk. The work is yours and yours alone.</div>
+        <div class="brent-reality"><strong>The team depends on one person</strong> for critical knowledge. When that person is unavailable — for any reason — the work stops and the scrambling starts.</div>
+      </div>
+      <div class="brent-vs">→</div>
+      <div class="brent-col after">
+        <div class="brent-col-title">After</div>
+        <div class="brent-relief"><strong>The team knows.</strong> The work is visible on a shared board. Someone can pick it up. You can actually leave — and not think about this place until you come back.</div>
+        <div class="brent-relief"><strong>Swarming became real.</strong> When something urgent hit, the whole team moved toward it together. It took practice. It wasn't always comfortable. But no one carried it alone.</div>
+      </div>
+    </div>
+    <div class="swarm-note anim-3">
+      <p>Swarming — <strong>when the whole team moves together toward what matters most</strong> — isn't just an efficiency mechanism. It's how good people stop burning out alone.</p>
+    </div>
+  </div>
+
+  <!-- SLIDE 13: MASTERY PURPOSE AUTONOMY -->
+  <div class="slide" id="s9">
+    <div class="slide-number">13</div>
+    <div class="anim-1" style="text-align:center; width:100%; max-width:960px;">
+      <div class="eyebrow">Daniel Pink · Drive</div>
+      <div class="slide-title">What You're <span>Actually After</span></div>
+      <div class="slide-subtitle">Agile doesn't impose these things. It creates the conditions for what you already want.</div>
+    </div>
+    <div class="mpa-grid anim-2">
+      <div class="mpa-card">
+        <div class="mpa-number">01</div>
+        <div class="mpa-heading">Mastery</div>
+        <div class="mpa-body">The drive to get better at things that matter. Short iterations create fast feedback loops — <strong>the fastest path to skill development is doing real work and learning from it immediately,</strong> not waiting for a quarterly review.</div>
+      </div>
+      <div class="mpa-card">
+        <div class="mpa-number">02</div>
+        <div class="mpa-heading">Purpose</div>
+        <div class="mpa-body">Knowing why the work matters. When work is visible, prioritized, and connected to outcomes — <strong>people understand their contribution.</strong> Hidden work is purposeless work. Patient care starts with making IT work visible.</div>
+      </div>
+      <div class="mpa-card">
+        <div class="mpa-number">03</div>
+        <div class="mpa-heading">Autonomy</div>
+        <div class="mpa-body">The team decides how to attack the work. Agile moves leadership from directing tasks to setting goals. <strong>Teams become self-organizing.</strong> That's not a risk — that's the point. And it turns out, it's also what people actually want.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 14: THREE VOICES THAT BLOCK CHANGE -->
+  <div class="slide" id="s9b">
+    <div class="slide-number">14</div>
+    <div class="anim-1" style="text-align:center; width:100%; max-width:700px;">
+      <div class="eyebrow">A Note to the Skeptics</div>
+      <div class="slide-title">Three Voices That <span>Block Change</span></div>
+      <div class="slide-subtitle">They are real. They are understandable. And they are worth naming out loud.</div>
+    </div>
+    <div class="voices-wrap anim-2">
+      <div class="voice-item">
+        <div class="voice-name">Voice of Judgement</div>
+        <div class="voice-desc">Shuts down an open mind. Prevents us from seeing possibilities and learning from others. Shows up as: "We tried this before." "This won't work here." "That's not how we do things."</div>
+      </div>
+      <div class="voice-item">
+        <div class="voice-name">Voice of Cynicism</div>
+        <div class="voice-desc">Blocks empathy and compassion. Makes it difficult to connect with others and their ideas. Shows up as: "Leadership just wants a buzzword." "Nothing ever really changes." "Who came up with this?"</div>
+      </div>
+      <div class="voice-item">
+        <div class="voice-name">Voice of Fear</div>
+        <div class="voice-desc">Inhibits willingness to take risks. Prevents stepping into the unknown to create meaningful change. Shows up as: "What if I fail?" "What does this mean for my role?" "I don't want to be exposed."</div>
+      </div>
+    </div>
+    <div class="voices-footer anim-3">The ask is not certainty. The ask is two weeks of honest effort and open eyes.</div>
+  </div>
+
+  <!-- SLIDE 15: THE ASK -->
+  <div class="slide" id="s10">
+    <div class="slide-number">15</div>
+    <div class="ask-bg">2</div>
+    <div class="ask-eyebrow anim-1">The Experiment</div>
+    <div class="ask-statement anim-2">Two Weeks.<br><span>One Team.</span><br>Come See.</div>
+    <div class="ask-sub anim-3">No methodology commitment. No declaration. Just two weeks of working differently — and watching what changes.</div>
+    <div class="ask-rule anim-4"></div>
+    <div class="ask-cta anim-5">The how will unfold together. That's the point.</div>
+  </div>
+
+</div><!-- /deck -->
+
+<!-- NAVIGATION -->
+<div class="nav">
+  <button class="nav-arrow" onclick="prevSlide()">←</button>
+  <div class="nav-section" onclick="goTo(0)">
+    <button>Intro</button>
+    <div class="nav-dots" id="dots-0"></div>
+  </div>
+  <div class="nav-section" onclick="goTo(2)">
+    <button>Problem</button>
+    <div class="nav-dots" id="dots-1"></div>
+  </div>
+  <div class="nav-section" onclick="goTo(5)">
+    <button>Science</button>
+    <div class="nav-dots" id="dots-2"></div>
+  </div>
+  <div class="nav-section" onclick="goTo(9)">
+    <button>Agile</button>
+    <div class="nav-dots" id="dots-3"></div>
+  </div>
+  <div class="nav-section" onclick="goTo(12)">
+    <button>Purpose</button>
+    <div class="nav-dots" id="dots-4"></div>
+  </div>
+  <div class="nav-section" onclick="goTo(14)">
+    <button>The Ask</button>
+    <div class="nav-dots" id="dots-5"></div>
+  </div>
+  <span class="slide-counter" id="counter">Intro · 1 of 2</span>
+  <button class="nav-arrow" onclick="nextSlide()">→</button>
+</div>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const counter = document.getElementById('counter');
+  const progress = document.getElementById('progress');
+  let current = 0;
+
+  const sections = [
+    { label: 'Intro',   start: 0,  end: 1  },
+    { label: 'Problem', start: 2,  end: 4  },
+    { label: 'Science', start: 5,  end: 8  },
+    { label: 'Agile',   start: 9,  end: 11 },
+    { label: 'Purpose', start: 12, end: 13 },
+    { label: 'The Ask', start: 14, end: 14 },
+  ];
+
+  sections.forEach((sec, si) => {
+    const count = sec.end - sec.start + 1;
+    const container = document.getElementById(`dots-${si}`);
+    for (let i = 0; i < count; i++) {
+      const dot = document.createElement('span');
+      dot.className = 'nav-dot';
+      dot.dataset.slide = sec.start + i;
+      dot.addEventListener('click', (e) => { e.stopPropagation(); showSlide(sec.start + i); });
+      container.appendChild(dot);
+    }
+  });
+
+  function showSlide(n) {
+    slides[current].classList.remove('active');
+    current = (n + slides.length) % slides.length;
+    slides[current].classList.add('active');
+    progress.style.width = `${((current + 1) / slides.length) * 100}%`;
+
+    let activeSection = 0;
+    for (let i = 0; i < sections.length; i++) {
+      if (current >= sections[i].start) activeSection = i;
+    }
+
+    document.querySelectorAll('.nav-section button').forEach((b, i) => {
+      b.classList.toggle('active-nav', i === activeSection);
+    });
+
+    document.querySelectorAll('.nav-dot').forEach(dot => {
+      const slideIdx = parseInt(dot.dataset.slide);
+      dot.classList.toggle('nav-dot-active', slideIdx === current);
+      dot.classList.toggle('nav-dot-section', sections[activeSection].start <= slideIdx && slideIdx <= sections[activeSection].end);
+    });
+
+    const sec = sections[activeSection];
+    counter.textContent = `${sec.label} · ${current - sec.start + 1} of ${sec.end - sec.start + 1}`;
+  }
+
+  function nextSlide() { showSlide(current + 1); }
+  function prevSlide() { showSlide(current - 1); }
+  function goTo(n) { showSlide(n); }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') nextSlide();
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') prevSlide();
+  });
+
+  let touchStartX = 0, touchStartY = 0;
+  document.addEventListener('touchstart', e => {
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
+  }, { passive: true });
+
+  document.addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].clientX - touchStartX;
+    const dy = e.changedTouches[0].clientY - touchStartY;
+    if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 40) {
+      if (dx < 0) nextSlide(); else prevSlide();
+    }
+  }, { passive: true });
+
+  progress.style.width = `${(1 / slides.length) * 100}%`;
+  showSlide(0);
+</script>
+</body>
+</html>

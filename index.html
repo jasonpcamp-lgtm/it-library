@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>IT Practice Library</title>
+<meta name="description" content="Agile, ITSM, ITIL and ServiceNow tools, guides and decks.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f5f4ee; --panel:#efede4; --card:#fbfaf6; --text:#1f1e1b; --muted:#6b6760;
+  --border:#e2dfd4; --accent:#c96442; --accent-soft:#f3e3db; --shadow:0 1px 2px rgba(31,30,27,.06);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#1f1e1c; --panel:#262522; --card:#2b2a27; --text:#ece9e1; --muted:#a39e94;
+    --border:#3a3833; --accent:#d97757; --accent-soft:#3a2a23; --shadow:none;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#1f1e1c; --panel:#262522; --card:#2b2a27; --text:#ece9e1; --muted:#a39e94;
+  --border:#3a3833; --accent:#d97757; --accent-soft:#3a2a23; --shadow:none;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--text);font:15px/1.55 Inter,system-ui,-apple-system,"Segoe UI",sans-serif}
+a{color:inherit}
+.layout{display:grid;grid-template-columns:260px 1fr;min-height:100vh}
+aside{background:var(--panel);border-right:1px solid var(--border);padding:28px 20px;position:sticky;top:0;height:100vh;overflow:auto}
+.brand{display:flex;align-items:center;gap:10px;margin-bottom:28px}
+.mark{width:28px;height:28px;border-radius:8px;background:var(--accent);display:grid;place-items:center;color:#fff;font-family:"Source Serif 4",serif;font-weight:600}
+.brand h1{font:600 19px/1.2 "Source Serif 4",Georgia,serif;margin:0}
+.navlabel{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:0 0 8px 10px}
+nav button{display:flex;justify-content:space-between;width:100%;text-align:left;background:none;border:0;color:var(--text);font:inherit;padding:8px 10px;border-radius:8px;cursor:pointer}
+nav button:hover{background:var(--border)}
+nav button[aria-pressed="true"]{background:var(--accent-soft);color:var(--accent);font-weight:600}
+nav .count{color:var(--muted);font-size:13px}
+.theme{margin-top:28px;background:none;border:1px solid var(--border);color:var(--muted);border-radius:8px;padding:6px 10px;font:inherit;font-size:13px;cursor:pointer}
+main{padding:44px clamp(16px,5vw,56px);max-width:1100px}
+.hero h2{font:500 clamp(28px,4vw,38px)/1.15 "Source Serif 4",Georgia,serif;margin:0 0 8px}
+.hero p{color:var(--muted);margin:0 0 24px;max-width:60ch}
+.search{position:relative;margin-bottom:28px;max-width:520px}
+.search input{width:100%;padding:12px 14px 12px 40px;border:1px solid var(--border);border-radius:12px;background:var(--card);color:var(--text);font:inherit;box-shadow:var(--shadow)}
+.search input:focus{outline:2px solid var(--accent);outline-offset:1px}
+.search svg{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--muted)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+.card{display:flex;flex-direction:column;gap:10px;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px 18px 16px;text-decoration:none;box-shadow:var(--shadow);transition:border-color .15s,transform .15s}
+.card:hover{border-color:var(--accent);transform:translateY(-1px)}
+.card h3{font:600 18px/1.3 "Source Serif 4",Georgia,serif;margin:0}
+.card p{margin:0;color:var(--muted);font-size:14px;flex:1}
+.meta{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:12px;color:var(--muted)}
+.tag{background:var(--accent-soft);color:var(--accent);border-radius:999px;padding:2px 9px;font-weight:500}
+.type{margin-left:auto;text-transform:uppercase;letter-spacing:.05em}
+.empty{color:var(--muted);padding:40px 0}
+footer{color:var(--muted);font-size:13px;margin-top:48px}
+@media (max-width:760px){
+  .layout{grid-template-columns:1fr}
+  aside{position:static;height:auto;padding:16px;border-right:0;border-bottom:1px solid var(--border)}
+  .brand{margin-bottom:14px}
+  .navlabel,.theme{display:none}
+  nav{display:flex;gap:6px;overflow-x:auto}
+  nav button{width:auto;white-space:nowrap;gap:8px;border:1px solid var(--border)}
+  main{padding:24px 16px}
+}
+</style>
+</head>
+<body>
+<div class="layout">
+  <aside>
+    <div class="brand"><div class="mark">IT</div><h1>IT Practice Library</h1></div>
+    <p class="navlabel">Categories</p>
+    <nav id="nav" aria-label="Categories"></nav>
+    <button class="theme" id="theme" type="button">Switch theme</button>
+  </aside>
+  <main>
+    <section class="hero">
+      <h2 id="heading">All resources</h2>
+      <p>Tools, field guides and decks for Agile teams and IT service management. Open any card to use it in your browser.</p>
+    </section>
+    <div class="search">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input id="q" type="search" placeholder="Search titles and descriptions" aria-label="Search">
+    </div>
+    <div class="grid" id="grid"></div>
+    <p class="empty" id="empty" hidden>Nothing matches that search.</p>
+    <footer>Free to view and share. No sign-in needed.</footer>
+  </main>
+</div>
+<script>
+const state={items:[],cat:'All',q:''};
+const cats=i=>Array.isArray(i.category)?i.category:(i.category?[i.category]:[]);
+const kind=f=>{if(/^https?:/.test(f))return'Link';const e=f.split('.').pop().toLowerCase();return e==='html'?'Tool':e==='pdf'?'PDF':['png','jpg','jpeg','gif','svg','webp'].includes(e)?'Image':e.toUpperCase()};
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function renderNav(){
+  const counts={All:state.items.length};
+  state.items.forEach(i=>cats(i).forEach(c=>counts[c]=(counts[c]||0)+1));
+  const names=['All',...Object.keys(counts).filter(c=>c!=='All').sort()];
+  document.getElementById('nav').innerHTML=names.map(c=>`<button type="button" data-cat="${esc(c)}" aria-pressed="${c===state.cat}"><span>${esc(c)}</span><span class="count">${counts[c]}</span></button>`).join('');
+}
+function render(){
+  const q=state.q.trim().toLowerCase();
+  const list=state.items.filter(i=>(state.cat==='All'||cats(i).includes(state.cat))&&(!q||(i.title+' '+(i.description||'')+' '+cats(i).join(' ')).toLowerCase().includes(q)));
+  document.getElementById('heading').textContent=state.cat==='All'?'All resources':state.cat;
+  document.getElementById('grid').innerHTML=list.map(i=>{
+    const ext=/^https?:/.test(i.file);
+    return `<a class="card" href="${esc(i.file)}" target="_blank" rel="noopener">
+      <h3>${esc(i.title)}</h3><p>${esc(i.description)}</p>
+      <div class="meta">${cats(i).map(c=>`<span class="tag">${esc(c)}</span>`).join('')}<span class="type">${kind(i.file)}${ext?' ↗':''}</span></div></a>`}).join('');
+  document.getElementById('empty').hidden=list.length>0;
+}
+document.getElementById('nav').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;state.cat=b.dataset.cat;renderNav();render();});
+document.getElementById('q').addEventListener('input',e=>{state.q=e.target.value;render();});
+document.getElementById('theme').addEventListener('click',()=>{
+  const r=document.documentElement,dark=r.dataset.theme?r.dataset.theme==='dark':matchMedia('(prefers-color-scheme: dark)').matches;
+  r.dataset.theme=dark?'light':'dark';try{localStorage.setItem('theme',r.dataset.theme)}catch(e){}
+});
+try{const t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t}catch(e){}
+fetch('presentations.json').then(r=>r.json()).then(d=>{
+  state.items=d.filter(i=>!i.hidden).sort((a,b)=>a.title.localeCompare(b.title));renderNav();render();
+}).catch(()=>{document.getElementById('empty').textContent='The library list could not be loaded.';document.getElementById('empty').hidden=false;});
+</script>
+</body>
+</html>

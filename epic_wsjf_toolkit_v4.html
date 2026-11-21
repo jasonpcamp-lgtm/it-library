@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Epic Sprint Planning — Mar–May 2026</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&display=swap');
+
+:root {
+  --bg:#111114; --surface:#1c1c1e; --surface2:#2c2c2e;
+  --border:#3a3a3c; --border-strong:#636366;
+  --text:#ffffff; --text-2:rgba(235,235,245,0.85); --text-3:rgba(235,235,245,0.55);
+  --blue:#0a84ff;
+  --s1c:#30d5c8; --s1bg:#005e56; --s1band:#002e2a; --s1head:#003d36; --s1b:#30d5c8;
+  --s2c:#0a84ff; --s2bg:#0a3580; --s2band:#00152e; --s2head:#001e47; --s2b:#0a84ff;
+  --s3c:#bf5af2; --s3bg:#4d1275; --s3band:#1a0030; --s3head:#280040; --s3b:#bf5af2;
+  --s4c:#ff9f0a; --s4bg:#6b3500; --s4band:#2a1200; --s4head:#3d1a00; --s4b:#ff9f0a;
+  --sys:-apple-system,'SF Pro Display','Helvetica Neue',Arial,sans-serif;
+  --mono:'DM Mono',ui-monospace,'SF Mono',monospace;
+  --r:12px; --rs:8px;
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--sys);min-height:100vh;padding:32px 24px 72px;display:flex;flex-direction:column;align-items:center;-webkit-font-smoothing:antialiased}
+
+/* ── Header ── */
+.ph{width:100%;max-width:1440px;display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:28px;padding-bottom:18px;border-bottom:1px solid var(--border);gap:16px;flex-wrap:wrap}
+.pt{font-size:2rem;font-weight:700;letter-spacing:-0.03em;line-height:1}
+.pt span{font-family:var(--mono);font-size:0.95rem;font-weight:400;color:var(--text-2);display:block;margin-top:5px;letter-spacing:0.02em}
+.tb{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.btn{font-family:var(--sys);font-size:0.95rem;font-weight:500;padding:9px 18px;border-radius:var(--rs);border:1px solid var(--border-strong);background:var(--surface2);color:var(--text);cursor:pointer;transition:all 0.12s;white-space:nowrap}
+.btn:hover{background:var(--border);border-color:var(--border-strong)}
+.btn.active{background:var(--border-strong)}
+.btn.pri{background:var(--blue);border-color:var(--blue);color:#fff}
+.btn.pri:hover{background:#0070e0;border-color:#0070e0}
+.btn.dng:hover{border-color:#ff453a;color:#ff453a;background:rgba(255,69,58,0.1)}
+.sep{width:1px;height:20px;background:var(--border)}
+.ic{font-size:0.95rem;color:var(--text-3);font-family:var(--mono)}
+
+/* ── Diagram ── */
+.diagram{width:100%;max-width:1440px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:24px 24px 28px;margin-bottom:12px}
+.mh{display:grid;grid-template-columns:repeat(2,1fr) 16px repeat(2,1fr)}
+.mg{display:flex;flex-direction:column}
+.mg.l{grid-column:1/3} .mg.r{grid-column:4/6}
+.ml{font-size:0.9rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-2);padding:0 6px 8px 6px;border-bottom:1px solid var(--border-strong);margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.ml .yr{font-size:0.8rem;color:var(--text-3);font-family:var(--mono)}
+.sg{display:grid;grid-template-columns:repeat(2,1fr) 16px repeat(2,1fr);align-items:stretch}
+.sd{grid-column:3;border-left:1px dashed var(--border);margin:0 8px}
+.sc{display:flex;flex-direction:column;padding:0 6px}
+.sc+.sc{border-left:1px solid var(--border)}
+.sc:nth-child(4){border-left:none}
+.sch{padding:16px 18px;border-radius:var(--rs) var(--rs) 0 0;display:flex;flex-direction:column;gap:5px}
+.s1 .sch{background:var(--s1head)}.s2 .sch{background:var(--s2head)}.s3 .sch{background:var(--s3head)}.s4 .sch{background:var(--s4head)}
+.sid{font-size:0.95rem;font-weight:600;letter-spacing:-0.01em;color:var(--text)}
+.sdt{font-size:0.88rem;color:var(--text-2);font-family:var(--mono)}
+.ef{background:transparent;border:none;border-bottom:1px dashed transparent;color:inherit;font-family:inherit;font-size:inherit;font-weight:inherit;letter-spacing:inherit;width:100%;outline:none;padding:1px 2px;cursor:text;transition:border-color 0.12s}
+.ef:hover{border-bottom-color:var(--border-strong)}
+.ef:focus{border-bottom-color:var(--blue);background:rgba(10,132,255,0.08);border-radius:3px}
+.dz{flex:1;min-height:120px;padding:14px 10px;display:flex;flex-direction:column;gap:9px;border-radius:0 0 var(--rs) var(--rs);border:1px solid transparent;border-top:none;transition:background 0.12s,border-color 0.12s}
+.s1 .dz{background:var(--s1band);border-color:var(--s1b)}
+.s2 .dz{background:var(--s2band);border-color:var(--s2b)}
+.s3 .dz{background:var(--s3band);border-color:var(--s3b)}
+.s4 .dz{background:var(--s4band);border-color:var(--s4b)}
+.dz.over{border-color:var(--blue)!important;background:rgba(10,132,255,0.12)!important;outline:2px dashed var(--blue);outline-offset:-3px}
+
+/* ── Chips ── */
+.chip{display:flex;align-items:center;gap:8px;padding:10px 16px;border-radius:20px;font-size:0.95rem;font-weight:500;letter-spacing:-0.01em;cursor:grab;transition:box-shadow 0.12s,transform 0.1s;user-select:none;word-break:break-word;white-space:normal;line-height:1.4;position:relative}
+.chip:active{cursor:grabbing;transform:scale(0.97)}
+.chip:hover{box-shadow:0 4px 14px rgba(0,0,0,0.5)}
+.chip.s1{background:var(--s1bg);color:#fff;border:1px solid var(--s1b)}
+.chip.s2{background:var(--s2bg);color:#fff;border:1px solid var(--s2b)}
+.chip.s3{background:var(--s3bg);color:#fff;border:1px solid var(--s3b)}
+.chip.s4{background:var(--s4bg);color:#fff;border:1px solid var(--s4b)}
+.cl{flex:1;cursor:default;min-width:0;word-break:break-word}
+.cl-edit{flex:1;min-width:0;font-family:var(--sys);font-size:0.95rem;font-weight:500;background:rgba(255,255,255,0.12);border:1.5px solid var(--blue);border-radius:8px;color:#fff;padding:2px 8px;outline:none;letter-spacing:-0.01em}
+
+/* WSJF badge — fully opaque, clickable */
+.wb{display:inline-flex;align-items:center;font-size:0.82rem;font-weight:700;font-family:var(--mono);padding:3px 10px;border-radius:10px;white-space:nowrap;flex-shrink:0;cursor:pointer;transition:opacity 0.12s}
+.wb:hover{opacity:0.8}
+.chip.s1 .wb{background:var(--s1c);color:#000;border:1px solid var(--s1c)}
+.chip.s2 .wb{background:var(--s2c);color:#fff;border:1px solid var(--s2c)}
+.chip.s3 .wb{background:var(--s3c);color:#fff;border:1px solid var(--s3c)}
+.chip.s4 .wb{background:var(--s4c);color:#000;border:1px solid var(--s4c)}
+.cc{opacity:0.5;cursor:pointer;font-size:0.82rem;flex-shrink:0;transition:opacity 0.1s;user-select:none}
+.cc:hover{opacity:1;color:#30d158}
+.cd{opacity:0.4;cursor:pointer;font-size:0.88rem;flex-shrink:0;transition:opacity 0.1s}
+.cd:hover{opacity:1;color:#ff453a}
+
+/* ── WSJF Score Popover ── */
+.popover{position:fixed;z-index:500;background:rgba(28,28,30,0.98);border:1px solid var(--border-strong);border-radius:var(--r);padding:16px 18px;min-width:260px;box-shadow:0 20px 60px rgba(0,0,0,0.7);backdrop-filter:blur(16px);display:none;pointer-events:none}
+.popover.vis{display:block}
+.pop-title{font-size:0.75rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-3);font-family:var(--mono);margin-bottom:10px}
+.pop-row{display:flex;justify-content:space-between;align-items:center;font-size:0.88rem;color:var(--text-2);padding:5px 0;border-bottom:1px solid var(--border)}
+.pop-row:last-child{border-bottom:none}
+.pop-row.tot{font-size:1rem;font-weight:700;color:var(--text);margin-top:4px;padding-top:10px}
+.pop-row .pv{font-family:var(--mono);font-weight:600;color:var(--text)}
+.pop-row.tot .pv{color:var(--blue);font-size:1.2rem}
+
+/* ── Add button ── */
+.ab{display:flex;align-items:center;gap:5px;padding:6px 12px;border-radius:20px;font-family:var(--sys);font-size:0.95rem;font-weight:500;background:rgba(255,255,255,0.06);border:1px dashed var(--border-strong);color:var(--text-2);cursor:pointer;transition:all 0.12s;align-self:flex-start}
+.ab:hover{border-color:var(--blue);color:var(--blue);background:rgba(10,132,255,0.1)}
+.ii{font-family:var(--sys);font-size:0.95rem;font-weight:500;background:rgba(255,255,255,0.08);border:1.5px solid var(--blue);border-radius:20px;color:var(--text);padding:6px 14px;outline:none;width:100%}
+.ii::placeholder{color:var(--text-3)}
+
+/* ── Backlog ── */
+.bp{width:100%;max-width:1440px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:18px 24px 20px}
+.bh{font-size:0.9rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-2);margin-bottom:12px;display:flex;align-items:center;gap:10px}
+.bc{font-family:var(--mono);font-size:0.82rem;font-weight:400;color:var(--text-3)}
+.bdz{display:flex;flex-wrap:wrap;gap:8px;min-height:64px;align-items:flex-start;padding:12px;border-radius:var(--rs);border:1px dashed var(--border-strong);transition:background 0.12s,border-color 0.12s}
+.bdz.over{border-color:var(--blue);background:rgba(10,132,255,0.1)}
+.bchip{display:inline-flex;align-items:center;gap:6px;padding:10px 16px;border-radius:20px;font-size:0.95rem;font-weight:500;letter-spacing:-0.01em;background:var(--surface2);border:1px dashed var(--border-strong);color:var(--text);cursor:grab;transition:all 0.12s;user-select:none;word-break:break-word;white-space:normal;line-height:1.35;position:relative}
+.bchip:hover{border-color:var(--border-strong);background:var(--border);box-shadow:0 2px 8px rgba(0,0,0,0.4)}
+.bchip:active{cursor:grabbing}
+.bchip .wb{background:rgba(255,255,255,0.15);color:var(--text);border:1px solid var(--border-strong)}
+.bll{cursor:default}
+.bld{opacity:0.3;cursor:pointer;font-size:0.88rem;transition:opacity 0.1s;flex-shrink:0}
+.bld:hover{opacity:1;color:#ff453a}
+.bcc{opacity:0.4;cursor:pointer;font-size:0.82rem;flex-shrink:0;transition:opacity 0.1s;user-select:none}
+.bcc:hover{opacity:1;color:#30d158}
+.be{font-size:0.9rem;color:var(--text-3);font-style:italic;padding:4px 2px}
+
+/* ── Hint ── */
+.hint{margin-top:10px;width:100%;max-width:1440px;font-size:0.82rem;color:var(--text-3);text-align:right;font-family:var(--mono)}
+
+/* ── Doodle ── */
+.ds{width:100%;max-width:1440px;margin-top:16px}
+.dh{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px}
+.dt{font-size:0.9rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-2)}
+.dtb{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.dcw{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;position:relative;height:700px}
+#dc{display:block;width:100%;height:100%;touch-action:none;cursor:crosshair}
+.cs{width:22px;height:22px;border-radius:50%;border:2.5px solid transparent;cursor:pointer;transition:transform 0.1s,border-color 0.1s;flex-shrink:0}
+.cs:hover{transform:scale(1.18)}
+.cs.active{border-color:#fff;box-shadow:0 0 0 1px var(--border-strong)}
+.sb{font-family:var(--mono);font-size:0.95rem;padding:4px 10px;border-radius:var(--rs);border:1px solid var(--border-strong);background:var(--surface2);color:var(--text-2);cursor:pointer;transition:all 0.12s}
+.sb.active{border-color:var(--blue);color:var(--blue);background:rgba(10,132,255,0.1)}
+.sb:hover{border-color:var(--border-strong);color:var(--text)}
+
+/* ── Modal ── */
+.mo{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:300;align-items:center;justify-content:center;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+.mo.open{display:flex}
+.md{background:rgba(36,36,38,0.97);border:1px solid var(--border-strong);border-radius:18px;padding:28px 32px;width:560px;box-shadow:0 40px 100px rgba(0,0,0,0.7);font-family:var(--sys)}
+.ws{display:flex;gap:6px;margin-bottom:22px;align-items:center}
+.wd{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.82rem;font-weight:700;font-family:var(--mono);border:1.5px solid var(--border-strong);color:var(--text-3);background:var(--surface2);transition:all 0.2s;flex-shrink:0}
+.wd.active{border-color:var(--blue);color:#fff;background:var(--blue)}
+.wd.done{border-color:var(--s1c);color:var(--s1c);background:rgba(48,213,200,0.15)}
+.wl{flex:1;height:1px;background:var(--border)}
+.we{font-size:0.78rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text-3);margin-bottom:6px;font-family:var(--mono)}
+.wq{font-size:1.3rem;font-weight:700;letter-spacing:-0.02em;color:var(--text);margin-bottom:8px;line-height:1.25}
+.wdesc{font-size:0.95rem;color:var(--text-2);line-height:1.55;margin-bottom:18px}
+.wen{font-size:0.88rem;color:var(--text-3);margin-bottom:18px;font-family:var(--mono)}
+.wen strong{color:var(--text-2)}
+.sg2{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-bottom:20px}
+.scb{font-family:var(--mono);font-size:1rem;font-weight:500;padding:12px 4px;border-radius:var(--rs);border:1px solid var(--border-strong);background:var(--surface2);color:var(--text);cursor:pointer;transition:all 0.12s;text-align:center}
+.scb:hover{border-color:var(--blue);color:var(--blue);background:rgba(10,132,255,0.1)}
+.scb.sel{border-color:var(--blue);background:var(--blue);color:#fff}
+.sl{display:flex;justify-content:space-between;font-size:0.8rem;color:var(--text-3);margin-top:-12px;margin-bottom:18px;padding:0 2px;font-family:var(--mono)}
+.wr{background:var(--bg);border:1px solid var(--border);border-radius:var(--rs);padding:14px 16px;margin-bottom:20px;display:none}
+.wr.vis{display:block}
+.rr{display:flex;justify-content:space-between;align-items:center;font-size:0.9rem;color:var(--text-2);padding:5px 0;border-bottom:1px solid var(--border)}
+.rr:last-child{border-bottom:none}
+.rr.tot{margin-top:6px;padding-top:10px;font-size:1.05rem;font-weight:700;color:var(--text)}
+.rr .v{font-weight:600;color:var(--text);font-family:var(--mono)}
+.rr.tot .v{font-size:1.4rem;color:#fff}
+/* wizard actions — back + cancel + continue */
+.wa{display:flex;gap:8px;justify-content:space-between;align-items:center;margin-top:16px}
+.wa-left{display:flex;gap:8px}
+.wa .bk{font-family:var(--sys);font-size:0.95rem;font-weight:500;padding:8px 18px;border-radius:var(--rs);border:1px solid var(--border-strong);background:transparent;color:var(--text-3);cursor:pointer;transition:all 0.12s}
+.wa .bk:hover{color:var(--text);border-color:var(--text-2)}
+.wa .bk:disabled{opacity:0.2;cursor:not-allowed}
+.wa .can{font-family:var(--sys);font-size:0.95rem;font-weight:500;padding:8px 18px;border-radius:var(--rs);border:1px solid var(--border-strong);background:var(--surface2);color:var(--text-2);cursor:pointer;transition:all 0.12s}
+.wa .can:hover{color:var(--text);border-color:var(--text-2)}
+.wa .nxt{font-family:var(--sys);font-size:0.95rem;font-weight:600;padding:8px 18px;border-radius:var(--rs);border:1px solid var(--blue);background:var(--blue);color:#fff;cursor:pointer;transition:all 0.12s}
+.wa .nxt:hover{background:#0070e0;border-color:#0070e0}
+.wa .nxt:disabled{opacity:0.3;cursor:not-allowed}
+</style>
+</head>
+<body>
+
+<!-- Score popover (singleton, repositioned by JS) -->
+<div class="popover" id="popover">
+  <div class="pop-title">WSJF Breakdown</div>
+  <div class="pop-row"><span>Cost of Delay — Business Value</span><span class="pv" id="pop-cod"></span></div>
+  <div class="pop-row"><span>Risk Reduction / Opp. Enablement</span><span class="pv" id="pop-rr"></span></div>
+  <div class="pop-row"><span>Time Criticality</span><span class="pv" id="pop-tc"></span></div>
+  <div class="pop-row"><span>Job Size</span><span class="pv" id="pop-js"></span></div>
+  <div class="pop-row tot"><span>WSJF Score</span><span class="pv" id="pop-wsjf"></span></div>
+</div>
+
+<div class="ph" id="ph">
+  <div class="pt">
+    <input class="ef pt-ef" id="page-title" value="Epic Sprint Planning" style="font-size:2rem;font-weight:700;letter-spacing:-0.03em;color:var(--text);width:420px" />
+    <span><input class="ef pt-ef" id="page-sub" value="Mar 09 – May 01 · 2026" style="font-family:var(--mono);font-size:0.95rem;font-weight:400;color:var(--text-2);letter-spacing:0.02em;width:280px" /></span>
+  </div>
+  <div class="tb" id="tb">
+    <button class="btn" onclick="addToBacklog()">+ Backlog Item</button>
+    <div class="sep"></div>
+    <button class="btn pri" onclick="exportJpeg()">↓ Export Board</button>
+    <div class="sep"></div>
+    <button class="btn pri" onclick="saveSession()">↓ Save JSON</button>
+    <button class="btn" onclick="document.getElementById('load-input').click()">↑ Load JSON</button>
+    <input type="file" id="load-input" accept=".json" style="display:none" onchange="loadSession(event)" />
+    <div class="sep"></div>
+    <button class="btn dng" onclick="clearAll()">✕ Clear All</button>
+    <div class="sep"></div>
+    <span class="ic" id="ic">0 items assigned</span>
+  </div>
+</div>
+
+<div class="diagram" id="diagram">
+  <div class="mh">
+    <div class="mg l">
+      <div class="ml">
+        <input class="ef" id="ml1" value="March" style="font-size:0.9rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-2);width:130px" />
+        <span class="yr"><input class="ef" id="yr1" value="2026" style="width:42px;font-size:0.8rem;color:var(--text-3);font-family:var(--mono)" /></span>
+      </div>
+    </div>
+    <div style="grid-column:3"></div>
+    <div class="mg r">
+      <div class="ml">
+        <input class="ef" id="ml2" value="April – May" style="font-size:0.9rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text-2);width:130px" />
+        <span class="yr"><input class="ef" id="yr2" value="2026" style="width:42px;font-size:0.8rem;color:var(--text-3);font-family:var(--mono)" /></span>
+      </div>
+    </div>
+  </div>
+  <div class="sg">
+    <div class="sc s1">
+      <div class="sch"><div class="sid"><input class="ef" id="lb1" value="SN MAR S1"/></div><div class="sdt"><input class="ef" id="dt1" value="Mar 09 – Mar 20"/></div></div>
+      <div class="dz" id="zone-s1" ondragover="onDO(event,'s1')" ondragleave="onDL(event,'s1')" ondrop="onDrop(event,'s1')"></div>
+    </div>
+    <div class="sc s2">
+      <div class="sch"><div class="sid"><input class="ef" id="lb2" value="SN MAR S2"/></div><div class="sdt"><input class="ef" id="dt2" value="Mar 23 – Apr 03"/></div></div>
+      <div class="dz" id="zone-s2" ondragover="onDO(event,'s2')" ondragleave="onDL(event,'s2')" ondrop="onDrop(event,'s2')"></div>
+    </div>
+    <div class="sd"></div>
+    <div class="sc s3">
+      <div class="sch"><div class="sid"><input class="ef" id="lb3" value="SN APR S1"/></div><div class="sdt"><input class="ef" id="dt3" value="Apr 07 – Apr 17"/></div></div>
+      <div class="dz" id="zone-s3" ondragover="onDO(event,'s3')" ondragleave="onDL(event,'s3')" ondrop="onDrop(event,'s3')"></div>
+    </div>
+    <div class="sc s4">
+      <div class="sch"><div class="sid"><input class="ef" id="lb4" value="SN APR S2"/></div><div class="sdt"><input class="ef" id="dt4" value="Apr 21 – May 01"/></div></div>
+      <div class="dz" id="zone-s4" ondragover="onDO(event,'s4')" ondragleave="onDL(event,'s4')" ondrop="onDrop(event,'s4')"></div>
+    </div>
+  </div>
+</div>
+
+<div class="bp" id="bp">
+  <div class="bh">Unassigned Backlog <span class="bc" id="bct">0 items</span></div>
+  <div class="bdz" id="zone-backlog" ondragover="onDO(event,'backlog')" ondragleave="onDL(event,'backlog')" ondrop="onDrop(event,'backlog')"></div>
+</div>
+
+<div class="hint">Drag to move · ⊕ to copy · click WSJF badge for score breakdown · ✕ to remove</div>
+
+<!-- Doodle pad -->
+<div class="ds">
+  <div class="dh">
+    <div class="dt">Facilitator Notes</div>
+    <div class="dtb">
+      <button class="btn active" id="btn-pen" onclick="setTool('pen')">✏ Pen</button>
+      <button class="btn" id="btn-eraser" onclick="setTool('eraser')">⌫ Erase</button>
+      <div class="sep"></div>
+      <div class="cs active" style="background:#ffffff" data-color="#ffffff" onclick="setColor(this)" title="White"></div>
+      <div class="cs" style="background:#30d5c8" data-color="#30d5c8" onclick="setColor(this)" title="Teal"></div>
+      <div class="cs" style="background:#0a84ff" data-color="#0a84ff" onclick="setColor(this)" title="Blue"></div>
+      <div class="cs" style="background:#ff9f0a" data-color="#ff9f0a" onclick="setColor(this)" title="Amber"></div>
+      <div class="cs" style="background:#ff453a" data-color="#ff453a" onclick="setColor(this)" title="Red"></div>
+      <div class="cs" style="background:#bf5af2" data-color="#bf5af2" onclick="setColor(this)" title="Violet"></div>
+      <div class="sep"></div>
+      <button class="sb active" data-size="2" onclick="setSize(this)">S</button>
+      <button class="sb" data-size="4" onclick="setSize(this)">M</button>
+      <button class="sb" data-size="8" onclick="setSize(this)">L</button>
+      <button class="sb" data-size="16" onclick="setSize(this)">XL</button>
+      <div class="sep"></div>
+      <button class="btn dng" onclick="clearDoodle()">✕ Clear</button>
+      <button class="btn pri" onclick="exportDoodle()">↓ Export Notes</button>
+    </div>
+  </div>
+  <div class="dcw" id="doodle-wrap"><canvas id="dc"></canvas></div>
+</div>
+
+<!-- WSJF Wizard Modal -->
+<div class="mo" id="mo">
+  <div class="md">
+    <div class="ws">
+      <div class="wd" id="d0">1</div><div class="wl"></div>
+      <div class="wd" id="d1">2</div><div class="wl"></div>
+      <div class="wd" id="d2">3</div><div class="wl"></div>
+      <div class="wd" id="d3">4</div><div class="wl"></div>
+      <div class="wd" id="d4">✓</div>
+    </div>
+    <div class="we" id="we"></div>
+    <div class="wq" id="wq"></div>
+    <div class="wdesc" id="wdesc"></div>
+    <div class="wen" id="wen"></div>
+    <div id="niw" style="display:none;margin-bottom:18px">
+      <input type="text" id="eni" class="ii" style="border-radius:8px;width:100%;font-size:1.05rem;padding:10px 14px" placeholder="Epic name…" maxlength="80" />
+    </div>
+    <div id="sw" style="display:none">
+      <div class="sg2" id="sgrid"></div>
+      <div class="sl"><span>Low</span><span>High</span></div>
+    </div>
+    <div class="wr" id="wres">
+      <div class="rr"><span>Cost of Delay — Business Value</span><span class="v" id="rcod"></span></div>
+      <div class="rr"><span>Risk Reduction / Opportunity Enablement</span><span class="v" id="rrr"></span></div>
+      <div class="rr"><span>Time Criticality</span><span class="v" id="rtc"></span></div>
+      <div class="rr"><span>Job Size</span><span class="v" id="rjs"></span></div>
+      <div class="rr tot">
+        <span>WSJF Score <span style="font-size:0.78rem;font-weight:400;font-family:var(--mono);color:var(--text-3)">(CoD+RR+TC)÷JS</span></span>
+        <span class="v" id="rwsjf"></span>
+      </div>
+    </div>
+    <div class="wa">
+      <div class="wa-left">
+        <button class="bk" id="bk" onclick="wizBack()" disabled>← Back</button>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="can" onclick="closeModal()">Cancel</button>
+        <button class="nxt" id="nxt" onclick="wizNext()" disabled>Continue →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── State ──────────────────────────────────────────────────────────────────
+const S = { sprints:{s1:[],s2:[],s3:[],s4:[]}, backlog:[] };
+let dragSrc = null;
+
+// ── WSJF Wizard ────────────────────────────────────────────────────────────
+const STEPS = [
+  { ey:'Epic Name',              q:'What is the name of this Epic?',           d:'Enter a clear, concise name for the body of work.',                                                                             t:'name' },
+  { ey:'Step 1 of 4 — Cost of Delay',    q:'What is the Business Value?',              d:'How valuable is this work? Consider revenue, strategic alignment, and user satisfaction. Score using Fibonacci: 1 (minimal) → 20 (critical).',  k:'cod', t:'score' },
+  { ey:'Step 2 of 4 — Risk Reduction',   q:'Risk Reduction / Opportunity Enablement', d:'Does this reduce risk or unlock future work? Consider tech debt, compliance, and downstream dependencies. Score using Fibonacci: 1 (low) → 20 (high).', k:'rr', t:'score' },
+  { ey:'Step 3 of 4 — Time Criticality', q:'How time-critical is this work?',         d:'Does value decay if delayed? Consider deadlines, market windows, and team dependencies. Score using Fibonacci: 1 (flexible) → 20 (urgent).',       k:'tc', t:'score' },
+  { ey:'Step 4 of 4 — Job Size',         q:'What is the estimated Job Size?',         d:'How large is the effort relative to other epics? WSJF favors small jobs with high CoD. Score using Fibonacci: 1 (very small) → 20 (very large).', k:'js', t:'score' },
+  { ey:'WSJF Complete', q:'Score calculated.', d:'Review your inputs. Hit "Add Epic" to place this epic on the board.', t:'result' }
+];
+let wz = { step:0, zone:null, name:'', cod:null, rr:null, tc:null, js:null };
+
+function startWizard(zone) {
+  wz = { step:0, zone, name:'', cod:null, rr:null, tc:null, js:null };
+  renderStep();
+  document.getElementById('mo').classList.add('open');
+}
+
+function renderStep() {
+  const s = STEPS[wz.step];
+  const nb = document.getElementById('nxt');
+  const bk = document.getElementById('bk');
+  // Step dots
+  for(let i=0;i<5;i++){
+    const d=document.getElementById('d'+i); d.className='wd';
+    if(i<wz.step) d.classList.add('done');
+    else if(i===wz.step) d.classList.add('active');
+  }
+  document.getElementById('we').textContent = s.ey;
+  document.getElementById('wq').textContent = s.q;
+  document.getElementById('wdesc').textContent = s.d;
+  // Epic name sub-label
+  const en = document.getElementById('wen');
+  if(wz.name && wz.step>0){ en.innerHTML='Epic: <strong>'+esc(wz.name)+'</strong>'; en.style.display='block'; }
+  else en.style.display='none';
+  // Back button — disabled on step 0 and step 1 (can't go back from name to nothing)
+  bk.disabled = wz.step <= 1;
+  // Panels
+  document.getElementById('niw').style.display = s.t==='name'?'block':'none';
+  document.getElementById('sw').style.display  = s.t==='score'?'block':'none';
+  document.getElementById('wres').classList.toggle('vis', s.t==='result');
+  if(s.t==='name'){
+    const inp=document.getElementById('eni'); inp.value=wz.name||'';
+    nb.textContent='Continue →'; nb.disabled=!wz.name.trim();
+    inp.oninput=()=>{ wz.name=inp.value; nb.disabled=!inp.value.trim(); };
+    inp.onkeydown=e=>{ if(e.key==='Enter'&&inp.value.trim()) wizNext(); };
+    setTimeout(()=>inp.focus(),60);
+  }
+  if(s.t==='score'){
+    buildGrid(s.k); nb.textContent='Continue →'; nb.disabled=wz[s.k]===null;
+  }
+  if(s.t==='result'){
+    const w=calcW();
+    document.getElementById('rcod').textContent=wz.cod;
+    document.getElementById('rrr').textContent=wz.rr;
+    document.getElementById('rtc').textContent=wz.tc;
+    document.getElementById('rjs').textContent=wz.js;
+    document.getElementById('rwsjf').textContent=w;
+    nb.textContent='Add Epic →'; nb.disabled=false;
+  }
+}
+
+function buildGrid(key){
+  const FIB=[1,2,3,5,8,13,20];
+  const g=document.getElementById('sgrid'); g.innerHTML='';
+  FIB.forEach(i=>{
+    const b=document.createElement('button');
+    b.className='scb'+(wz[key]===i?' sel':'');
+    b.textContent=i;
+    b.addEventListener('click',()=>{
+      wz[key]=i; document.getElementById('nxt').disabled=false;
+      g.querySelectorAll('.scb').forEach(x=>x.classList.remove('sel')); b.classList.add('sel');
+    });
+    g.appendChild(b);
+  });
+}
+
+function calcW(){ const{cod,rr,tc,js}=wz; return Math.round(((cod+rr+tc)/js)*10)/10; }
+
+function wizNext(){
+  const s=STEPS[wz.step];
+  if(s.t==='name'){ const v=document.getElementById('eni').value.trim(); if(!v)return; wz.name=v; }
+  if(s.t==='result'){
+    const item={name:wz.name,wsjf:calcW(),cod:wz.cod,rr:wz.rr,tc:wz.tc,js:wz.js};
+    if(wz.zone==='backlog') S.backlog.push(item); else S.sprints[wz.zone].push(item);
+    render(); closeModal(); return;
+  }
+  wz.step++; renderStep();
+}
+
+// ── Back button ─────────────────────────────────────────────────────────────
+function wizBack(){
+  if(wz.step <= 1) return;
+  wz.step--;
+  renderStep();
+}
+
+function closeModal(){ document.getElementById('mo').classList.remove('open'); hidePopover(); }
+
+// ── Score Popover ───────────────────────────────────────────────────────────
+let popoverOpen = false;
+let popoverTarget = null;
+
+function showPopover(el, item) {
+  const p = document.getElementById('popover');
+  document.getElementById('pop-cod').textContent  = item.cod;
+  document.getElementById('pop-rr').textContent   = item.rr;
+  document.getElementById('pop-tc').textContent   = item.tc;
+  document.getElementById('pop-js').textContent   = item.js;
+  document.getElementById('pop-wsjf').textContent = item.wsjf;
+  // Position near the badge
+  const r = el.getBoundingClientRect();
+  p.style.display='block';
+  const pw = p.offsetWidth, ph = p.offsetHeight;
+  let top = r.bottom + 8 + window.scrollY;
+  let left = r.left + window.scrollX;
+  if(left + pw > window.innerWidth - 16) left = window.innerWidth - pw - 16;
+  if(top + ph > window.innerHeight + window.scrollY - 16) top = r.top + window.scrollY - ph - 8;
+  p.style.top  = top  + 'px';
+  p.style.left = left + 'px';
+  p.classList.add('vis');
+  p.style.pointerEvents='auto';
+  popoverOpen = true;
+  popoverTarget = el;
+}
+
+function hidePopover(){
+  const p = document.getElementById('popover');
+  p.classList.remove('vis');
+  p.style.display='none';
+  p.style.pointerEvents='none';
+  popoverOpen = false;
+  popoverTarget = null;
+}
+
+document.addEventListener('click', e => {
+  if(popoverOpen && !e.target.classList.contains('wb') && !document.getElementById('popover').contains(e.target)){
+    hidePopover();
+  }
+});
+
+// ── Inline epic name editing ─────────────────────────────────────────────────
+function startInlineEdit(labelEl, item, chipEl){
+  const inp = document.createElement('input');
+  inp.className = 'cl-edit';
+  inp.value = item.name;
+  inp.maxLength = 80;
+  chipEl.draggable = false; // prevent drag while editing
+  labelEl.replaceWith(inp);
+  inp.focus();
+  inp.select();
+  function commit(){
+    const val = inp.value.trim() || item.name;
+    item.name = val;
+    chipEl.draggable = true;
+    render();
+  }
+  inp.addEventListener('blur', commit);
+  inp.addEventListener('keydown', e=>{
+    if(e.key==='Enter'){ e.preventDefault(); inp.blur(); }
+    if(e.key==='Escape'){ inp.value=item.name; inp.blur(); }
+    e.stopPropagation();
+  });
+  inp.addEventListener('click', e=>e.stopPropagation());
+}
+
+// ── Render ──────────────────────────────────────────────────────────────────
+function render(){
+  ['s1','s2','s3','s4'].forEach(sid=>{
+    const z=document.getElementById('zone-'+sid); z.innerHTML='';
+    S.sprints[sid].forEach((item,i)=>z.appendChild(mkChip(item,sid,i)));
+    z.appendChild(mkAdd(sid));
+  });
+  const bz=document.getElementById('zone-backlog'); bz.innerHTML='';
+  if(S.backlog.length===0){
+    const e=document.createElement('div'); e.className='be';
+    e.textContent='No staged items. Add a backlog item or drag epics here.';
+    bz.appendChild(e);
+  } else S.backlog.forEach((item,i)=>bz.appendChild(mkBChip(item,i)));
+  bz.appendChild(mkBAdd());
+  const tot=Object.values(S.sprints).reduce((a,v)=>a+v.length,0);
+  document.getElementById('ic').textContent=tot+' item'+(tot!==1?'s':'')+' assigned';
+  document.getElementById('bct').textContent=S.backlog.length+' item'+(S.backlog.length!==1?'s':'');
+}
+
+function mkChip(item,sid,idx){
+  const c=document.createElement('div'); c.className='chip '+sid; c.draggable=true;
+  // Label — double-click to edit
+  const l=document.createElement('span'); l.className='cl'; l.textContent=item.name;
+  l.title='Double-click to rename';
+  l.addEventListener('dblclick', e=>{ e.stopPropagation(); startInlineEdit(l, item, c); });
+  // WSJF badge
+  const b=document.createElement('span'); b.className='wb'; b.textContent='WSJF '+item.wsjf;
+  b.title='Click to see score breakdown';
+  b.addEventListener('click', e=>{ e.stopPropagation(); if(popoverTarget===b){hidePopover();}else{showPopover(b,item);} });
+  // Copy
+  const cp=document.createElement('span'); cp.className='cc'; cp.textContent='⊕'; cp.title='Duplicate epic';
+  cp.addEventListener('click', e=>{ e.stopPropagation(); const clone={...item}; S.sprints[sid].splice(idx+1,0,clone); render(); });
+  // Delete
+  const d=document.createElement('span'); d.className='cd'; d.textContent='✕';
+  d.addEventListener('click', e=>{ e.stopPropagation(); S.sprints[sid].splice(idx,1); render(); hidePopover(); });
+  c.appendChild(l); c.appendChild(b); c.appendChild(cp); c.appendChild(d);
+  c.addEventListener('dragstart',e=>{
+    dragSrc={zone:sid,idx};
+    e.dataTransfer.effectAllowed='move';
+    e.dataTransfer.setData('text/plain',item.name);
+    setTimeout(()=>c.style.opacity='0.3',0);
+    hidePopover();
+  });
+  c.addEventListener('dragend',()=>c.style.opacity='1');
+  return c;
+}
+
+function mkBChip(item,idx){
+  const c=document.createElement('div'); c.className='bchip'; c.draggable=true;
+  const l=document.createElement('span'); l.className='bll'; l.textContent=item.name;
+  l.title='Double-click to rename';
+  l.addEventListener('dblclick', e=>{ e.stopPropagation(); startInlineEdit(l, item, c); });
+  const b=document.createElement('span'); b.className='wb'; b.textContent='WSJF '+item.wsjf;
+  b.title='Click to see score breakdown';
+  b.addEventListener('click', e=>{ e.stopPropagation(); if(popoverTarget===b){hidePopover();}else{showPopover(b,item);} });
+  const cp=document.createElement('span'); cp.className='bcc'; cp.textContent='⊕'; cp.title='Duplicate epic';
+  cp.addEventListener('click', e=>{ e.stopPropagation(); const clone={...item}; S.backlog.splice(idx+1,0,clone); render(); });
+  const d=document.createElement('span'); d.className='bld'; d.textContent='✕';
+  d.addEventListener('click', e=>{ e.stopPropagation(); S.backlog.splice(idx,1); render(); hidePopover(); });
+  c.appendChild(l); c.appendChild(b); c.appendChild(cp); c.appendChild(d);
+  c.addEventListener('dragstart',e=>{
+    dragSrc={zone:'backlog',idx};
+    e.dataTransfer.effectAllowed='move';
+    e.dataTransfer.setData('text/plain',item.name);
+    setTimeout(()=>c.style.opacity='0.3',0);
+    hidePopover();
+  });
+  c.addEventListener('dragend',()=>c.style.opacity='1');
+  return c;
+}
+
+function mkAdd(sid){ const b=document.createElement('button');b.className='ab';b.textContent='+ add epic';b.addEventListener('click',()=>startWizard(sid));return b; }
+function mkBAdd(){ const b=document.createElement('button');b.className='ab';b.textContent='+ add epic';b.addEventListener('click',()=>startWizard('backlog'));return b; }
+
+// ── Drag & drop ─────────────────────────────────────────────────────────────
+function getZ(z){ return document.getElementById('zone-'+z); }
+function onDO(e,z){ e.preventDefault();e.dataTransfer.dropEffect='move';getZ(z).classList.add('over'); }
+function onDL(e,z){ const el=getZ(z); if(!el.contains(e.relatedTarget))el.classList.remove('over'); }
+function onDrop(e,tz){
+  e.preventDefault(); getZ(tz).classList.remove('over');
+  if(!dragSrc||dragSrc.zone===tz){dragSrc=null;return;}
+  const{zone:sz,idx}=dragSrc;
+  let item; if(sz==='backlog')item=S.backlog.splice(idx,1)[0]; else item=S.sprints[sz].splice(idx,1)[0];
+  if(tz==='backlog')S.backlog.push(item); else S.sprints[tz].push(item);
+  dragSrc=null; render();
+}
+
+function addToBacklog(){ startWizard('backlog'); }
+
+function clearAll(){
+  if(!confirm('Clear all sprint assignments and backlog items?'))return;
+  S.sprints={s1:[],s2:[],s3:[],s4:[]}; S.backlog=[]; render();
+}
+
+// ── Export Board JPEG ────────────────────────────────────────────────────────
+// Fix: clone diagram at full intrinsic width, explicit style inheritance
+function exportJpeg(){
+  const tb=document.getElementById('tb'); tb.style.visibility='hidden';
+  // Build off-screen capture container
+  const cap=document.createElement('div');
+  cap.style.cssText=[
+    'position:absolute','left:-9999px','top:0',
+    'background:#111114','padding:40px 40px 48px',
+    'display:flex','flex-direction:column','gap:16px',
+    'width:1440px','font-family:-apple-system,Helvetica Neue,Arial,sans-serif',
+    'color:#ffffff','-webkit-font-smoothing:antialiased'
+  ].join(';');
+
+  // Header — text only, no toolbar buttons
+  const hdrWrap=document.createElement('div');
+  hdrWrap.style.cssText='padding-bottom:18px;border-bottom:1px solid #3a3a3c;margin-bottom:4px';
+  const hdrTitle=document.createElement('div');
+  hdrTitle.style.cssText='font-size:2rem;font-weight:700;letter-spacing:-0.03em;color:#fff';
+  hdrTitle.textContent = document.getElementById('page-title')?.value || 'Epic Sprint Planning';
+  const hdrSub=document.createElement('div');
+  hdrSub.style.cssText='font-size:0.95rem;color:rgba(235,235,245,0.85);margin-top:5px;font-family:DM Mono,monospace';
+  hdrSub.textContent = document.getElementById('page-sub')?.value || 'Mar 09 – May 01 · 2026';
+  hdrWrap.appendChild(hdrTitle); hdrWrap.appendChild(hdrSub);
+  cap.appendChild(hdrWrap);
+
+  // Deep-clone diagram and backlog, apply explicit background so html2canvas sees it
+  const diag=document.getElementById('diagram').cloneNode(true);
+  diag.style.cssText+='background:#1c1c1e;border:1px solid #3a3a3c;border-radius:12px;padding:24px';
+  cap.appendChild(diag);
+
+  const bl=document.getElementById('bp').cloneNode(true);
+  bl.style.cssText+='background:#1c1c1e;border:1px solid #3a3a3c;border-radius:12px;padding:18px 24px';
+  cap.appendChild(bl);
+
+  document.body.appendChild(cap);
+  html2canvas(cap,{
+    backgroundColor:'#111114',scale:2,useCORS:true,logging:false,
+    windowWidth:1520, width:1440
+  }).then(canvas=>{
+    document.body.removeChild(cap); tb.style.visibility='';
+    const a=document.createElement('a');
+    a.download='sprint-planning-'+new Date().toISOString().slice(0,10)+'.jpg';
+    a.href=canvas.toDataURL('image/jpeg',0.95); a.click();
+  }).catch(err=>{
+    document.body.removeChild(cap); tb.style.visibility='';
+    console.error(err); alert('Export failed. See console.');
+  });
+}
+
+// ── Save / Load JSON session ─────────────────────────────────────────────────
+function getConfig(){
+  return {
+    labels:{ ml1:v('ml1'),yr1:v('yr1'),ml2:v('ml2'),yr2:v('yr2'),
+             'page-title':v('page-title'),'page-sub':v('page-sub') },
+    sprints:{ lb1:v('lb1'),dt1:v('dt1'),lb2:v('lb2'),dt2:v('dt2'),lb3:v('lb3'),dt3:v('dt3'),lb4:v('lb4'),dt4:v('dt4') }
+  };
+}
+function v(id){ return document.getElementById(id)?.value||''; }
+
+function saveSession(){
+  const payload = {
+    version: 1,
+    savedAt: new Date().toISOString(),
+    config: getConfig(),
+    board: S
+  };
+  const blob = new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+  const a = document.createElement('a');
+  a.download = 'sprint-session-'+new Date().toISOString().slice(0,10)+'.json';
+  a.href = URL.createObjectURL(blob);
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+function loadSession(evt){
+  const file = evt.target.files[0]; if(!file)return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if(!data.board || !data.board.sprints) throw new Error('Invalid session file');
+      // Restore board
+      S.sprints = data.board.sprints;
+      S.backlog  = data.board.backlog || [];
+      // Restore config labels
+      if(data.config){
+        const {labels,sprints} = data.config;
+        Object.entries({...labels,...sprints}).forEach(([id,val])=>{
+          const el=document.getElementById(id); if(el)el.value=val;
+        });
+      }
+      render();
+    } catch(err){
+      alert('Could not load session file: '+err.message);
+    }
+  };
+  reader.readAsText(file);
+  evt.target.value=''; // reset so same file can be re-loaded
+}
+
+function esc(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+// ── Doodle Pad ───────────────────────────────────────────────────────────────
+let dTool='pen', dColor='#ffffff', dSize=2, dDrawing=false, dLast=[0,0];
+let dCv, dCtx, dLogW=0, dLogH=0;
+
+function initDoodle(){
+  dCv=document.getElementById('dc'); if(!dCv)return;
+  dCtx=dCv.getContext('2d');
+  const wrap=document.getElementById('doodle-wrap');
+  const dpr=window.devicePixelRatio||1;
+  dLogW=wrap.clientWidth; dLogH=wrap.clientHeight;
+  const img=dCv.toDataURL();
+  dCv.width=dLogW*dpr; dCv.height=dLogH*dpr;
+  dCv.style.width=dLogW+'px'; dCv.style.height=dLogH+'px';
+  dCtx.scale(dpr,dpr); dCtx.lineCap='round'; dCtx.lineJoin='round';
+  const im=new Image(); im.onload=()=>dCtx.drawImage(im,0,0,dLogW,dLogH); im.src=img;
+  ['mousedown','mousemove','mouseup','mouseleave','touchstart','touchmove','touchend']
+    .forEach(ev=>{ dCv.removeEventListener(ev,dEvt); dCv.addEventListener(ev,dEvt,{passive:false}); });
+}
+
+function dEvt(e){
+  const t=e.type;
+  if(t==='mousedown'||t==='touchstart'){ dDrawing=true; dLast=dPos(e); dDot(); e.preventDefault(); }
+  else if((t==='mousemove'||t==='touchmove')&&dDrawing){ dLine(dPos(e)); e.preventDefault(); }
+  else if(t==='mouseup'||t==='mouseleave'||t==='touchend'){ dDrawing=false; }
+}
+function dPos(e){ const r=dCv.getBoundingClientRect(),s=e.touches?e.touches[0]:e; return[s.clientX-r.left,s.clientY-r.top]; }
+function dDot(){
+  dCtx.beginPath();
+  if(dTool==='eraser'){dCtx.globalCompositeOperation='destination-out';dCtx.arc(dLast[0],dLast[1],dSize*2,0,Math.PI*2);dCtx.fill();}
+  else{dCtx.globalCompositeOperation='source-over';dCtx.fillStyle=dColor;dCtx.arc(dLast[0],dLast[1],dSize/2,0,Math.PI*2);dCtx.fill();}
+}
+function dLine([x,y]){
+  dCtx.beginPath();dCtx.moveTo(dLast[0],dLast[1]);dCtx.lineTo(x,y);
+  if(dTool==='eraser'){dCtx.globalCompositeOperation='destination-out';dCtx.strokeStyle='rgba(0,0,0,1)';dCtx.lineWidth=dSize*4;}
+  else{dCtx.globalCompositeOperation='source-over';dCtx.strokeStyle=dColor;dCtx.lineWidth=dSize;}
+  dCtx.stroke(); dLast=[x,y];
+}
+function setTool(t){
+  dTool=t;
+  document.getElementById('btn-pen').classList.toggle('active',t==='pen');
+  document.getElementById('btn-eraser').classList.toggle('active',t==='eraser');
+  if(dCv)dCv.style.cursor=t==='eraser'?'cell':'crosshair';
+}
+function setColor(el){
+  dColor=el.dataset.color;
+  document.querySelectorAll('.cs').forEach(s=>s.classList.remove('active')); el.classList.add('active');
+  if(dTool==='eraser')setTool('pen');
+}
+function setSize(el){
+  dSize=parseInt(el.dataset.size);
+  document.querySelectorAll('.sb').forEach(b=>b.classList.remove('active')); el.classList.add('active');
+}
+function clearDoodle(){
+  if(!confirm('Clear the notes pad?'))return;
+  dCtx.clearRect(0,0,dLogW,dLogH);
+}
+function exportDoodle(){
+  const wrap=document.getElementById('doodle-wrap');
+  html2canvas(wrap,{backgroundColor:'#1c1c1e',scale:2,useCORS:true,logging:false})
+    .then(canvas=>{ const a=document.createElement('a'); a.download='facilitator-notes-'+new Date().toISOString().slice(0,10)+'.jpg'; a.href=canvas.toDataURL('image/jpeg',0.95); a.click(); })
+    .catch(err=>{ console.error(err); alert('Export failed.'); });
+}
+
+window.addEventListener('resize',()=>initDoodle());
+document.addEventListener('DOMContentLoaded',()=>{ initDoodle(); render(); });
+render();
+</script>
+</body>
+</html>
