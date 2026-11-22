@@ -27,7 +27,7 @@
     "title": "Agile Ceremonies in Visual Timeline",
     "description": "This visual shows the main ceremonies and roles aligned to a timebox for visual reference. Interactive!",
     "category": "Agile",
-    "file": "https://chatgpt.com/canvas/shared/694977fce56c8191a8bda5a32ba80380",
+    "file": "sprint_cadence_visual.html",
     "updated": "2026-03-24"
   },
   {
@@ -53,8 +53,7 @@
       "ITIL"
     ],
     "file": "ITIL_Quality_Work_Notes_SOP.pdf",
-    "updated": "2026-03-24",
-    "hidden": true
+    "updated": "2026-03-24"
   },
   {
     "title": "ITIL Service Managment Practice - 7 Questions to Ask for Work Logs",
