@@ -136,5 +136,15 @@
     "category": "ITIL",
     "file": "wbs_intake_tool.html",
     "updated": "2026-03-31"
+  },
+  {
+    "title": "Team Operating Model",
+    "description": "A model for team workflow: Identity, Culture and Execution rings, laws of work, antipatterns, and a ticket rubric.",
+    "category": [
+      "Agile",
+      "ITIL"
+    ],
+    "file": "team-operating-model.html",
+    "updated": "2026-11-22"
   }
 ]
