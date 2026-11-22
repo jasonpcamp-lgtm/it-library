@@ -1,0 +1,713 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Sprint Cadence Visual</title>
+<meta name="description" content="Sprint ceremonies on a two-week timebox with continuous refinement. Click or tab to any item for details." />
+<style>
+  :root{
+    --bg0:#02030a; --bg1:#050814; --bg2:#1b2440;
+    --ink:#f1f5f9; --ink2:#cbd5e1; --muted:#94a3b8;
+    --line:rgba(255,255,255,.10); --glass:rgba(255,255,255,.05); --glass2:rgba(255,255,255,.08);
+    --ceremony:#38bdf8; --role:#34d399; --practice:#c4b5fd; --foundation:#fcd34d;
+    --track:rgba(125,211,252,.75); --rail:rgba(186,230,253,.55); --kaizen:rgba(167,243,208,.8);
+    --focus:rgba(255,255,255,.55);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{
+    min-height:100vh; color:var(--ink);
+    background:radial-gradient(circle at top, var(--bg2) 0%, var(--bg1) 55%, var(--bg0) 100%) fixed, var(--bg0);
+    font-family:ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  button{font:inherit; color:inherit}
+  .wrap{max-width:1400px; margin:0 auto; padding:16px}
+  .board{
+    position:relative; border:1px solid var(--line); border-radius:18px;
+    background:rgba(255,255,255,.02); box-shadow:0 22px 80px rgba(0,0,0,.55); overflow:hidden;
+  }
+  header{padding:24px 24px 4px}
+  .eyebrow{font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:rgba(241,245,249,.5)}
+  h1{margin:8px 0 0; font-size:17px; font-weight:650; letter-spacing:.01em}
+  .lead{margin:8px 0 0; max-width:70rem; font-size:13px; line-height:1.65; color:var(--ink2)}
+  .meta{display:flex; flex-wrap:wrap; align-items:center; gap:8px 18px; margin-top:14px; font-size:12px; color:var(--muted)}
+  .legend{display:flex; flex-wrap:wrap; gap:8px 14px; margin:0; padding:0; list-style:none}
+  .legend li{display:flex; align-items:center; gap:6px}
+  .swatch{width:10px; height:10px; border-radius:50%; border:2px solid currentColor}
+  .t-ceremony{--c:var(--ceremony); --c-soft:rgba(56,189,248,.16)}
+  .t-role{--c:var(--role); --c-soft:rgba(52,211,153,.15)}
+  .t-practice{--c:var(--practice); --c-soft:rgba(139,92,246,.16)}
+  .t-foundation{--c:var(--foundation); --c-soft:rgba(252,211,77,.14)}
+  .legend .t-ceremony,.legend .t-role,.legend .t-practice,.legend .t-foundation{color:var(--c)}
+
+  /* ---------- Stage (desktop: positioned map) ---------- */
+  .stage{position:relative; height:760px; margin-top:6px}
+  .lines{position:absolute; inset:0; width:100%; height:100%; pointer-events:none; overflow:visible}
+  .slot{position:absolute; left:calc(var(--x) * 1%); top:calc(var(--y) * 1%); transform:translate(-50%,-50%); z-index:2; width:var(--w, auto)}
+  .slot.al-left{transform:translate(0,-50%)}
+  .slot.al-right{transform:translate(-100%,-50%)}
+
+  /* shared interactive look */
+  .hit{
+    cursor:pointer; border:1px solid var(--line); background:var(--glass);
+    -webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px);
+    transition:scale .15s ease, background-color .15s ease, border-color .15s ease, box-shadow .15s ease;
+  }
+  .hit:hover{scale:1.03; background:var(--glass2)}
+  .hit:active{scale:.99}
+  .hit:focus{outline:none}
+  .hit:focus-visible{box-shadow:0 0 0 2px var(--bg1), 0 0 0 4px var(--focus)}
+  .hit[aria-expanded="true"]{background:var(--c-soft, var(--glass2)); border-color:var(--c, rgba(255,255,255,.3))}
+
+  /* nodes */
+  .node{display:block; padding:0; border:0; background:none; text-align:left; cursor:pointer}
+  .node:focus{outline:none}
+  .dot{
+    display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center;
+    width:var(--d); height:var(--d); border-radius:50%; border:2px solid var(--c); background:rgba(13,20,38,.78);
+    box-shadow:0 0 0 1px color-mix(in srgb, var(--c) 35%, transparent), 0 18px 50px color-mix(in srgb, var(--c) 16%, transparent);
+    transition:scale .15s ease, background-color .15s ease; line-height:1.1; padding:4px;
+  }
+  .node:hover .dot{scale:1.04; background:rgba(25,34,60,.9)}
+  .node:focus-visible .dot{box-shadow:0 0 0 2px var(--bg1), 0 0 0 4px var(--focus)}
+  .node[aria-expanded="true"] .dot{background:var(--c-soft)}
+  .sz-md{--d:78px} .sz-lg{--d:94px}
+  .lt{font-size:12px; font-weight:650; color:var(--ink)}
+  .lb{font-size:10.5px; color:var(--ink2); margin-top:3px}
+  .full{display:none}
+
+  /* ghost prev/next sprint */
+  .ghost{
+    width:78px; height:128px; border-radius:999px; border-style:dashed; border-color:rgba(255,255,255,.16);
+    color:rgba(241,245,249,.55); font-size:11.5px; line-height:1.25; padding:0 8px; background:rgba(255,255,255,.035);
+  }
+
+  /* daily blocks, pills, practice buttons */
+  .daily{display:block; width:100%; min-width:150px; text-align:left; border-radius:16px; padding:14px 16px; border-color:color-mix(in srgb, var(--c) 30%, transparent)}
+  .daily b{display:block; font-size:14px; font-weight:650}
+  .daily span{display:block; margin-top:4px; font-size:12px; color:var(--ink2)}
+  .pill{border-radius:999px; padding:9px 16px; font-size:12.5px; white-space:nowrap; border-color:color-mix(in srgb, var(--c) 34%, transparent)}
+  .chip{border-radius:12px; padding:9px 13px; font-size:12.5px; border-color:color-mix(in srgb, var(--c) 34%, transparent)}
+  .rail-label{
+    border:0; background:none; padding:4px 2px; cursor:pointer; font-size:11px; letter-spacing:.18em;
+    color:rgba(224,242,254,.72); text-transform:uppercase;
+  }
+  .rail-label:hover{color:#e0f2fe}
+  .rail-label:focus{outline:none}
+  .rail-label:focus-visible{box-shadow:0 0 0 2px var(--focus); border-radius:6px}
+
+  .roles-box{position:absolute; right:24px; top:14px; z-index:2}
+  .kicker{font-size:10px; letter-spacing:.22em; color:rgba(255,255,255,.55); text-transform:uppercase}
+  .roles{display:flex; gap:12px; margin-top:10px}
+  .role{width:50px; height:50px; border-radius:50%; font-size:12px; font-weight:650; border-color:color-mix(in srgb, var(--c) 45%, transparent)}
+
+  .practices{padding:8px 24px 26px}
+  .practices .row{display:flex; flex-wrap:wrap; justify-content:center; gap:10px; margin-top:10px}
+  .practices .kicker{text-align:center}
+
+  /* ---------- Popover ---------- */
+  .pop{
+    position:fixed; z-index:50; width:min(360px, calc(100vw - 24px)); max-height:calc(100vh - 24px); overflow:auto;
+    border:1px solid var(--c); border-radius:14px; background:rgba(2,6,23,.95); color:var(--ink); padding:16px;
+    -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px);
+    box-shadow:0 0 0 1px color-mix(in srgb, var(--c) 30%, transparent), 0 18px 60px rgba(0,0,0,.55);
+    opacity:0; transform:translateY(6px) scale(.98); transition:opacity .14s ease, transform .14s ease;
+  }
+  .pop[hidden]{display:none}
+  .pop.open{opacity:1; transform:none}
+  .pop:focus{outline:none}
+  .pop-top{display:flex; align-items:flex-start; justify-content:space-between; gap:12px}
+  .badge{
+    display:inline-flex; align-items:center; border-radius:999px; padding:2px 8px; font-size:10.5px; letter-spacing:.06em;
+    background:var(--c-soft); color:var(--c); box-shadow:inset 0 0 0 1px color-mix(in srgb, var(--c) 35%, transparent);
+  }
+  .sub{font-size:11px; color:var(--ink2); margin-left:8px}
+  .pop h2{margin:9px 0 0; font-size:14.5px; line-height:1.35; font-weight:650}
+  .pop h2:focus{outline:none}
+  .pop ul{margin:12px 0 0; padding-left:20px; font-size:13px; line-height:1.45; color:#e2e8f0}
+  .pop li+li{margin-top:7px}
+  .x{
+    flex:none; border:0; background:none; color:var(--ink2); border-radius:8px; width:30px; height:30px;
+    cursor:pointer; font-size:15px; line-height:1;
+  }
+  .x:hover{background:rgba(255,255,255,.07); color:var(--ink)}
+  .x:focus{outline:none}
+  .x:focus-visible{box-shadow:0 0 0 2px var(--focus)}
+
+  /* ---------- Cynefin dialog ---------- */
+  .scrim{position:fixed; inset:0; z-index:60; background:rgba(0,0,0,.45); opacity:0; transition:opacity .18s ease}
+  .scrim.open{opacity:1}
+  .scrim[hidden]{display:none}
+  .cyn{
+    position:fixed; z-index:61; right:24px; bottom:24px; width:min(400px, calc(100vw - 24px)); max-height:calc(100vh - 48px); overflow:auto;
+    border:1px solid var(--line); border-radius:18px; background:rgba(2,6,23,.96); padding:16px;
+    box-shadow:0 18px 60px rgba(0,0,0,.6); opacity:0; transform:translateY(18px); transition:opacity .18s ease, transform .18s ease;
+  }
+  .cyn[hidden]{display:none}
+  .cyn.open{opacity:1; transform:none}
+  .cyn .kicker{font-size:11px; color:var(--ink2); font-weight:650}
+  .cyn h2{margin:8px 0 0; font-size:14.5px}
+  .cyn ul{margin:10px 0 0; padding-left:20px; font-size:12.5px; line-height:1.45; color:#e2e8f0}
+  .cyn li+li{margin-top:5px}
+  .quads{display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:14px}
+  .quad{
+    text-align:left; border-radius:12px; padding:11px 12px; cursor:pointer; border:1px solid var(--qb); background:var(--qa);
+    transition:filter .15s ease;
+  }
+  .quad:hover{filter:brightness(1.15)}
+  .quad:focus{outline:none}
+  .quad:focus-visible{box-shadow:0 0 0 2px var(--focus)}
+  .quad[aria-pressed="true"]{box-shadow:inset 0 0 0 2px var(--qb)}
+  .quad b{display:block; font-size:13.5px}
+  .quad span{display:block; margin-top:4px; font-size:11.5px; color:rgba(226,232,240,.9)}
+  .q-complex{--qa:rgba(14,165,233,.2); --qb:rgba(56,189,248,.45)}
+  .q-complicated{--qa:rgba(99,102,241,.2); --qb:rgba(129,140,248,.45)}
+  .q-chaotic{--qa:rgba(16,185,129,.2); --qb:rgba(52,211,153,.45)}
+  .q-clear{--qa:rgba(245,158,11,.2); --qb:rgba(251,191,36,.45)}
+  .detail{margin-top:10px; border:1px solid var(--line); background:rgba(255,255,255,.05); border-radius:12px; padding:11px 12px; font-size:12.5px; line-height:1.45; color:#e2e8f0}
+
+  .hint{font-size:12px; color:var(--muted)}
+  .sr{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap}
+
+  /* ---------- Phone / narrow: vertical timeline ---------- */
+  @media (max-width: 899px){
+    .wrap{padding:12px}
+    header{padding:20px 16px 4px}
+    .stage{height:auto; display:flex; flex-direction:column; padding:14px 16px 8px}
+    .lines{display:none}
+    .slot, .slot.al-left, .slot.al-right{position:relative; left:auto; top:auto; transform:none; order:var(--o); padding:7px 0 7px 70px; width:auto}
+    .slot::before{content:""; position:absolute; left:26px; top:0; bottom:0; width:2px; background:rgba(125,211,252,.35)}
+    .slot.first::before{top:50%}
+    .slot.last::before{bottom:50%}
+    .slot:not(.is-node)::after{content:""; position:absolute; left:22px; top:50%; width:10px; height:10px; margin-top:-5px; border-radius:50%; background:#0b1222; border:2px solid rgba(125,211,252,.6)}
+    .slot.is-node{padding-left:0}
+    .node{display:flex; align-items:center; gap:16px; width:100%}
+    .sz-md,.sz-lg{--d:54px}
+    .dot{flex:none; padding:2px}
+    .lt{font-size:10px} .lb{display:none}
+    .full{display:block; min-width:0}
+    .full b{display:block; font-size:14px; font-weight:650; color:var(--ink)}
+    .full small{display:block; margin-top:3px; font-size:12px; color:var(--ink2)}
+    .ghost{width:100%; height:auto; padding:10px 14px; border-radius:12px; text-align:left}
+    .daily{min-width:0}
+    .pill{white-space:normal; text-align:left}
+    .slot.aside{padding-left:0; margin-top:10px}
+    .slot.aside::before,.slot.aside::after{display:none}
+    .roles-box{position:relative; right:auto; top:auto; order:60; margin-top:18px}
+    .practices{padding:8px 16px 22px}
+    .practices .row{justify-content:flex-start}
+    .practices .kicker{text-align:left}
+    .pop{left:12px !important; right:12px; top:auto !important; bottom:12px; width:auto; max-height:70vh}
+    .cyn{left:12px; right:12px; bottom:12px; width:auto}
+  }
+  @media (prefers-reduced-motion: reduce){
+    *{transition:none !important}
+    .hit:hover,.node:hover .dot{scale:none}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <main class="board" aria-labelledby="pageTitle">
+    <header>
+      <div class="eyebrow">Agile · Scrum cadence</div>
+      <h1 id="pageTitle">Sprint ceremonies (zoomed) with continuous refinement</h1>
+      <p class="lead">Pre-sprint refine → plan → sprint start → dailies → demo anytime → plan next → customer demo → delivery → retro → kaizen → next sprint.</p>
+      <div class="meta">
+        <ul class="legend" aria-label="Legend">
+          <li class="t-ceremony"><span class="swatch" aria-hidden="true"></span><span style="color:var(--ink2)">Ceremony</span></li>
+          <li class="t-role"><span class="swatch" aria-hidden="true"></span><span style="color:var(--ink2)">Role</span></li>
+          <li class="t-practice"><span class="swatch" aria-hidden="true"></span><span style="color:var(--ink2)">Practice</span></li>
+          <li class="t-foundation"><span class="swatch" aria-hidden="true"></span><span style="color:var(--ink2)">Foundation</span></li>
+        </ul>
+        <span class="hint">Click or tab to any item for details. Esc closes.</span>
+      </div>
+    </header>
+
+    <div class="stage" id="stage">
+      <svg class="lines" id="lines" aria-hidden="true" focusable="false"></svg>
+      <!-- slots are generated by the script below; noscript fallback lists the cadence -->
+      <noscript><p style="padding:16px;color:#cbd5e1">This visual needs JavaScript to show its interactive timeline.</p></noscript>
+    </div>
+
+    <section class="practices" aria-label="Practices">
+      <div class="kicker">Practices</div>
+      <div class="row" id="practiceRow"></div>
+    </section>
+  </main>
+</div>
+
+<!-- Shared popover (moved next to the item that opened it, so Tab order stays natural) -->
+<div class="pop" id="pop" role="dialog" aria-modal="false" aria-labelledby="popTitle" tabindex="-1" hidden>
+  <div class="pop-top">
+    <div>
+      <span class="badge" id="popBadge"></span><span class="sub" id="popSub"></span>
+      <h2 id="popTitle" tabindex="-1"></h2>
+    </div>
+    <button type="button" class="x" id="popClose" aria-label="Close details">✕</button>
+  </div>
+  <ul id="popList"></ul>
+</div>
+
+<!-- Cynefin dialog -->
+<div class="scrim" id="scrim" hidden></div>
+<div class="cyn t-foundation" id="cyn" role="dialog" aria-modal="true" aria-labelledby="cynTitle" hidden>
+  <div class="pop-top">
+    <div>
+      <span class="badge">FOUNDATION</span>
+      <h2 id="cynTitle" tabindex="-1">Cynefin near refinement</h2>
+    </div>
+    <button type="button" class="x" id="cynClose" aria-label="Close Cynefin">✕</button>
+  </div>
+  <ul id="cynList"></ul>
+  <div class="kicker" style="margin-top:14px; letter-spacing:.2em">CYNEFIN</div>
+  <div class="quads" id="quads"></div>
+  <div class="detail" id="cynDetail" aria-live="polite">Click a quadrant to map work. Complex/Chaotic work is what you protect the sprint for.</div>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ---------- Content (unchanged from the original component) ---------- */
+  var DATA = {
+    "refinement": { type: "foundation", title: "Backlog refinement (continuous)", subtitle: "Wed / Thu (example)", bullets: [
+      "Not always tied to the next sprint only.",
+      "Makes items ready for planning: clarify, slice, estimate, accept.",
+      "Product Backlog is the single ordered list (Product Owner owns)."] },
+    "cynefin": { type: "foundation", title: "Cynefin near refinement", bullets: [
+      "Use Cynefin to decide how to approach work (Clear, Complicated, Complex, Chaotic).",
+      "Complex/Chaotic work needs discovery and feedback loops, not just estimation.",
+      "This is why we refine before we plan: get the work shaped the right way."] },
+    "sprint-planning": { type: "ceremony", title: "Sprint Planning", subtitle: "Fri before sprint", bullets: [
+      "Define what can be delivered and how.",
+      "Timeboxed (~2 hours per sprint week).",
+      "Use empirical data (capacity/velocity) rather than hopes.",
+      "Confirm Definition of Done and the Sprint Goal."] },
+    "sprint": { type: "ceremony", title: "Sprint (timebox container)", subtitle: "2 weeks (example)", bullets: [
+      "All events live inside this timebox.",
+      "No unmanaged work pushed in; team may pull if capacity allows.",
+      "Enables inspect/adapt loops and predictable cadence."] },
+    "interrupt": { type: "practice", title: "Interrupt pattern / Scrum Master", bullets: [
+      "Scrum Master routes interrupts so the team stays focused.",
+      "Protects the sprint timebox while still handling urgent work.",
+      "If interrupts are constant, create a visible lane and make tradeoffs explicit."] },
+    "daily": { type: "ceremony", title: "Daily Scrum", subtitle: "15 min, Mon–Fri", bullets: [
+      "Focus on progress toward the Sprint Goal and impediments.",
+      "Not a status meeting for management.",
+      "Keep it short; move deep dives to after."] },
+    "demo-mid": { type: "ceremony", title: "Demo as you go", bullets: [
+      "Shortens the feedback loop.",
+      "Stakeholders can see increments during the sprint.",
+      "Reduces surprise at Sprint Review and improves alignment."] },
+    "next-planning": { type: "ceremony", title: "Next sprint planning (week 2)", bullets: [
+      "Plan the next sprint before this one ends.",
+      "Depends on continuous refinement.",
+      "Keeps the Monday start clean and reduces churn."] },
+    "sprint-review": { type: "ceremony", title: "Sprint Review / demo to customer", bullets: [
+      "Inspect the increment and adapt the Product Backlog.",
+      "Engage stakeholders for feedback and next priorities.",
+      "PO can make release decisions."] },
+    "delivery": { type: "ceremony", title: "Sprint delivery (increment)", subtitle: "Meets DoD", bullets: [
+      "Increment meets Definition of Done.",
+      "Provides transparency and trust.",
+      "Supports pull-based delivery."] },
+    "retro": { type: "ceremony", title: "Sprint Retrospective", bullets: [
+      "Inspect/adapt how the team works.",
+      "Create action plans (not vibes-only reflection).",
+      "Feeds a Kaizen item into the next sprint."] },
+    "kaizen": { type: "practice", title: "Kaizen to next sprint", bullets: [
+      "Retro output becomes real work.",
+      "Place improvement in the backlog (visible, sized, owned).",
+      "Small experiments compound over time."] },
+    "dod": { type: "practice", title: "Definition of Done", bullets: [
+      "Living quality checklist.",
+      "Shared agreement with stakeholders.",
+      "Reveals team maturity and prevents 'almost done'."] },
+    "timeboxing": { type: "practice", title: "Timeboxing", bullets: [
+      "Creates focus and urgency.",
+      "Work expands to fill time, so constrain time to constrain chaos.",
+      "Used for all Scrum events."] },
+    "stories": { type: "practice", title: "User stories (3C’s / INVEST)", bullets: [
+      "3C’s: Card, Conversation, Confirmation.",
+      "INVEST: Independent, Negotiable, Valuable, Estimable, Small, Testable.",
+      "Supports good refinement and better slicing."] },
+    "facilitation": { type: "practice", title: "Scrum Master facilitation tips", bullets: [
+      "Ask open-ended, decision-driving questions.",
+      "Keep the group oriented to outcomes and next actions.",
+      "Use structure (agenda, timebox, working agreements) to reduce drift."] },
+    "po": { type: "role", title: "Product Owner", bullets: [
+      "Maximizes value.",
+      "Owns/prioritizes Product Backlog.",
+      "Engages stakeholders; makes release decisions."] },
+    "sm": { type: "role", title: "Scrum Master", bullets: [
+      "Servant leader, facilitator, coach.",
+      "Protects the team; removes impediments.",
+      "Ensures Scrum is understood and practiced."] },
+    "team": { type: "role", title: "Team", bullets: [
+      "Self-managing, cross-functional.",
+      "Delivers increments.",
+      "Improves processes and outcomes."] },
+    "agile-terms": { type: "foundation", title: "More agile terms & definitions", bullets: [
+      "Agile is a philosophy; Scrum is a framework.",
+      "Empirical control: transparency, inspection, adaptation.",
+      "Value: people, working solutions, collaboration, responding to change."] },
+    "prev-sprint": { type: "foundation", title: "Previous sprint context", bullets: [
+      "This sprint is part of a chain, not an island.",
+      "Last retro/Kaizen can feed this sprint."] },
+    "next-sprint": { type: "foundation", title: "Next sprint context", bullets: [
+      "Current Kaizen and refinement feed the next sprint.",
+      "Planning in week 2 prepares it."] }
+  };
+
+  var QUADS = [
+    { cls: "q-complex", title: "Complex", mini: "Probe → Sense → Respond",
+      detail: "Complex: unknown unknowns. Probe → Sense → Respond. Use experiments and iterative delivery. Protect this from over-planning." },
+    { cls: "q-complicated", title: "Complicated", mini: "Sense → Analyze → Respond",
+      detail: "Complicated: known unknowns. Sense → Analyze → Respond. SME work, analysis, design. Feed refined items into sprints." },
+    { cls: "q-chaotic", title: "Chaotic", mini: "Act → Sense → Respond",
+      detail: "Chaotic: act to stabilize first, then sense/respond. Often ops/incidents; keep out of the sprint unless you have a lane." },
+    { cls: "q-clear", title: "Clear", mini: "Sense → Categorize → Respond",
+      detail: "Clear: known knowns. Sense → Categorize → Respond. SOP work. Often batchable and automatable." }
+  ];
+
+  /* ---------- Layout: x/y are % of the desktop stage; o is order in the phone timeline ---------- */
+  var SLOTS = [
+    { kind: "ghost", key: "prev-sprint", label: "Prev sprint", x: 4.5, y: 55, o: 1 },
+    { kind: "node", key: "refinement", top: "Refine", bottom: "Wed/Thu", size: "md", x: 16, y: 41, o: 2 },
+    { kind: "pill", key: "cynefin", label: "Cynefin: classify work", x: 10, y: 90, o: 3, align: "left" },
+    { kind: "rail", key: "refinement", label: "Continuous refinement", x: 10, y: 79.5, o: 4, align: "left" },
+    { kind: "node", key: "sprint-planning", top: "Planning", bottom: "Fri", size: "md", x: 27, y: 41, o: 5 },
+    { kind: "node", key: "sprint", top: "Sprint start", bottom: "Mon", size: "lg", x: 37, y: 55, o: 6 },
+    { kind: "chip", key: "interrupt", label: "Interrupt pattern / SM", x: 37, y: 68, o: 7 },
+    { kind: "daily", key: "daily", label: "Daily Scrum", sub: "week 1 (Mon–Fri)", x: 44, y: 34, w: 15, o: 8 },
+    { kind: "node", key: "demo-mid", top: "Demo", bottom: "as you go", size: "md", x: 52, y: 17, o: 9 },
+    { kind: "daily", key: "daily", label: "Daily Scrum", sub: "week 2 (Mon–Fri)", x: 60, y: 34, w: 15, o: 10 },
+    { kind: "node", key: "next-planning", top: "Next plan", bottom: "week 2", size: "md", x: 64, y: 71, o: 11 },
+    { kind: "node", key: "sprint-review", top: "Review", bottom: "to customer", size: "md", x: 74, y: 42, o: 12 },
+    { kind: "node", key: "delivery", top: "Delivery", bottom: "Fri", size: "lg", x: 82, y: 55, o: 13 },
+    { kind: "node", key: "retro", top: "Retro", bottom: "", size: "md", x: 79, y: 76, o: 14 },
+    { kind: "node", key: "kaizen", top: "Kaizen", bottom: "", size: "md", x: 90, y: 74, o: 15 },
+    { kind: "ghost", key: "next-sprint", label: "Next sprint", x: 95.5, y: 55, o: 16 },
+    { kind: "pill", key: "agile-terms", label: "More agile terms & definitions", x: 90, y: 90, o: 40, align: "right", aside: true }
+  ];
+  var ROLES = [["po", "PO"], ["sm", "SM"], ["team", "TEAM"]];
+  var PRACTICES = [["dod", "Definition of Done"], ["timeboxing", "Timeboxing"],
+                   ["stories", "User stories (3C’s / INVEST)"], ["facilitation", "SM facilitation tips"]];
+
+  var stage = document.getElementById("stage");
+  var svg = document.getElementById("lines");
+  var pop = document.getElementById("pop");
+  var popTitle = document.getElementById("popTitle");
+  var popBadge = document.getElementById("popBadge");
+  var popSub = document.getElementById("popSub");
+  var popList = document.getElementById("popList");
+  var popClose = document.getElementById("popClose");
+  var scrim = document.getElementById("scrim");
+  var cyn = document.getElementById("cyn");
+  var cynClose = document.getElementById("cynClose");
+  var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var narrowMQ = window.matchMedia("(max-width: 899px)");
+
+  function el(tag, cls, text) {
+    var n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (text != null) n.textContent = text;
+    return n;
+  }
+
+  function makeTrigger(btn, key) {
+    var item = DATA[key];
+    btn.type = "button";
+    btn.dataset.key = key;
+    btn.setAttribute("aria-haspopup", "dialog");
+    btn.setAttribute("aria-expanded", "false");
+    btn.setAttribute("aria-controls", key === "cynefin" ? "cyn" : "pop");
+    btn.classList.add("t-" + item.type);
+    return btn;
+  }
+
+  /* ---------- Build the stage ---------- */
+  SLOTS.forEach(function (s, i) {
+    var slot = el("div", "slot");
+    slot.style.setProperty("--x", s.x);
+    slot.style.setProperty("--y", s.y);
+    slot.style.setProperty("--o", s.o);
+    if (s.align) slot.classList.add("al-" + s.align);
+    if (s.aside) slot.classList.add("aside");
+    if (s.w) slot.style.setProperty("--w", s.w + "%");
+    var item = DATA[s.key], btn;
+
+    if (s.kind === "node") {
+      slot.classList.add("is-node");
+      btn = el("button", "node sz-" + s.size);
+      var dot = el("span", "dot");
+      dot.setAttribute("aria-hidden", "true");
+      dot.appendChild(el("span", "lt", s.top));
+      if (s.bottom) dot.appendChild(el("span", "lb", s.bottom));
+      var full = el("span", "full");
+      full.appendChild(el("b", null, item.title));
+      var small = item.subtitle || s.bottom;
+      if (small) full.appendChild(el("small", null, small));
+      btn.appendChild(dot);
+      btn.appendChild(full);
+      btn.setAttribute("aria-label", item.title + (s.bottom ? " (" + s.bottom + ")" : ""));
+    } else if (s.kind === "ghost") {
+      btn = el("button", "hit ghost", s.label);
+      btn.setAttribute("aria-label", item.title);
+    } else if (s.kind === "daily") {
+      btn = el("button", "hit daily");
+      btn.appendChild(el("b", null, s.label));
+      btn.appendChild(el("span", null, s.sub));
+      btn.setAttribute("aria-label", "Daily Scrum, " + s.sub);
+    } else if (s.kind === "pill") {
+      btn = el("button", "hit pill", s.label);
+    } else if (s.kind === "chip") {
+      btn = el("button", "hit chip", s.label);
+    } else if (s.kind === "rail") {
+      btn = el("button", "rail-label", s.label);
+      btn.setAttribute("aria-label", "Continuous refinement: " + item.title);
+    }
+    makeTrigger(btn, s.key);
+    if (s.kind === "node") { btn.classList.remove("t-" + item.type); slot.classList.add("t-" + item.type); }
+    slot.appendChild(btn);
+    if (s.kind === "node") slot.dataset.node = s.key;
+    stage.appendChild(slot);
+  });
+
+  // First/last markers for the phone timeline line
+  (function markEnds() {
+    var tl = SLOTS.filter(function (s) { return !s.aside; }).map(function (s) { return s.o; });
+    var min = Math.min.apply(null, tl), max = Math.max.apply(null, tl);
+    Array.prototype.forEach.call(stage.querySelectorAll(".slot"), function (sl) {
+      var o = +sl.style.getPropertyValue("--o");
+      if (o === min) sl.classList.add("first");
+      if (o === max) sl.classList.add("last");
+    });
+  })();
+
+  // Roles
+  var rolesBox = el("div", "roles-box");
+  rolesBox.appendChild(el("div", "kicker", "Roles"));
+  var rolesRow = el("div", "roles");
+  ROLES.forEach(function (r) {
+    var b = makeTrigger(el("button", "hit role", r[1]), r[0]);
+    b.setAttribute("aria-label", DATA[r[0]].title);
+    rolesRow.appendChild(b);
+  });
+  rolesBox.appendChild(rolesRow);
+  stage.appendChild(rolesBox);
+
+  // Practices row
+  var prow = document.getElementById("practiceRow");
+  PRACTICES.forEach(function (p) { prow.appendChild(makeTrigger(el("button", "hit chip", p[1]), p[0])); });
+
+  // Cynefin dialog content
+  var cynList = document.getElementById("cynList");
+  DATA.cynefin.bullets.forEach(function (b) { cynList.appendChild(el("li", null, b)); });
+  var quads = document.getElementById("quads");
+  var cynDetail = document.getElementById("cynDetail");
+  QUADS.forEach(function (q) {
+    var b = el("button", "quad " + q.cls);
+    b.type = "button";
+    b.setAttribute("aria-pressed", "false");
+    b.appendChild(el("b", null, q.title));
+    b.appendChild(el("span", null, q.mini));
+    b.addEventListener("click", function () {
+      Array.prototype.forEach.call(quads.children, function (c) { c.setAttribute("aria-pressed", "false"); });
+      b.setAttribute("aria-pressed", "true");
+      cynDetail.textContent = q.detail;
+    });
+    quads.appendChild(b);
+  });
+
+  /* ---------- Connector lines (drawn in real pixels so arrowheads never stretch) ---------- */
+  var NS = "http://www.w3.org/2000/svg";
+  function drawLines() {
+    while (svg.firstChild) svg.removeChild(svg.firstChild);
+    if (narrowMQ.matches) return;
+    var W = stage.clientWidth, H = stage.clientHeight;
+    if (!W || !H) return;
+    svg.setAttribute("viewBox", "0 0 " + W + " " + H);
+    var defs = document.createElementNS(NS, "defs");
+    [["ah-track", "rgba(125,211,252,.85)", 14], ["ah-rail", "rgba(186,230,253,.7)", 12], ["ah-kaizen", "rgba(167,243,208,.9)", 10]]
+      .forEach(function (m) {
+        var mk = document.createElementNS(NS, "marker");
+        mk.setAttribute("id", m[0]);
+        mk.setAttribute("viewBox", "0 0 10 10");
+        mk.setAttribute("refX", "1"); mk.setAttribute("refY", "5");
+        mk.setAttribute("markerUnits", "userSpaceOnUse");
+        mk.setAttribute("markerWidth", m[2]); mk.setAttribute("markerHeight", m[2]);
+        mk.setAttribute("orient", "auto");
+        var p = document.createElementNS(NS, "path");
+        p.setAttribute("d", "M0,0 L10,5 L0,10 z");
+        p.setAttribute("fill", m[1]);
+        mk.appendChild(p); defs.appendChild(mk);
+      });
+    svg.appendChild(defs);
+    function line(d, stroke, w, marker, dash) {
+      var p = document.createElementNS(NS, "path");
+      p.setAttribute("d", d); p.setAttribute("fill", "none");
+      p.setAttribute("stroke", stroke); p.setAttribute("stroke-width", w);
+      p.setAttribute("stroke-linecap", "round");
+      if (dash) p.setAttribute("stroke-dasharray", dash);
+      if (marker) p.setAttribute("marker-end", "url(#" + marker + ")");
+      svg.appendChild(p);
+    }
+    var X = function (p) { return W * p / 100; }, Y = function (p) { return H * p / 100; };
+    // Main sprint track
+    line("M" + X(7) + "," + Y(55) + " L" + (X(92) - 14) + "," + Y(55), "rgba(125,211,252,.7)", 6, "ah-track");
+    // Continuous refinement rail
+    line("M" + X(10) + "," + Y(83.5) + " L" + (X(90) - 12) + "," + Y(83.5), "rgba(186,230,253,.55)", 4, "ah-rail");
+    // Kaizen -> next sprint
+    var sr = stage.getBoundingClientRect();
+    var kz = stage.querySelector('[data-node="kaizen"] .dot');
+    var nx = stage.querySelector('[data-key="next-sprint"]');
+    if (kz && nx) {
+      var a = kz.getBoundingClientRect(), b = nx.getBoundingClientRect();
+      var x1 = a.right - a.width * 0.22 - sr.left, y1 = a.top + a.height * 0.12 - sr.top;
+      var x2 = b.left + b.width / 2 - sr.left, y2 = b.bottom - sr.top + 11;
+      line("M" + x1 + "," + y1 + " Q" + ((x1 + x2) / 2 - 4) + "," + (y1 - 6) + " " + x2 + "," + y2, "rgba(167,243,208,.75)", 3, "ah-kaizen");
+    }
+    // Retro -> Kaizen
+    var rt = stage.querySelector('[data-node="retro"] .dot');
+    if (rt && kz && kz.getBoundingClientRect().left - rt.getBoundingClientRect().right > 24) {
+      var r = rt.getBoundingClientRect(), k = kz.getBoundingClientRect();
+      line("M" + (r.right - sr.left + 4) + "," + (r.top + r.height / 2 - sr.top) + " L" + (k.left - sr.left - 14) + "," + (k.top + k.height / 2 - sr.top),
+           "rgba(167,243,208,.55)", 2, "ah-kaizen", "4 5");
+    }
+  }
+
+  /* ---------- Popover ---------- */
+  var current = null; // the trigger button whose popover is open
+  var closeTimer = null;
+
+  function placePop() {
+    if (!current || pop.hidden) return;
+    if (narrowMQ.matches) { pop.style.left = ""; pop.style.top = ""; return; }
+    var r = current.getBoundingClientRect();
+    var pw = pop.offsetWidth, ph = pop.offsetHeight, vw = window.innerWidth, vh = window.innerHeight, m = 12;
+    var left = r.right + m;
+    if (left + pw > vw - m) left = r.left - m - pw;           // flip to the left side
+    if (left < m) left = Math.min(Math.max(m, r.left + r.width / 2 - pw / 2), vw - pw - m); // centre under/over
+    var top = (left === r.right + m || left === r.left - m - pw) ? r.top - 8 : r.bottom + m;
+    if (top + ph > vh - m) top = Math.max(m, (left === r.right + m || left === r.left - m - pw) ? vh - ph - m : r.top - m - ph);
+    top = Math.max(m, top);
+    pop.style.left = Math.round(left) + "px";
+    pop.style.top = Math.round(top) + "px";
+  }
+
+  function insertionPoint(btn) {
+    // Put the popover right after the trigger's positioned wrapper (never inside a transformed element,
+    // which would break position:fixed), so Tab moves on to the next item naturally.
+    var host = btn.closest(".slot") || btn;
+    return host;
+  }
+
+  function openPop(btn) {
+    var key = btn.dataset.key, item = DATA[key];
+    clearTimeout(closeTimer);
+    if (current && current !== btn) current.setAttribute("aria-expanded", "false");
+    current = btn;
+    pop.className = "pop t-" + item.type;
+    popBadge.textContent = item.type.toUpperCase();
+    popSub.textContent = item.subtitle || "";
+    popTitle.textContent = item.title;
+    while (popList.firstChild) popList.removeChild(popList.firstChild);
+    item.bullets.forEach(function (b) { popList.appendChild(el("li", null, b)); });
+    var host = insertionPoint(btn);
+    host.parentNode.insertBefore(pop, host.nextSibling);
+    pop.hidden = false;
+    btn.setAttribute("aria-expanded", "true");
+    placePop();
+    requestAnimationFrame(function () { pop.classList.add("open"); });
+    popTitle.focus({ preventScroll: true });
+  }
+
+  function closePop(returnFocus) {
+    if (!current) return;
+    var btn = current;
+    current = null;
+    btn.setAttribute("aria-expanded", "false");
+    pop.classList.remove("open");
+    closeTimer = setTimeout(function () { pop.hidden = true; }, reduceMotion ? 0 : 150);
+    if (returnFocus) btn.focus({ preventScroll: true });
+  }
+
+  /* ---------- Cynefin dialog ---------- */
+  var cynOpener = null;
+  function openCyn(btn) {
+    closePop(false);
+    cynOpener = btn;
+    btn.setAttribute("aria-expanded", "true");
+    scrim.hidden = false; cyn.hidden = false;
+    requestAnimationFrame(function () { scrim.classList.add("open"); cyn.classList.add("open"); });
+    document.getElementById("cynTitle").focus({ preventScroll: true });
+  }
+  function closeCyn() {
+    if (cyn.hidden) return;
+    scrim.classList.remove("open"); cyn.classList.remove("open");
+    setTimeout(function () { scrim.hidden = true; cyn.hidden = true; }, reduceMotion ? 0 : 190);
+    if (cynOpener) { cynOpener.setAttribute("aria-expanded", "false"); cynOpener.focus({ preventScroll: true }); }
+    cynOpener = null;
+  }
+
+  /* ---------- Events ---------- */
+  document.addEventListener("click", function (e) {
+    var btn = e.target.closest && e.target.closest("[data-key]");
+    if (!btn) return;
+    if (btn.dataset.key === "cynefin") { openCyn(btn); return; }
+    if (current === btn) closePop(false); else openPop(btn);
+  });
+  popClose.addEventListener("click", function () { closePop(true); });
+  cynClose.addEventListener("click", closeCyn);
+  scrim.addEventListener("click", closeCyn);
+
+  // Outside click closes the popover (triggers handle their own toggle/switch in the click handler)
+  document.addEventListener("pointerdown", function (e) {
+    if (!current) return;
+    if (pop.contains(e.target)) return;
+    if (e.target.closest && e.target.closest("[data-key]")) return;
+    closePop(false);
+  });
+
+  // Keyboard: Escape closes; Tab is trapped inside the Cynefin dialog
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" || e.key === "Esc") {
+      if (cynOpener) { e.preventDefault(); closeCyn(); return; }
+      if (current) { e.preventDefault(); closePop(true); }
+      return;
+    }
+    if (e.key === "Tab" && cynOpener) {
+      var f = cyn.querySelectorAll("button");
+      var first = f[0], last = f[f.length - 1];
+      if (e.shiftKey && (document.activeElement === first || !cyn.contains(document.activeElement))) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    }
+  });
+
+  // Tabbing out of the popover closes it (focus is already where the user is going)
+  pop.addEventListener("focusout", function (e) {
+    if (!current) return;
+    var to = e.relatedTarget;
+    if (!to) return;                // pointer handling covers clicks
+    if (pop.contains(to) || to === current) return;
+    closePop(false);
+  });
+
+  var raf = 0;
+  function relayout() {
+    cancelAnimationFrame(raf);
+    raf = requestAnimationFrame(function () { drawLines(); placePop(); });
+  }
+  window.addEventListener("resize", relayout);
+  window.addEventListener("scroll", function () { placePop(); }, { passive: true });
+  if (narrowMQ.addEventListener) narrowMQ.addEventListener("change", relayout); else narrowMQ.addListener(relayout);
+  if (window.ResizeObserver) new ResizeObserver(relayout).observe(stage);
+  drawLines();
+})();
+</script>
+</body>
+</html>
