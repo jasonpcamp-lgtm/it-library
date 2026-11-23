@@ -153,5 +153,19 @@
     "category": "Agile",
     "file": "why_slack_matters.html",
     "updated": "2026-11-23"
+  },
+  {
+    "title": "Shortest Job First and WSJF",
+    "description": "Interactive: why doing short jobs first cuts waiting, and how WSJF weighs jobs by cost of delay and size.",
+    "category": "Agile",
+    "file": "wsjf_shortest_job_first.html",
+    "updated": "2026-11-23"
+  },
+  {
+    "title": "The Testing Pyramid",
+    "description": "The three levels of testing, from many fast unit checks to a few full end-to-end runs.",
+    "category": "Agile",
+    "file": "testing_pyramid.html",
+    "updated": "2026-11-23"
   }
 ]

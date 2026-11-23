@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta name="robots" content="noindex">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Shortest Job First and WSJF</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --void:#0A0716; --panel:#150E2E; --edge:#3B2A6B;
+    --cyan:#22E7FF; --magenta:#FF3D9A; --amber:#FFC63D; --lime:#7CF06A;
+    --chalk:#EDE9FF; --dim:#8E7FC4;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;min-height:100vh;background:var(--void);color:var(--chalk);
+    font-family:"Chakra Petch",system-ui,sans-serif;padding:clamp(.75rem,2.5vw,1.75rem);
+  }
+  .tabs,.controls,.lanes{max-width:1180px;margin-left:auto;margin-right:auto}
+
+  .tabs{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:clamp(.8rem,2.2vw,1.1rem)}
+  .tab{
+    font-family:inherit;font-weight:700;font-size:clamp(.85rem,2.3vw,1.05rem);letter-spacing:.05em;
+    background:none;color:var(--dim);border:2px solid var(--edge);border-radius:8px;
+    padding:.6em 1.1em;cursor:pointer;flex:1;min-width:9rem;
+  }
+  .tab:hover{color:var(--chalk)}
+  .tab[aria-selected="true"]{color:#0A0716;background:var(--amber);border-color:var(--amber)}
+
+  .controls{display:flex;gap:.7rem;flex-wrap:wrap;align-items:center;margin-bottom:clamp(.8rem,2.2vw,1.1rem)}
+  button.go{
+    font-family:inherit;font-weight:700;font-size:clamp(1rem,2.6vw,1.15rem);letter-spacing:.05em;
+    color:#0A0716;background:linear-gradient(180deg,var(--cyan),#0FB6CC);
+    border:0;border-bottom:5px solid #0A7E90;border-radius:8px;padding:.6em 1.6em;cursor:pointer;
+  }
+  button.go:active{transform:translateY(3px);border-bottom-width:2px}
+  button.go:disabled{opacity:.45;cursor:default;transform:none}
+  button.ghost{
+    font-family:inherit;font-size:1rem;background:none;color:var(--dim);
+    border:1px solid var(--edge);border-radius:6px;padding:.55em 1.1em;cursor:pointer;
+  }
+  button.ghost:hover{color:var(--chalk);border-color:var(--magenta)}
+  select{font-family:inherit;font-size:1rem;color:var(--chalk);background:#080512;border:1px solid var(--edge);border-radius:6px;padding:.55em .8em}
+  .clock{margin-left:auto;color:var(--dim);font-variant-numeric:tabular-nums;font-size:.9rem;letter-spacing:.08em}
+  .clock b{color:var(--amber);font-size:1.4rem;letter-spacing:0}
+
+  .lanes{display:grid;gap:clamp(.8rem,2.2vw,1.2rem)}
+  .lane{background:var(--panel);border:2px solid var(--edge);border-radius:10px;padding:clamp(.8rem,2.2vw,1.2rem)}
+  .lane.off{display:none}
+  .lane h2{margin:0 0 .7rem;font-size:clamp(1rem,2.6vw,1.2rem);letter-spacing:.03em}
+  .bad h2{color:var(--magenta)} .good h2{color:var(--lime)}
+
+  .track{display:flex;align-items:center}
+  .conveyor{
+    position:relative;flex:1;min-width:0;height:46px;overflow:hidden;
+    background:repeating-linear-gradient(90deg,rgba(59,42,107,.5) 0 2px,transparent 2px 26px);
+    border:1px solid var(--edge);border-right:0;border-radius:6px 0 0 6px;
+  }
+  .cube{
+    position:absolute;top:8px;height:30px;border-radius:4px;
+    display:flex;align-items:center;justify-content:center;
+    font-size:.72rem;font-weight:700;color:#0A0716;overflow:hidden;white-space:nowrap;
+    box-shadow:inset 0 -3px 0 rgba(0,0,0,.28);
+  }
+  .chip{position:relative;flex:none;width:clamp(78px,11vw,96px)}
+  .chip svg{display:block;width:100%;height:auto}
+  .chipLabel{position:absolute;inset:28% 16% 26%;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none}
+  .chipLabel .nm{font-size:.6rem;font-weight:700}
+  .chipLabel .ms{font-size:.85rem;font-weight:700;font-variant-numeric:tabular-nums}
+
+  .waits{border:2px solid var(--edge);border-radius:8px;background:#060411;padding:clamp(.7rem,2vw,.95rem);margin-top:.8rem}
+  .waitrow{display:flex;align-items:center;gap:.6rem;margin-bottom:.5rem}
+  .waitrow:last-child{margin-bottom:0}
+  .who{width:2.6em;flex:none;font-weight:700;font-size:.9rem;text-align:right}
+  .meter{flex:1;min-width:0;height:30px;background:#120C26;border-radius:4px;position:relative;overflow:hidden}
+  .grow{position:absolute;left:0;top:0;bottom:0;width:0;border-radius:4px}
+  .grow.locked{opacity:.32}
+  .num{width:7.6em;flex:none;font-size:.85rem;font-variant-numeric:tabular-nums;color:var(--amber);font-weight:600}
+  .num.locked{color:var(--dim);font-weight:400}
+
+  .stats{border-top:1px solid var(--edge);margin-top:.85rem;padding-top:.7rem;display:flex;gap:1.6rem;align-items:baseline;flex-wrap:wrap}
+  .stat .k{color:var(--dim);font-size:.66rem;letter-spacing:.12em;display:block}
+  .stat .v{font-size:clamp(1.7rem,5.5vw,2.5rem);font-weight:700;font-variant-numeric:tabular-nums;line-height:1}
+  .bad .v{color:var(--magenta)} .good .v{color:var(--lime)}
+  .stat.sub .v{font-size:clamp(1.05rem,3vw,1.3rem);color:var(--chalk)}
+  /* page text around the demo */
+  .page{max-width:1180px;margin:0 auto}
+  .eyebrow{color:var(--amber);font-size:.8rem;font-weight:700;letter-spacing:.14em;margin:0 0 .4rem}
+  .page h1{margin:0 0 .5rem;font-size:clamp(1.7rem,5vw,2.6rem);line-height:1.1}
+  .lede{color:var(--dim);font-size:clamp(1rem,2.4vw,1.15rem);line-height:1.5;margin:0 0 1.4rem;max-width:62rem}
+  .page h2.sec{margin:2.2rem 0 .7rem;font-size:clamp(1.2rem,3.4vw,1.55rem);color:var(--cyan)}
+  .page p,.page li{line-height:1.6;max-width:62rem}
+  .page p{margin:.5rem 0}
+  .page strong{color:var(--amber)}
+  .card{background:var(--panel);border:2px solid var(--edge);border-radius:10px;padding:clamp(.8rem,2.2vw,1.2rem);margin:1rem 0}
+  .formula{font-size:clamp(1.05rem,3vw,1.35rem);font-weight:700;text-align:center;margin:.3rem 0}
+  .formula .top{color:var(--lime)} .formula .bot{color:var(--magenta)}
+  .tblwrap{overflow-x:auto}
+  table.t{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums;min-width:520px}
+  table.t th,table.t td{padding:.55rem .6rem;border-bottom:1px solid var(--edge);text-align:right}
+  table.t th:first-child,table.t td:first-child{text-align:left}
+  table.t th{color:var(--dim);font-size:.75rem;letter-spacing:.1em;font-weight:600}
+  table.t tr.win td{color:var(--lime);font-weight:700}
+  .note{color:var(--dim);font-size:.85rem}
+  .page a{color:var(--cyan)}
+  .gap{height:1rem}
+</style>
+</head>
+<body>
+
+<div class="page">
+  <p class="eyebrow">FLOW · PRIORITIZATION</p>
+  <h1>Do the short jobs first</h1>
+  <p class="lede">One worker, four jobs: one big job (100 ms) and three small ones (10 ms each). The total work is the same 130 ms either way. Only the order changes. Press <strong>RUN</strong> and watch how long each job sits before it is done.</p>
+</div>
+
+<div class="tabs" role="tablist">
+  <button class="tab" role="tab" id="tab1" aria-selected="true">BIG JOB FIRST</button>
+  <button class="tab" role="tab" id="tab2" aria-selected="false">SHORTEST FIRST</button>
+  <button class="tab" role="tab" id="tab3" aria-selected="false">SIDE BY SIDE</button>
+</div>
+
+<div class="controls">
+  <button class="go" id="run">RUN</button>
+  <button class="ghost" id="reset">Reset</button>
+  <select id="speed">
+    <option value="55">Slow</option>
+    <option value="34" selected>Normal</option>
+    <option value="18">Fast</option>
+  </select>
+  <div class="clock">CLOCK <b id="clk">0</b> ms</div>
+</div>
+
+<div class="lanes">
+  <section class="lane bad" id="laneA">
+    <h2>BIG JOB FIRST</h2>
+    <div class="track">
+      <div class="conveyor" id="cvA"></div>
+      <div class="chip">
+        <svg viewBox="0 0 110 110" aria-hidden="true">
+          <g stroke="#3B2A6B" stroke-width="4">
+            <line x1="20" y1="8" x2="20" y2="20"/><line x1="50" y1="8" x2="50" y2="20"/><line x1="80" y1="8" x2="80" y2="20"/>
+            <line x1="20" y1="90" x2="20" y2="102"/><line x1="50" y1="90" x2="50" y2="102"/><line x1="80" y1="90" x2="80" y2="102"/>
+          </g>
+          <rect x="0" y="20" width="100" height="70" rx="8" fill="#080512" stroke="#3B2A6B" stroke-width="3"/>
+          <rect id="coreA" x="12" y="30" width="76" height="50" rx="5" fill="#150E2E"/>
+          <rect id="fillA" x="12" y="74" width="0" height="6" fill="#0A0716"/>
+        </svg>
+        <div class="chipLabel"><span class="nm" id="nmA">idle</span><span class="ms" id="msA"></span></div>
+      </div>
+    </div>
+    <div class="waits" id="wsA"></div>
+    <div class="stats">
+      <div class="stat"><span class="k">TOTAL WAITING</span><span class="v" id="wA">0</span></div>
+      <div class="stat sub"><span class="k">AVERAGE</span><span class="v" id="aA">&ndash;</span></div>
+    </div>
+  </section>
+
+  <section class="lane good off" id="laneB">
+    <h2>SHORTEST JOB FIRST</h2>
+    <div class="track">
+      <div class="conveyor" id="cvB"></div>
+      <div class="chip">
+        <svg viewBox="0 0 110 110" aria-hidden="true">
+          <g stroke="#3B2A6B" stroke-width="4">
+            <line x1="20" y1="8" x2="20" y2="20"/><line x1="50" y1="8" x2="50" y2="20"/><line x1="80" y1="8" x2="80" y2="20"/>
+            <line x1="20" y1="90" x2="20" y2="102"/><line x1="50" y1="90" x2="50" y2="102"/><line x1="80" y1="90" x2="80" y2="102"/>
+          </g>
+          <rect x="0" y="20" width="100" height="70" rx="8" fill="#080512" stroke="#3B2A6B" stroke-width="3"/>
+          <rect id="coreB" x="12" y="30" width="76" height="50" rx="5" fill="#150E2E"/>
+          <rect id="fillB" x="12" y="74" width="0" height="6" fill="#0A0716"/>
+        </svg>
+        <div class="chipLabel"><span class="nm" id="nmB">idle</span><span class="ms" id="msB"></span></div>
+      </div>
+    </div>
+    <div class="waits" id="wsB"></div>
+    <div class="stats">
+      <div class="stat"><span class="k">TOTAL WAITING</span><span class="v" id="wB">0</span></div>
+      <div class="stat sub"><span class="k">AVERAGE</span><span class="v" id="aB">&ndash;</span></div>
+    </div>
+  </section>
+</div>
+
+<script>
+(function(){
+  const JOBS={BIG:{dur:100,color:"#FF3D9A"},A:{dur:10,color:"#22E7FF"},B:{dur:10,color:"#FFC63D"},C:{dur:10,color:"#7CF06A"}};
+  const ROW=["BIG","A","B","C"];
+  const LANES={
+    A:{order:["BIG","A","B","C"],el:"laneA",cv:"cvA",ws:"wsA",nm:"nmA",ms:"msA",core:"coreA",fill:"fillA",w:"wA",avg:"aA"},
+    B:{order:["A","B","C","BIG"],el:"laneB",cv:"cvB",ws:"wsB",nm:"nmB",ms:"msB",core:"coreB",fill:"fillB",w:"wB",avg:"aB"}
+  };
+  Object.values(LANES).forEach(L=>{
+    let t=0; L.plan={};
+    L.order.forEach(id=>{const j=JOBS[id],start=t;t+=j.dur;L.plan[id]={id,dur:j.dur,color:j.color,start,finish:t};});
+    L.built=false;
+  });
+  const TOTAL=130, $=id=>document.getElementById(id);
+
+  function build(L){
+    $(L.cv).innerHTML=""; L.cubes={};
+    ROW.forEach(id=>{
+      const j=L.plan[id], c=document.createElement("div");
+      c.className="cube"; c.style.background=j.color;
+      c.textContent = j.dur>=100 ? id+" · "+j.dur+" ms" : id;
+      $(L.cv).appendChild(c); L.cubes[id]=c;
+    });
+    $(L.ws).innerHTML=ROW.map(id=>
+      `<div class="waitrow">
+         <span class="who" style="color:${JOBS[id].color}">${id}</span>
+         <span class="meter"><span class="grow" data-g="${id}" style="background:${JOBS[id].color}"></span></span>
+         <span class="num" data-n="${id}">0 ms</span>
+       </div>`).join("");
+    L.grows={};L.nums={};
+    ROW.forEach(id=>{L.grows[id]=$(L.ws).querySelector(`[data-g="${id}"]`);L.nums[id]=$(L.ws).querySelector(`[data-n="${id}"]`);});
+    L.built=true;
+  }
+
+  function renderLane(L,t){
+    if($(L.el).classList.contains("off")) return;
+    if(!L.built) build(L);
+    const W=$(L.cv).clientWidth, P=W/138, mouth=W;
+    ROW.forEach(id=>{
+      const j=L.plan[id], el=L.cubes[id];
+      if(t>=j.finish){ el.style.display="none"; }
+      else{
+        el.style.display="flex";
+        el.style.left=(mouth-(j.start-t)*P-j.dur*P).toFixed(1)+"px";
+        el.style.width=(j.dur*P).toFixed(1)+"px";
+      }
+      const waited=Math.min(t,j.finish), done=t>=j.finish;
+      L.grows[id].style.width=(waited/TOTAL*100).toFixed(2)+"%";
+      L.grows[id].classList.toggle("locked",done);
+      L.nums[id].textContent = done ? "done at "+j.finish+" ms" : Math.round(waited)+" ms";
+      L.nums[id].classList.toggle("locked",done);
+    });
+    const cur=ROW.map(id=>L.plan[id]).find(j=>j.start<=t&&j.finish>t);
+    if(cur){
+      $(L.core).setAttribute("fill",cur.color);
+      $(L.fill).setAttribute("width",(76*(t-cur.start)/cur.dur).toFixed(1));
+      $(L.nm).textContent=cur.id; $(L.nm).style.color="#0A0716";
+      $(L.ms).textContent=Math.ceil(cur.finish-t); $(L.ms).style.color="#0A0716";
+    }else{
+      $(L.core).setAttribute("fill","#150E2E"); $(L.fill).setAttribute("width","0");
+      $(L.nm).textContent=t>=TOTAL?"done":"idle"; $(L.nm).style.color="#8E7FC4";
+      $(L.ms).textContent="";
+    }
+    const wait=ROW.reduce((s,id)=>s+Math.min(t,L.plan[id].finish),0);
+    $(L.w).textContent=Math.round(wait);
+    $(L.avg).textContent = t>=TOTAL ? (wait/4).toFixed(1)+" ms" : "\u2013";
+  }
+
+  let raf=null,t0=null,playing=false,now=0;
+  function draw(t){now=t;$("clk").textContent=Math.min(Math.round(t),TOTAL);renderLane(LANES.A,t);renderLane(LANES.B,t);}
+  function step(ts){
+    if(t0===null)t0=ts;
+    const t=Math.min((ts-t0)/Number($("speed").value),TOTAL);
+    draw(t);
+    if(t<TOTAL) raf=requestAnimationFrame(step);
+    else{playing=false;$("run").disabled=false;}
+  }
+  function stop(){cancelAnimationFrame(raf);playing=false;t0=null;$("run").disabled=false;}
+
+  $("run").addEventListener("click",()=>{
+    if(playing)return;
+    playing=true;t0=null;$("run").disabled=true;raf=requestAnimationFrame(step);
+  });
+  $("reset").addEventListener("click",()=>{stop();draw(0);});
+
+  const TABS={tab1:["A"],tab2:["B"],tab3:["A","B"]};
+  Object.keys(TABS).forEach(id=>{
+    $(id).addEventListener("click",()=>{
+      Object.keys(TABS).forEach(o=>$(o).setAttribute("aria-selected", o===id?"true":"false"));
+      $("laneA").classList.toggle("off",!TABS[id].includes("A"));
+      $("laneB").classList.toggle("off",!TABS[id].includes("B"));
+      stop(); draw(0);
+    });
+  });
+
+  window.addEventListener("resize",()=>{if(!playing)draw(now);});
+  draw(0);
+})();
+</script>
+
+<div class="page">
+  <h2 class="sec">What the demo shows</h2>
+  <div class="tblwrap card">
+    <table class="t">
+      <thead><tr><th>ORDER</th><th>BIG DONE AT</th><th>A</th><th>B</th><th>C</th><th>TOTAL</th><th>AVERAGE</th></tr></thead>
+      <tbody>
+        <tr><td>Big job first</td><td>100</td><td>110</td><td>120</td><td>130</td><td>460 ms</td><td>115 ms</td></tr>
+        <tr class="win"><td>Shortest first</td><td>130</td><td>10</td><td>20</td><td>30</td><td>190 ms</td><td>47.5 ms</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>The demo counts each job's time from the start until it is finished. Running the short jobs first cuts the average from 115 ms to 47.5 ms, about <strong>59% less</strong>, with the same total work. The big job finishes 30 ms later, but three jobs finish 90 ms or more sooner.</p>
+  <p>The reason is simple: whatever runs first makes <em>every</em> job behind it wait. Put a long job at the front and its whole length is added to each job in the queue. Put the short ones at the front and the queue clears quickly. When all the jobs are known up front, shortest-first gives the lowest average wait of any order.</p>
+  <p><strong>The catch:</strong> if new short jobs keep arriving, a big job can be pushed back forever. Teams need a way to weigh it again over time, which is where WSJF comes in.</p>
+
+  <h2 class="sec">From Shortest Job First to WSJF</h2>
+  <p>Shortest Job First assumes every job is equally worth finishing. Real work isn't. A small task may be worth little, and a big one may be urgent. <strong>Weighted Shortest Job First</strong> (WSJF) keeps the idea but weighs each job by what it costs to wait for it.</p>
+  <div class="card">
+    <p class="formula">WSJF = <span class="top">Cost of Delay</span> ÷ <span class="bot">Job Size</span></p>
+    <p class="note" style="text-align:center">Do the job with the highest score first.</p>
+  </div>
+  <ul>
+    <li><strong>Cost of Delay:</strong> what waiting costs. In SAFe (Scaled Agile Framework) it is scored as business value + time criticality + risk reduction or opportunity enablement, each on a relative scale.</li>
+    <li><strong>Job Size:</strong> how long it takes, as a relative estimate. It stands in for duration.</li>
+  </ul>
+  <p>If every job has the same Cost of Delay, WSJF puts them in size order, which is Shortest Job First. If every job is the same size, it puts the most costly delay first. Time criticality also answers the catch above: a job that waits gets more urgent, so its score rises when the backlog is re-scored.</p>
+
+  <h2 class="sec">A worked example</h2>
+  <p>Three features. Treat Cost of Delay as cost per week of waiting and Job Size as weeks of work.</p>
+  <div class="tblwrap card">
+    <table class="t">
+      <thead><tr><th>FEATURE</th><th>COST OF DELAY</th><th>JOB SIZE</th><th>WSJF</th></tr></thead>
+      <tbody>
+        <tr><td>Reporting overhaul</td><td>20</td><td>20</td><td>1.0</td></tr>
+        <tr><td>Login fix</td><td>8</td><td>2</td><td>4.0</td></tr>
+        <tr><td>Alert routing</td><td>13</td><td>5</td><td>2.6</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>Ranking by value alone starts with the reporting overhaul, since it has the highest Cost of Delay. WSJF starts with the login fix, then alert routing, then the overhaul.</p>
+  <div class="tblwrap card">
+    <table class="t">
+      <thead><tr><th>ORDER</th><th>DONE AT (WEEKS)</th><th>DELAY COST</th></tr></thead>
+      <tbody>
+        <tr><td>Highest value first: overhaul, alerts, login</td><td>20, 25, 27</td><td>20×20 + 13×25 + 8×27 = 941</td></tr>
+        <tr class="win"><td>WSJF: login, alerts, overhaul</td><td>2, 7, 27</td><td>8×2 + 13×7 + 20×27 = 647</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>Same three features, same 27 weeks. The WSJF order runs up about <strong>31% less</strong> cost of delay, because the small, valuable items stop waiting behind the big one.</p>
+  <p class="note">These numbers are an illustration. In practice the scores are relative estimates, so use WSJF to compare and order work, not as a precise cost.</p>
+
+  <h2 class="sec">Try it on your own backlog</h2>
+  <p>The <a href="epic_wsjf_toolkit_v4.html">Agile WSJF Epic Planning Tool</a> in this library scores and ranks epics with this formula.</p>
+  <p class="note">Sources: Donald Reinertsen, <em>The Principles of Product Development Flow</em> (2009), which introduced WSJF; Scaled Agile Framework (SAFe), which uses it to order its backlogs. Shortest Job First is a standard scheduling method from operating systems.</p>
+  <div class="gap"></div>
+</div>
+
+</body>
+</html>

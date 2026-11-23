@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta name="robots" content="noindex">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Testing Pyramid</title>
+<style>
+  :root{--bg:#0f1a2a;--panel:#16243a;--edge:#24364f;--ink:#eef2f7;--mute:#a7b3c4;
+        --lime:#d6f23b;--blue:#6cc2ff;--orange:#ff8a4c}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding:clamp(16px,3vw,32px)}
+  .page{max-width:1100px;margin:0 auto}
+  .eyebrow{color:var(--lime);font-size:.8rem;font-weight:700;letter-spacing:.14em;margin:0 0 .4rem}
+  h1{margin:0 0 .5rem;font-size:clamp(1.7rem,5vw,2.6rem);line-height:1.1}
+  .lede{color:var(--mute);font-size:clamp(1rem,2.4vw,1.15rem);margin:0 0 1.4rem;max-width:60rem}
+  figure{margin:0 0 1.6rem}
+  figure img{display:block;width:100%;height:auto;border-radius:12px;border:1px solid var(--edge)}
+  figure a{color:var(--mute);font-size:.85rem}
+  .levels{display:grid;gap:14px}
+  .lvl{background:var(--panel);border:1px solid var(--edge);border-left:6px solid var(--c);border-radius:12px;padding:16px 18px}
+  .lvl .tag{color:var(--c);font-size:.75rem;font-weight:700;letter-spacing:.12em}
+  .lvl h2{margin:.2rem 0 .35rem;font-size:clamp(1.1rem,3vw,1.3rem)}
+  .lvl p{margin:0;color:var(--mute)}
+  .close{margin:1.8rem 0 .4rem;font-size:clamp(1.1rem,3vw,1.35rem);font-weight:600}
+  .close span{color:var(--lime)}
+  .why{color:var(--mute);max-width:60rem}
+</style>
+</head>
+<body>
+<div class="page">
+  <p class="eyebrow">TECH OPS · QUALITY PLAYBOOK</p>
+  <h1>Call it right before first pitch.</h1>
+  <p class="lede">The testing pyramid: lots of fast checks at the base, a handful of full-system rehearsals at the top. Build confidence from the ground up.</p>
+
+  <figure>
+    <img src="testing_pyramid.png" width="3200" height="1920" alt="The testing pyramid. Base, Batting practice: Unit checks, many, fast and cheap. Middle, Scrimmage: Integration, some, steady and targeted. Top, Game day: End-to-end, few, slow and costly.">
+    <a href="testing_pyramid.png">Open the full-size image</a>
+  </figure>
+
+  <div class="levels">
+    <section class="lvl" style="--c:var(--orange)">
+      <div class="tag">TOP · FEW · SLOW · COSTLY</div>
+      <h2>Game day: end-to-end tests, the whole system, live</h2>
+      <p>A pitch tracked from camera all the way to the data the club sees. These prove the full chain works, but they take the longest to run and to diagnose. Save them for the plays that matter most.</p>
+    </section>
+    <section class="lvl" style="--c:var(--blue)">
+      <div class="tag">MIDDLE · SOME · STEADY · TARGETED</div>
+      <h2>Scrimmage: integration tests, do the pieces play together?</h2>
+      <p>Camera feed to tracking engine, tracking engine to data delivery. They catch the hand-off errors that unit checks cannot see, such as a changed format or a missed connection.</p>
+    </section>
+    <section class="lvl" style="--c:var(--lime)">
+      <div class="tag">BASE · MANY · FAST · CHEAP</div>
+      <h2>Batting practice: unit checks, one rep, in isolation</h2>
+      <p>A single calibration calc, one config rule, one device check. Run them on every change, so problems surface in minutes.</p>
+    </section>
+  </div>
+
+  <p class="close">Catch it at the base and it costs a rep. <span>Catch it at the top and it costs a game.</span></p>
+  <p class="why">Why the shape matters: the higher a test sits, the slower and more costly it is to run and to fix what it finds. Most checks belong at the base, where they are cheap enough to run on every change. A team whose tests are mostly at the top (an upside-down pyramid) finds problems late and waits longer for answers.</p>
+</div>
+</body>
+</html>
