@@ -279,6 +279,7 @@
     .tag-pill[data-tag="ITSM"].active     { background: rgba(160,123,196,.2); border-color: var(--purple); color: var(--purple); }
     .tag-pill[data-tag="ITIL"].active     { background: rgba(76,170,110,.2); border-color: var(--green); color: var(--green); }
     .tag-pill[data-tag="ServiceNow"].active { background: rgba(214,177,90,.15); border-color: var(--accent); color: var(--accent); }
+    .tag-pill[data-tag="Quality"].active  { background: rgba(217,138,76,.18); border-color: #d98a4c; color: #d98a4c; }
 
     .tag-pill:hover { border-color: rgba(255,255,255,.2); color: var(--ink); }
 
@@ -357,6 +358,7 @@
     .cat-badge.ITSM      { color: var(--purple); border-color: rgba(160,123,196,.35); background: rgba(160,123,196,.08); }
     .cat-badge.ITIL      { color: var(--green); border-color: rgba(76,170,110,.35); background: rgba(76,170,110,.08); }
     .cat-badge.ServiceNow { color: var(--accent); border-color: rgba(214,177,90,.35); background: rgba(214,177,90,.08); }
+    .cat-badge.Quality   { color: #d98a4c; border-color: rgba(217,138,76,.35); background: rgba(217,138,76,.08); }
 
     .entry-actions {
       display: flex;
@@ -533,6 +535,7 @@
           <span class="tag-pill" data-tag="ITSM" onclick="toggleTag(this)">ITSM</span>
           <span class="tag-pill" data-tag="ITIL" onclick="toggleTag(this)">ITIL</span>
           <span class="tag-pill" data-tag="ServiceNow" onclick="toggleTag(this)">ServiceNow</span>
+          <span class="tag-pill" data-tag="Quality" onclick="toggleTag(this)">Quality</span>
         </div>
       </div>
     </div>
@@ -739,7 +742,7 @@
   function editEntry(i) {
     const entry = entries[i];
     const cats  = getCats(entry);
-    const tagPills = ['Agile','ITSM','ITIL','ServiceNow'].map(t =>
+    const tagPills = ['Agile','ITSM','ITIL','ServiceNow','Quality'].map(t =>
       `<span class="tag-pill ${cats.includes(t)?'active':''}" data-tag="${t}" onclick="toggleTag(this)">${t}</span>`
     ).join('');
 

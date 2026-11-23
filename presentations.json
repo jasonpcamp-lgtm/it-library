@@ -164,7 +164,7 @@
   {
     "title": "The Testing Pyramid",
     "description": "The three levels of testing, from many fast unit checks to a few full end-to-end runs.",
-    "category": "Agile",
+    "category": "Quality",
     "file": "testing_pyramid.html",
     "updated": "2026-11-23"
   }
