@@ -146,5 +146,12 @@
     ],
     "file": "team-operating-model.html",
     "updated": "2026-11-22"
+  },
+  {
+    "title": "Why Slack Matters",
+    "description": "Interactive: how running a team too full, or across too many projects, quietly drains its capacity.",
+    "category": "Agile",
+    "file": "why_slack_matters.html",
+    "updated": "2026-11-23"
   }
 ]

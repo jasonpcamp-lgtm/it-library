@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta name="robots" content="noindex"><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Why Slack Matters</title>
+<style>
+:root{--bg:#0f1419;--panel:#1a222c;--ink:#e6edf3;--mute:#8b98a5;--acc:#4cc9f0;--hot:#f72585;--ok:#80ed99}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,Segoe UI,Roboto,sans-serif;padding:24px}
+h1{margin:0 0 4px;font-size:28px}h2{margin:0 0 8px;font-size:20px}.sub{color:var(--mute);margin-bottom:20px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}@media(max-width:900px){.grid{grid-template-columns:1fr}}
+.panel{background:var(--panel);border-radius:14px;padding:20px}
+.src{color:var(--mute);font-size:13px;margin-top:10px}
+.row{display:flex;align-items:center;gap:14px;margin:12px 0}
+input[type=range]{flex:1;accent-color:var(--acc)}
+.big{font-size:40px;font-weight:700;min-width:120px;text-align:right}
+.hot{color:var(--hot)}.ok{color:var(--ok)}
+canvas{width:100%;height:auto;display:block;background:#0b1015;border-radius:10px}
+.lane{position:relative;height:70px;background:#0b1015;border-radius:10px;margin-top:10px;overflow:hidden}
+.srv{position:absolute;right:10px;top:10px;width:90px;height:50px;border:2px solid var(--acc);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--acc)}
+.job{position:absolute;top:22px;width:26px;height:26px;border-radius:5px;background:var(--acc);transition:left .3s linear}
+table{width:100%;border-collapse:collapse;margin-top:8px}th,td{padding:10px 8px;text-align:center;border-bottom:1px solid #2b3744}
+th{color:var(--mute);font-weight:600;font-size:13px}tr.sel{background:#243040}
+.bar{height:14px;border-radius:7px;background:#2b3744;overflow:hidden}.bar i{display:block;height:100%;background:var(--hot)}
+.cap{font-size:14px;color:var(--mute);margin-top:10px}
+</style></head><body>
+<h1>Why Slack Matters</h1>
+<div class="sub">Two ways a team loses capacity it thinks it has: running too full, and running too fragmented.</div>
+<div class="grid">
+<div class="panel">
+ <h2>1 · Utilization vs. wait time</h2>
+ <div class="row"><span>Team utilization</span><input id="u" type="range" min="50" max="99" value="80"><span class="big" id="uv">80%</span></div>
+ <canvas id="c" width="640" height="320"></canvas>
+ <div class="lane" id="lane"><div class="srv">TEAM</div></div>
+ <div class="row"><span>Average wait, relative to a 50%-busy team:</span><span class="big hot" id="w">4×</span></div>
+ <div class="cap">Queueing theory (Kingman's formula, 1961): wait time grows roughly as ρ / (1 − ρ). Past ~80% utilization, delay rises faster than the work added. Popularized for software by Tom DeMarco, <em>Slack</em> (2001) and Donald Reinertsen, <em>Principles of Product Development Flow</em> (2009).</div>
+</div>
+<div class="panel">
+ <h2>2 · Context switching</h2>
+ <div class="row"><span>Projects per person</span><input id="p" type="range" min="1" max="5" value="2"><span class="big" id="pv">2</span></div>
+ <table><thead><tr><th>Projects</th><th>Time per project</th><th>Lost to switching</th><th></th></tr></thead>
+ <tbody id="tb"></tbody></table>
+ <div class="row"><span>Productive capacity at this load:</span><span class="big ok" id="cap">80%</span></div>
+ <div class="cap">Table: Gerald Weinberg, <em>Quality Software Management: Systems Thinking</em> (1992), reproduced in Jeff Sutherland, <em>Scrum: The Art of Doing Twice the Work in Half the Time</em> (2014).</div>
+</div>
+</div>
+<script>
+const $=id=>document.getElementById(id),u=$('u'),uv=$('uv'),w=$('w'),p=$('p'),pv=$('pv'),tb=$('tb'),cap=$('cap');
+const rows=[[1,100,0],[2,40,20],[3,20,40],[4,10,60],[5,5,75]];
+const c=document.getElementById('c'),x=c.getContext('2d');
+function curve(sel){x.clearRect(0,0,640,320);const L=50,B=280,W=570,H=250;
+x.strokeStyle='#2b3744';x.lineWidth=1;x.beginPath();x.moveTo(L,30);x.lineTo(L,B);x.lineTo(L+W,B);x.stroke();
+x.fillStyle='#8b98a5';x.font='12px system-ui';x.fillText('utilization →',L+W-80,B+18);
+['50%','60%','70%','80%','90%','100%'].forEach((t,i)=>x.fillText(t,L+i*W/5-10,B+18));
+x.save();x.translate(14,B-40);x.rotate(-Math.PI/2);x.fillText('wait time →',0,0);x.restore();
+const f=u=>u/(1-u),max=f(0.985);
+x.strokeStyle='#4cc9f0';x.lineWidth=3;x.beginPath();
+for(let i=0;i<=200;i++){const u=.5+.485*i/200,px=L+(u-.5)/.5*W,py=B-Math.min(1,f(u)/max)*H;i?x.lineTo(px,py):x.moveTo(px,py);}x.stroke();
+x.fillStyle='rgba(247,37,133,.12)';x.fillRect(L+.6*W,30,W*.4,H);
+const u=sel/100,px=L+(u-.5)/.5*W,py=B-Math.min(1,f(u)/max)*H;
+x.fillStyle='#f72585';x.beginPath();x.arc(px,py,7,0,7);x.fill();}
+const lane=document.getElementById('lane');let jobs=[];
+function queue(sel){const u=sel/100,n=Math.min(18,Math.round(u/(1-u)));
+while(jobs.length>n)lane.removeChild(jobs.pop());
+while(jobs.length<n){const j=document.createElement('div');j.className='job';lane.appendChild(j);jobs.push(j);}
+jobs.forEach((j,i)=>j.style.left=(lane.clientWidth-120-i*32)+'px');}
+function upd(){const s=+u.value;uv.textContent=s+'%';w.textContent=((s/100)/(1-s/100)).toFixed(1)+'×';curve(s);queue(s);}
+u.oninput=upd;
+function updP(){const n=+p.value;pv.textContent=n;tb.innerHTML=rows.map(r=>`<tr class="${r[0]==n?'sel':''}"><td>${r[0]}</td><td>${r[1]}%</td><td>${r[2]}%</td><td><div class="bar"><i style="width:${r[2]}%"></i></div></td></tr>`).join('');
+cap.textContent=(100-rows[n-1][2])+'%';}
+p.oninput=updP;upd();updP();window.onresize=upd;
+</script></body></html>
